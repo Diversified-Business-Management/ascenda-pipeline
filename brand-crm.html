@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ascenda Brand CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #09090b;
+  --surface: #101013;
+  --card: #16161b;
+  --card2: #1c1c23;
+  --border: #22222e;
+  --border2: #2a2a38;
+  --accent: #e8ff47;
+  --accent2: #47c2ff;
+  --accent3: #ff6b47;
+  --gold: #f5c842;
+  --text: #f0f0f5;
+  --muted: #6b6b7e;
+  --muted2: #9090a8;
+  --success: #3ddc97;
+  --warning: #ffbe3d;
+  --danger: #ff4757;
+  --navy: #1a3a7a;
+  --phase-colors: #47c2ff, #3ddc97, #ffbe3d, #e8ff47, #ff6b47, #c47aff, #ff8c47, #47ffb8, #ff4757, #aaffaa;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body { background: var(--black); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; display: flex; flex-direction: column; }
+
+/* ── TOP NAV ── */
+.topnav {
+  height: 52px; background: var(--surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.5rem; flex-shrink: 0; z-index: 200;
+}
+.topnav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.1em; color: var(--accent); }
+.topnav-logo span { color: var(--muted2); }
+.topnav-status { display:flex; align-items:center; gap:.5rem; font-size:.68rem; font-family:'DM Mono',monospace; color: var(--success); }
+.pulse { width:7px; height:7px; border-radius:50%; background:var(--success); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+.topnav-back { display: flex; align-items: center; gap: .4rem; color: var(--muted2); font-size: .75rem; cursor: pointer; padding: .4rem .8rem; border-radius: 4px; border: 1px solid var(--border); transition: all .2s; background: none; }
+.topnav-back:hover { color: var(--accent); border-color: var(--accent); }
+.topnav-back.hidden { display: none; }
+
+/* ── LAYOUT ── */
+.app-body { display: flex; flex: 1; overflow: hidden; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 260px; min-width: 260px; background: var(--surface); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.sidebar-header { padding: 1rem 1.25rem .75rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.sidebar-title { font-family: 'DM Mono', monospace; font-size: .65rem; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); }
+.sidebar-count { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: var(--accent); }
+.sidebar-search { padding: .75rem 1rem; border-bottom: 1px solid var(--border); }
+.sidebar-search input { width: 100%; background: var(--card); border: 1px solid var(--border2); border-radius: 5px; padding: .5rem .75rem; color: var(--text); font-size: .8rem; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color .2s; }
+.sidebar-search input:focus { border-color: var(--accent); }
+.sidebar-search input::placeholder { color: var(--muted); }
+.brand-list { flex: 1; overflow-y: auto; padding: .5rem 0; }
+.brand-list::-webkit-scrollbar { width: 3px; }
+.brand-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+.brand-item { padding: .75rem 1.25rem; cursor: pointer; border-left: 3px solid transparent; transition: all .15s; display: flex; justify-content: space-between; align-items: center; }
+.brand-item:hover { background: var(--card); }
+.brand-item.active { background: var(--card); border-left-color: var(--accent); }
+.brand-item-name { font-weight: 600; font-size: .85rem; margin-bottom: .15rem; }
+.brand-item-phase { font-size: .65rem; font-family: 'DM Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.brand-item-score { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; }
+.btn-add-brand { margin: .75rem 1rem; padding: .65rem; background: rgba(232,255,71,.08); border: 1px solid rgba(232,255,71,.2); border-radius: 5px; color: var(--accent); font-size: .75rem; font-weight: 600; font-family: 'DM Sans', sans-serif; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; width: calc(100% - 2rem); transition: all .2s; }
+.btn-add-brand:hover { background: rgba(232,255,71,.15); }
+
+/* ── MAIN CONTENT ── */
+.main-content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+.main-content::-webkit-scrollbar { width: 4px; }
+.main-content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+/* ── BRAND LIST VIEW ── */
+#view-list { padding: 1.5rem 2rem; }
+.view-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; }
+.view-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: .05em; }
+.view-sub { font-size: .72rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+.pipeline-summary { display: grid; grid-template-columns: repeat(5, 1fr); gap: .75rem; margin-bottom: 1.5rem; }
+.pipeline-tile { background: var(--card); border: 1px solid var(--border); border-radius: 7px; padding: .9rem 1rem; }
+.pipeline-tile-n { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--accent); }
+.pipeline-tile-label { font-size: .62rem; font-family: 'DM Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-top: .1rem; }
+.brand-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 1rem; }
+.brand-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; cursor: pointer; transition: all .2s; position: relative; overflow: hidden; }
+.brand-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:8px 8px 0 0; }
+.brand-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,.3); }
+.bc-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:.9rem; }
+.bc-initials { width:42px; height:42px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:1.1rem; }
+.bc-name { font-weight:600; font-size:.95rem; margin-bottom:.2rem; }
+.bc-cat { font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+.bc-score-num { font-family:'Bebas Neue',sans-serif; font-size:2rem; line-height:1; text-align:right; }
+.bc-score-lbl { font-size:.58rem; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; text-align:right; }
+.bc-progress { height:3px; background:var(--border2); border-radius:2px; margin:.9rem 0 .6rem; overflow:hidden; }
+.bc-progress-fill { height:100%; border-radius:2px; }
+.bc-bottom { display:flex; justify-content:space-between; font-size:.7rem; }
+.bc-phase-name { color:var(--text); font-weight:500; }
+.bc-retailer { color:var(--muted); }
+
+/* ── BRAND DETAIL VIEW ── */
+#view-detail { display:none; flex-direction:column; flex:1; }
+.detail-hero { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.detail-hero-left { display:flex; align-items:center; gap:1rem; }
+.detail-initials-lg { width:56px; height:56px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:1.4rem; flex-shrink:0; }
+.detail-name { font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:.04em; }
+.detail-meta { display:flex; gap:.75rem; flex-wrap:wrap; margin-top:.2rem; }
+.detail-tag { font-size:.65rem; font-family:'DM Mono',monospace; color:var(--muted); background:var(--card); padding:.2rem .6rem; border-radius:3px; border:1px solid var(--border); }
+.detail-score-big { text-align:right; }
+.detail-score-num { font-family:'Bebas Neue',sans-serif; font-size:3rem; line-height:1; }
+.detail-score-lbl { font-size:.62rem; color:var(--muted); font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:.1em; }
+
+/* PHASE TIMELINE */
+.phase-timeline { padding: 1rem 2rem; border-bottom: 1px solid var(--border); background: var(--surface); overflow-x: auto; flex-shrink: 0; }
+.timeline-track { display:flex; align-items:center; min-width:900px; }
+.tl-step { display:flex; align-items:center; flex:1; }
+.tl-dot-wrap { display:flex; flex-direction:column; align-items:center; gap:.3rem; cursor:pointer; }
+.tl-dot { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.65rem; font-weight:700; font-family:'DM Mono',monospace; border:2px solid var(--border2); color:var(--muted); transition:all .2s; }
+.tl-dot.done { background:var(--success); border-color:var(--success); color:#000; }
+.tl-dot.active { background:var(--accent); border-color:var(--accent); color:#000; box-shadow:0 0 0 4px rgba(232,255,71,.15); }
+.tl-dot.pending { background:var(--card); }
+.tl-label { font-size:.56rem; font-family:'DM Mono',monospace; color:var(--muted); text-align:center; letter-spacing:.05em; text-transform:uppercase; white-space:nowrap; }
+.tl-label.active { color:var(--accent); }
+.tl-label.done { color:var(--success); }
+.tl-line { flex:1; height:2px; background:var(--border2); margin:0 4px; margin-bottom:20px; }
+.tl-line.done { background:var(--success); }
+
+/* DETAIL TABS */
+.detail-tabs { display:flex; border-bottom:1px solid var(--border); background:var(--surface); flex-shrink:0; padding:0 2rem; }
+.dtab { padding:.65rem 1.1rem; font-size:.72rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all .2s; white-space:nowrap; }
+.dtab:hover { color:var(--text); }
+.dtab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.detail-tab-content { display:none; padding:1.5rem 2rem; flex:1; }
+.detail-tab-content.active { display:block; }
+
+/* INFO GRID */
+.info-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem; }
+.info-row { display:flex; flex-direction:column; gap:.2rem; padding:.75rem 1rem; background:var(--card); border:1px solid var(--border); border-radius:6px; }
+.info-label { font-size:.62rem; font-family:'DM Mono',monospace; letter-spacing:.1em; color:var(--muted); text-transform:uppercase; }
+.info-value { font-size:.88rem; font-weight:500; }
+.info-value.editable { cursor:pointer; border-bottom:1px dashed var(--border2); display:inline-block; }
+.info-value.editable:hover { border-bottom-color:var(--accent); color:var(--accent); }
+
+/* NOTES */
+.notes-list { display:flex; flex-direction:column; gap:.75rem; margin-bottom:1rem; max-height:380px; overflow-y:auto; }
+.note-item { background:var(--card); border:1px solid var(--border); border-radius:6px; padding:1rem; position:relative; }
+.note-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem; }
+.note-date { font-size:.62rem; font-family:'DM Mono',monospace; color:var(--muted); }
+.note-type { font-size:.58rem; padding:.15rem .5rem; border-radius:3px; font-family:'DM Mono',monospace; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
+.note-type.call { background:rgba(71,194,255,.15); color:var(--accent2); }
+.note-type.email { background:rgba(232,255,71,.1); color:var(--accent); }
+.note-type.meeting { background:rgba(61,220,151,.12); color:var(--success); }
+.note-type.internal { background:rgba(255,190,61,.1); color:var(--warning); }
+.note-text { font-size:.82rem; line-height:1.65; color:var(--muted2); }
+.note-del { position:absolute; top:.6rem; right:.6rem; background:none; border:none; color:var(--border2); font-size:.8rem; cursor:pointer; transition:color .2s; padding:.2rem; }
+.note-del:hover { color:var(--danger); }
+.add-note-form { background:var(--card); border:1px solid var(--border); border-radius:7px; padding:1rem; }
+.note-form-row { display:flex; gap:.75rem; margin-bottom:.75rem; }
+.note-type-select, .note-input, .note-textarea { background:var(--surface); border:1px solid var(--border2); border-radius:4px; color:var(--text); font-family:'DM Sans',sans-serif; outline:none; transition:border-color .2s; }
+.note-type-select { padding:.5rem .75rem; font-size:.8rem; }
+.note-textarea { padding:.65rem .85rem; font-size:.82rem; width:100%; resize:vertical; min-height:80px; }
+.note-type-select:focus, .note-textarea:focus { border-color:var(--accent); }
+
+/* FILES */
+.files-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:.75rem; margin-bottom:1rem; }
+.file-card { background:var(--card); border:1px solid var(--border); border-radius:6px; padding:.9rem; display:flex; flex-direction:column; gap:.5rem; position:relative; }
+.file-icon { font-size:1.5rem; }
+.file-name { font-size:.8rem; font-weight:600; word-break:break-word; }
+.file-meta { font-size:.65rem; font-family:'DM Mono',monospace; color:var(--muted); }
+.file-actions { display:flex; gap:.5rem; margin-top:.25rem; }
+.file-btn { font-size:.65rem; padding:.25rem .6rem; border-radius:3px; cursor:pointer; border:1px solid var(--border2); background:none; color:var(--muted2); font-family:'DM Sans',sans-serif; transition:all .2s; }
+.file-btn:hover { border-color:var(--accent); color:var(--accent); }
+.upload-zone { border:2px dashed var(--border2); border-radius:7px; padding:2rem; text-align:center; cursor:pointer; transition:all .2s; }
+.upload-zone:hover, .upload-zone.drag { border-color:var(--accent); background:rgba(232,255,71,.04); }
+.upload-zone p { font-size:.82rem; color:var(--muted); margin-bottom:.5rem; }
+.upload-zone small { font-size:.7rem; color:var(--muted); font-family:'DM Mono',monospace; }
+.upload-url-row { display:flex; gap:.75rem; margin-top:1rem; }
+.upload-url-input { flex:1; background:var(--surface); border:1px solid var(--border2); border-radius:4px; padding:.6rem .85rem; color:var(--text); font-size:.82rem; outline:none; font-family:'DM Sans',sans-serif; }
+.upload-url-input:focus { border-color:var(--accent); }
+
+/* A&P BUDGET */
+.ap-section { margin-bottom:1.5rem; }
+.ap-section-header { display:flex; justify-content:space-between; align-items:center; padding:.65rem 1rem; border-radius:6px 6px 0 0; font-size:.7rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+.ap-section-header.advertising { background:rgba(71,194,255,.12); color:var(--accent2); border:1px solid rgba(71,194,255,.2); }
+.ap-section-header.promotional { background:rgba(232,255,71,.08); color:var(--accent); border:1px solid rgba(232,255,71,.15); }
+.ap-section-header.nonworking { background:rgba(61,220,151,.08); color:var(--success); border:1px solid rgba(61,220,151,.15); }
+.ap-section-header span { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; }
+.ap-table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--border); border-top:none; border-radius:0 0 6px 6px; overflow:hidden; }
+.ap-table th { background:var(--surface); font-size:.6rem; font-family:'DM Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding:.5rem .6rem; text-align:center; border-bottom:1px solid var(--border); }
+.ap-table th:first-child { text-align:left; min-width:140px; }
+.ap-table td { padding:.45rem .6rem; border-bottom:1px solid var(--border); font-size:.78rem; }
+.ap-table td:first-child { font-weight:500; color:var(--text); }
+.ap-table td:not(:first-child) { text-align:center; }
+.ap-table tr:last-child td { border-bottom:none; }
+.ap-table tr:hover td { background:rgba(255,255,255,.02); }
+.ap-input { background:transparent; border:none; color:var(--text); font-size:.78rem; text-align:center; width:56px; font-family:'DM Sans',sans-serif; outline:none; padding:.15rem .2rem; border-radius:3px; }
+.ap-input:focus { background:rgba(232,255,71,.08); }
+.ap-total-row td { background:var(--surface); font-weight:700; font-family:'DM Mono',monospace; font-size:.75rem; border-top:1px solid var(--border2); color:var(--accent); }
+.ap-grand-total { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:.9rem 1.25rem; display:flex; justify-content:space-between; align-items:center; margin-top:.75rem; }
+.ap-grand-label { font-size:.7rem; font-family:'DM Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.ap-grand-val { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; color:var(--success); }
+.ap-grand-monthly { font-size:.72rem; color:var(--muted); font-family:'DM Mono',monospace; }
+.ap-add-row { font-size:.7rem; padding:.4rem .9rem; background:none; border:1px dashed var(--border2); border-radius:4px; color:var(--muted); cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .2s; margin-top:.4rem; }
+.ap-add-row:hover { border-color:var(--accent); color:var(--accent); }
+
+/* SUBMISSION BUILDER */
+.submission-builder { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:1.25rem; margin-bottom:1rem; }
+.sb-title { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:.05em; margin-bottom:.3rem; }
+.sb-desc { font-size:.8rem; color:var(--muted); margin-bottom:1.25rem; line-height:1.6; }
+.sb-options { display:grid; grid-template-columns:1fr 1fr 1fr; gap:.75rem; margin-bottom:1.25rem; }
+.sb-option { background:var(--surface); border:1.5px solid var(--border); border-radius:6px; padding:1rem; cursor:pointer; transition:all .2s; text-align:center; }
+.sb-option:hover { border-color:var(--border2); }
+.sb-option.selected { border-color:var(--accent); background:rgba(232,255,71,.05); }
+.sb-option-icon { font-size:1.5rem; margin-bottom:.4rem; }
+.sb-option-label { font-size:.75rem; font-weight:700; color:var(--text); }
+.sb-option-sub { font-size:.65rem; color:var(--muted); margin-top:.15rem; }
+.sb-fields { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-bottom:1rem; }
+.sb-field { display:flex; flex-direction:column; gap:.3rem; }
+.sb-label { font-size:.65rem; font-family:'DM Mono',monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.sb-input, .sb-textarea { background:var(--surface); border:1px solid var(--border2); border-radius:4px; padding:.55rem .8rem; color:var(--text); font-size:.82rem; font-family:'DM Sans',sans-serif; outline:none; transition:border-color .2s; }
+.sb-input:focus, .sb-textarea:focus { border-color:var(--accent); }
+.sb-textarea { resize:vertical; min-height:80px; }
+.sb-field.full { grid-column:1/-1; }
+.sb-progress { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1rem; display:none; margin-top:.75rem; }
+.sb-progress-title { font-size:.72rem; font-family:'DM Mono',monospace; letter-spacing:.1em; color:var(--muted); margin-bottom:.75rem; text-transform:uppercase; }
+.sb-step { display:flex; align-items:center; gap:.75rem; padding:.5rem 0; border-bottom:1px solid var(--border); font-size:.8rem; }
+.sb-step:last-child { border-bottom:none; }
+.sb-step-dot { width:20px; height:20px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:.6rem; }
+.sb-step-dot.done { background:var(--success); color:#000; }
+.sb-step-dot.running { background:var(--warning); color:#000; animation: pulse 1s infinite; }
+.sb-step-dot.pending { background:var(--border2); color:var(--muted); }
+.sb-step-label { flex:1; }
+.sb-step-status { font-size:.68rem; font-family:'DM Mono',monospace; color:var(--muted); }
+
+/* RAG NAMESPACE */
+.rag-badge { display:flex; align-items:center; gap:.5rem; background:rgba(71,194,255,.08); border:1px solid rgba(71,194,255,.2); border-radius:6px; padding:.65rem 1rem; font-family:'DM Mono',monospace; font-size:.72rem; color:var(--accent2); margin-bottom:1rem; }
+.rag-ns { font-weight:600; }
+
+/* GENERIC BUTTONS */
+.btn { display:inline-flex; align-items:center; gap:.4rem; padding:.55rem 1.25rem; border-radius:5px; font-family:'DM Sans',sans-serif; font-size:.76rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; border:none; transition:all .2s; }
+.btn-primary { background:var(--accent); color:var(--black); }
+.btn-primary:hover { background:#d4eb30; }
+.btn-secondary { background:var(--card2); border:1px solid var(--border2); color:var(--muted2); }
+.btn-secondary:hover { border-color:var(--accent); color:var(--accent); }
+.btn-danger { background:rgba(255,71,87,.1); border:1px solid rgba(255,71,87,.2); color:var(--danger); }
+.btn-danger:hover { background:rgba(255,71,87,.2); }
+.btn-sm { padding:.35rem .8rem; font-size:.68rem; }
+
+/* EMPTY STATE */
+.empty-state { text-align:center; padding:4rem 2rem; color:var(--muted); }
+.empty-state h3 { font-family:'Bebas Neue',sans-serif; font-size:1.5rem; color:var(--muted2); margin-bottom:.5rem; }
+
+/* MODAL */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.8); backdrop-filter:blur(8px); z-index:500; display:none; align-items:center; justify-content:center; padding:1.5rem; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1.75rem; max-width:500px; width:100%; max-height:85vh; overflow-y:auto; position:relative; }
+.modal-title { font-family:'Bebas Neue',sans-serif; font-size:1.5rem; letter-spacing:.05em; margin-bottom:1.25rem; }
+.modal-close { position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--muted); font-size:1.1rem; cursor:pointer; transition:color .2s; }
+.modal-close:hover { color:var(--text); }
+.modal-fields { display:flex; flex-direction:column; gap:.9rem; }
+.mfield { display:flex; flex-direction:column; gap:.3rem; }
+.mlabel { font-size:.65rem; font-family:'DM Mono',monospace; letter-spacing:.1em; color:var(--muted); text-transform:uppercase; }
+.minput, .mselect, .mtextarea { background:var(--surface); border:1px solid var(--border2); border-radius:4px; padding:.6rem .85rem; color:var(--text); font-size:.85rem; font-family:'DM Sans',sans-serif; outline:none; transition:border-color .2s; }
+.minput:focus, .mselect:focus, .mtextarea:focus { border-color:var(--accent); }
+.mtextarea { resize:vertical; min-height:80px; }
+.modal-actions { display:flex; gap:.75rem; margin-top:1.25rem; justify-content:flex-end; }
+
+.notif { position:fixed; bottom:1.5rem; right:1.5rem; background:var(--card); border:1px solid var(--accent); border-radius:7px; padding:.85rem 1.25rem; font-size:.78rem; z-index:999; transform:translateX(120%); transition:transform .3s; max-width:280px; }
+.notif.show { transform:translateX(0); }
+.notif-title { font-weight:600; color:var(--accent); margin-bottom:.15rem; }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<div class="topnav">
+  <div class="topnav-logo">ASCENDA<span>·CRM</span></div>
+  <button class="topnav-back hidden" id="btn-back" onclick="showListView()">← Back to All Brands</button>
+  <div class="topnav-status"><div class="pulse"></div>PINECONE CONNECTED</div>
+</div>
+
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Brands</div>
+      <div class="sidebar-count" id="sidebar-count">0</div>
+    </div>
+    <div class="sidebar-search">
+      <input type="text" id="brand-search" placeholder="Search brands..." oninput="filterBrands(this.value)">
+    </div>
+    <div class="brand-list" id="brand-list"></div>
+    <button class="btn-add-brand" onclick="openAddBrand()">+ Add New Brand</button>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content" id="main-content">
+
+    <!-- LIST VIEW -->
+    <div id="view-list">
+      <div style="padding:1.5rem 2rem;">
+        <div class="view-header">
+          <div>
+            <div class="view-title">BRAND PORTFOLIO</div>
+            <div class="view-sub" id="portfolio-sub">LOADING...</div>
+          </div>
+          <button class="btn btn-primary" onclick="openAddBrand()">+ New Brand</button>
+        </div>
+        <div class="pipeline-summary" id="pipeline-summary"></div>
+        <div class="brand-grid" id="brand-grid"></div>
+      </div>
+    </div>
+
+    <!-- DETAIL VIEW -->
+    <div id="view-detail">
+
+      <div class="detail-hero">
+        <div class="detail-hero-left">
+          <div class="detail-initials-lg" id="d-initials"></div>
+          <div>
+            <div class="detail-name" id="d-name"></div>
+            <div class="detail-meta" id="d-meta"></div>
+          </div>
+        </div>
+        <div class="detail-score-big">
+          <div class="detail-score-num" id="d-score"></div>
+          <div class="detail-score-lbl">Readiness Score</div>
+        </div>
+      </div>
+
+      <div class="phase-timeline">
+        <div class="timeline-track" id="timeline-track"></div>
+      </div>
+
+      <div class="detail-tabs">
+        <div class="dtab active" onclick="switchDetailTab('overview',this)">Overview</div>
+        <div class="dtab" onclick="switchDetailTab('notes',this)">Call Notes</div>
+        <div class="dtab" onclick="switchDetailTab('files',this)">Files & Assets</div>
+        <div class="dtab" onclick="switchDetailTab('budget',this)">A&P Budget</div>
+        <div class="dtab" onclick="switchDetailTab('builder',this)">Sam's Club Builder</div>
+        <div class="dtab" onclick="switchDetailTab('rag',this)">RAG / AI</div>
+      </div>
+
+      <!-- OVERVIEW -->
+      <div class="detail-tab-content active" id="dtab-overview">
+        <div class="info-grid" id="overview-grid"></div>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;" id="overview-actions"></div>
+      </div>
+
+      <!-- CALL NOTES -->
+      <div class="detail-tab-content" id="dtab-notes">
+        <div class="notes-list" id="notes-list"></div>
+        <div class="add-note-form">
+          <div class="note-form-row">
+            <select class="note-type-select" id="new-note-type">
+              <option value="call">📞 Call</option>
+              <option value="email">📧 Email</option>
+              <option value="meeting">🤝 Meeting</option>
+              <option value="internal">📋 Internal</option>
+            </select>
+            <input type="text" class="note-input" id="new-note-title" placeholder="Subject / brief title..." style="flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:.5rem .75rem;color:var(--text);font-size:.8rem;font-family:'DM Sans',sans-serif;outline:none;">
+          </div>
+          <textarea class="note-textarea" id="new-note-text" placeholder="Enter call notes, action items, key takeaways..."></textarea>
+          <div style="display:flex;justify-content:flex-end;margin-top:.65rem;">
+            <button class="btn btn-primary" onclick="addNote()">Add Note</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILES -->
+      <div class="detail-tab-content" id="dtab-files">
+        <div class="rag-badge">
+          <span>🔷</span>
+          <span>Pinecone Namespace:</span>
+          <span class="rag-ns" id="file-rag-ns">brands/—</span>
+          <span style="margin-left:auto;color:var(--muted);" id="file-rag-count">0 vectors</span>
+        </div>
+        <div class="files-grid" id="files-grid"></div>
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-upload-input').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleFileDrop(event)">
+          <p>📎 Drop files here or click to upload</p>
+          <small>PDF, DOCX, XLSX, PNG, JPG, MP4 — max 50MB</small>
+          <input type="file" id="file-upload-input" multiple style="display:none" onchange="handleFileSelect(event)">
+        </div>
+        <div class="upload-url-row" style="margin-top:.75rem;">
+          <input type="url" class="upload-url-input" id="link-url" placeholder="Or paste a Google Drive / Dropbox link...">
+          <select class="note-type-select" id="link-type">
+            <option value="Two-Pager">Two-Pager</option>
+            <option value="COI">COI</option>
+            <option value="Financial Model">Financial Model</option>
+            <option value="LOI">LOI</option>
+            <option value="Product Photo">Product Photo</option>
+            <option value="Compliance Doc">Compliance Doc</option>
+            <option value="Other">Other</option>
+          </select>
+          <button class="btn btn-secondary" onclick="addFileLink()">+ Add Link</button>
+        </div>
+      </div>
+
+      <!-- A&P BUDGET -->
+      <div class="detail-tab-content" id="dtab-budget">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.05em;">A&P MARKETING BUDGET TRACKER</div>
+            <div style="font-size:.7rem;color:var(--muted);font-family:'DM Mono',monospace;" id="budget-brand-label"></div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="exportBudget()">↓ Export CSV</button>
+        </div>
+
+        <!-- ADVERTISING -->
+        <div class="ap-section">
+          <div class="ap-section-header advertising">
+            <span>ADVERTISING <span style="font-family:'DM Sans';font-weight:400;font-size:.65rem;text-transform:none;letter-spacing:0;color:rgba(71,194,255,.7)">Awareness / Brand Building Efforts</span></span>
+            <span id="adv-split">55%</span>
+          </div>
+          <table class="ap-table" id="adv-table">
+            <thead><tr>
+              <th>Description</th>
+              <th>JAN</th><th>FEB</th><th>MAR</th><th>APR</th><th>MAY</th><th>JUN</th>
+              <th>JUL</th><th>AUG</th><th>SEP</th><th>OCT</th><th>NOV</th><th>DEC</th>
+              <th>TOTAL</th>
+            </tr></thead>
+            <tbody id="adv-body"></tbody>
+            <tfoot><tr class="ap-total-row">
+              <td>ADVERTISING TOTAL</td>
+              <td colspan="12"></td>
+              <td id="adv-total">$0</td>
+            </tr></tfoot>
+          </table>
+          <button class="ap-add-row" onclick="addBudgetRow('adv')">+ Add Row</button>
+        </div>
+
+        <!-- PROMOTIONAL -->
+        <div class="ap-section">
+          <div class="ap-section-header promotional">
+            <span>PROMOTIONAL <span style="font-family:'DM Sans';font-weight:400;font-size:.65rem;text-transform:none;letter-spacing:0;color:rgba(232,255,71,.6)">Conversion / Performance Efforts</span></span>
+            <span id="promo-split">17%</span>
+          </div>
+          <table class="ap-table" id="promo-table">
+            <thead><tr>
+              <th>Description</th>
+              <th>JAN</th><th>FEB</th><th>MAR</th><th>APR</th><th>MAY</th><th>JUN</th>
+              <th>JUL</th><th>AUG</th><th>SEP</th><th>OCT</th><th>NOV</th><th>DEC</th>
+              <th>TOTAL</th>
+            </tr></thead>
+            <tbody id="promo-body"></tbody>
+            <tfoot><tr class="ap-total-row">
+              <td>PROMOTIONAL TOTAL</td>
+              <td colspan="12"></td>
+              <td id="promo-total">$0</td>
+            </tr></tfoot>
+          </table>
+          <button class="ap-add-row" onclick="addBudgetRow('promo')">+ Add Row</button>
+        </div>
+
+        <!-- NON WORKING -->
+        <div class="ap-section">
+          <div class="ap-section-header nonworking">
+            <span>NON WORKING <span style="font-family:'DM Sans';font-weight:400;font-size:.65rem;text-transform:none;letter-spacing:0;color:rgba(61,220,151,.6)">Subscriptions / Platforms / Consulting Fees</span></span>
+            <span id="nw-split">28%</span>
+          </div>
+          <table class="ap-table" id="nw-table">
+            <thead><tr>
+              <th>Description</th>
+              <th>JAN</th><th>FEB</th><th>MAR</th><th>APR</th><th>MAY</th><th>JUN</th>
+              <th>JUL</th><th>AUG</th><th>SEP</th><th>OCT</th><th>NOV</th><th>DEC</th>
+              <th>TOTAL</th>
+            </tr></thead>
+            <tbody id="nw-body"></tbody>
+            <tfoot><tr class="ap-total-row">
+              <td>NON WORKING TOTAL</td>
+              <td colspan="12"></td>
+              <td id="nw-total">$0</td>
+            </tr></tfoot>
+          </table>
+          <button class="ap-add-row" onclick="addBudgetRow('nw')">+ Add Row</button>
+        </div>
+
+        <div class="ap-grand-total">
+          <div>
+            <div class="ap-grand-label">Annual Budget Total</div>
+            <div class="ap-grand-monthly" id="monthly-total">$0 / month</div>
+          </div>
+          <div class="ap-grand-val" id="grand-total">$0</div>
+        </div>
+      </div>
+
+      <!-- SAM'S CLUB BUILDER -->
+      <div class="detail-tab-content" id="dtab-builder">
+        <div class="submission-builder">
+          <div class="sb-title">SAM'S CLUB SUBMISSION BUILDER</div>
+          <div class="sb-desc">Auto-generate your Sam's Club submission package using brand data and AI. Select the outputs you need, fill in any missing details, and let Claude build the materials.</div>
+          <div class="sb-options">
+            <div class="sb-option selected" id="opt-twopager" onclick="toggleOption(this)">
+              <div class="sb-option-icon">📄</div>
+              <div class="sb-option-label">Two-Pager PDF</div>
+              <div class="sb-option-sub">Retail-ready brand document</div>
+            </div>
+            <div class="sb-option selected" id="opt-deck" onclick="toggleOption(this)">
+              <div class="sb-option-icon">📊</div>
+              <div class="sb-option-label">PowerPoint Deck</div>
+              <div class="sb-option-sub">Executive presentation</div>
+            </div>
+            <div class="sb-option selected" id="opt-form" onclick="toggleOption(this)">
+              <div class="sb-option-icon">📋</div>
+              <div class="sb-option-label">Submission Form</div>
+              <div class="sb-option-sub">Pre-filled Sam's Club form</div>
+            </div>
+          </div>
+          <div class="sb-fields">
+            <div class="sb-field"><label class="sb-label">Key Differentiator</label><input type="text" class="sb-input" id="sb-diff" placeholder="What makes this brand unique for Sam's members?"></div>
+            <div class="sb-field"><label class="sb-label">Price Point</label><input type="text" class="sb-input" id="sb-price" placeholder="e.g. $29.99 Sam's Club exclusive"></div>
+            <div class="sb-field"><label class="sb-label">Units Per Event (Est.)</label><input type="number" class="sb-input" id="sb-units" placeholder="e.g. 500"></div>
+            <div class="sb-field"><label class="sb-label">Revenue Per Event (Est.)</label><input type="text" class="sb-input" id="sb-rev" placeholder="e.g. $14,995"></div>
+            <div class="sb-field full"><label class="sb-label">Brand Narrative <span style="color:var(--muted);font-size:.6rem;">(Claude will expand this)</span></label><textarea class="sb-textarea" id="sb-narrative" placeholder="Brief story — why this brand, why now, why Sam's Club members will love it..."></textarea></div>
+            <div class="sb-field full"><label class="sb-label">Target Member Profile</label><input type="text" class="sb-input" id="sb-member" placeholder="e.g. Health-conscious families, 35-55, value-seekers"></div>
+          </div>
+          <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="runSubmissionBuilder()">⚡ Generate Submission Package</button>
+            <button class="btn btn-secondary" onclick="clearBuilder()">Reset</button>
+          </div>
+          <div class="sb-progress" id="sb-progress">
+            <div class="sb-progress-title">Build Progress</div>
+            <div id="sb-steps"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RAG / AI -->
+      <div class="detail-tab-content" id="dtab-rag">
+        <div class="rag-badge" style="margin-bottom:1.25rem;">
+          <span>🔷</span>
+          <span>Brand Namespace:</span>
+          <span class="rag-ns" id="rag-ns-label">brands/—</span>
+          <span style="margin-left:auto;" id="rag-vector-count">0 vectors</span>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:1rem;">
+          <div style="background:var(--surface);padding:.6rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.6rem;">
+            <span style="display:flex;gap:.3rem;"><span style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></span><span style="width:9px;height:9px;border-radius:50%;background:#ffbd2e;"></span><span style="width:9px;height:9px;border-radius:50%;background:#28ca41;"></span></span>
+            <span style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);" id="rag-console-label">brand-rag · namespace query</span>
+          </div>
+          <div style="padding:1rem;">
+            <div style="display:flex;gap:.65rem;margin-bottom:.75rem;">
+              <input type="text" id="rag-query-input" placeholder="Ask anything about this brand — history, scores, performance, documents..." style="flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:.6rem .85rem;color:var(--text);font-size:.8rem;font-family:'DM Mono',monospace;outline:none;" onkeydown="if(event.key==='Enter')queryBrandRAG()">
+              <button class="btn btn-primary" onclick="queryBrandRAG()">Query</button>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:.85rem;min-height:120px;font-family:'DM Mono',monospace;font-size:.74rem;line-height:1.8;white-space:pre-wrap;" id="rag-result">// Query this brand's RAG namespace above&#10;// All notes, files, scores, and submissions are indexed here&#10;// Namespace is isolated — other brands cannot access this data</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:.65rem;flex-wrap:wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="syncToRAG()">⟳ Sync Brand to Pinecone</button>
+          <button class="btn btn-secondary btn-sm" onclick="setRAGQuery('Summarize all call notes for this brand')">Summarize Notes</button>
+          <button class="btn btn-secondary btn-sm" onclick="setRAGQuery('What documents are missing for Sam\\'s Club submission?')">Check Doc Gaps</button>
+          <button class="btn btn-secondary btn-sm" onclick="setRAGQuery('What is the readiness score history?')">Score History</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ADD BRAND MODAL -->
+<div class="modal-overlay" id="modal-add" onclick="if(event.target===this)closeModal('modal-add')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-add')">✕</button>
+    <div class="modal-title">ADD NEW BRAND</div>
+    <div class="modal-fields">
+      <div class="mfield"><label class="mlabel">Brand Name *</label><input class="minput" id="m-name" placeholder="e.g. NutriPure Foods"></div>
+      <div class="mfield"><label class="mlabel">Category *</label>
+        <select class="mselect" id="m-category">
+          <option value="">Select...</option>
+          <option>Food & Beverage</option><option>Health & Wellness</option><option>Beauty & Personal Care</option>
+          <option>Household Products</option><option>Electronics</option><option>Pet Products</option>
+          <option>Baby & Kids</option><option>Wellness/Supplements</option><option>Other</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+        <div class="mfield"><label class="mlabel">Contact Name</label><input class="minput" id="m-contact" placeholder="Full name"></div>
+        <div class="mfield"><label class="mlabel">Email</label><input class="minput" id="m-email" placeholder="founder@brand.com"></div>
+        <div class="mfield"><label class="mlabel">Annual Revenue</label>
+          <select class="mselect" id="m-revenue">
+            <option value="">Select...</option>
+            <option>Under $500K</option><option>$500K – $1M</option><option>$1M – $5M</option>
+            <option>$5M – $20M</option><option>Over $20M</option>
+          </select>
+        </div>
+        <div class="mfield"><label class="mlabel">Target Retailer</label>
+          <select class="mselect" id="m-retailer">
+            <option value="">Select...</option>
+            <option>Sam's Club</option><option>Costco</option><option>Both</option><option>Other</option>
+          </select>
+        </div>
+        <div class="mfield"><label class="mlabel">Economic Model</label>
+          <select class="mselect" id="m-model">
+            <option value="">Select...</option>
+            <option>Roadshow</option><option>Inline</option><option>Commission/Brokerage</option>
+            <option>Private Label</option><option>Not Sure</option>
+          </select>
+        </div>
+        <div class="mfield"><label class="mlabel">Initial Phase</label>
+          <select class="mselect" id="m-phase">
+            <option value="1">Phase 1 — Opportunity ID</option>
+            <option value="2">Phase 2 — Compliance</option>
+            <option value="3">Phase 3 — Readiness Eval</option>
+            <option value="4">Phase 4 — Go/No-Go</option>
+            <option value="5">Phase 5 — Investment Plan</option>
+          </select>
+        </div>
+      </div>
+      <div class="mfield"><label class="mlabel">Initial Score (0–100)</label><input class="minput" id="m-score" type="number" min="0" max="100" placeholder="e.g. 78"></div>
+      <div class="mfield"><label class="mlabel">Notes</label><textarea class="mtextarea" id="m-notes" placeholder="Any initial notes about this brand..."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBrand()">Create Brand</button>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"><div class="notif-title" id="notif-title"></div><div id="notif-body"></div></div>
+
+<script>
+// ─── CONFIG ────────────────────────────────────────────────────────────────
+const PINECONE_HOST = 'https://ascenda-pipeline-8t9sj7i.svc.aped-4627-b74a.pinecone.io';
+const N8N_BASE = 'https://YOUR_N8N_INSTANCE.com'; // update after n8n setup
+
+// ─── DATA ──────────────────────────────────────────────────────────────────
+const PHASE_NAMES = [
+  'Opportunity ID','Compliance & DD','Readiness Eval','Go/No-Go',
+  'Investment Plan','Retail Readiness','Logistics','Execute Roadshow',
+  'Evaluate & Iterate','Growth & Scale'
+];
+const PHASE_LABELS = ['OPP','COMP','READY','GO/NO','INVEST','RETAIL','LOGIS','EXEC','EVAL','SCALE'];
+
+const COLORS = ['#47c2ff','#3ddc97','#ffbe3d','#e8ff47','#ff6b47','#c47aff','#ff8c47','#47ffb8','#ff4757','#aaffaa'];
+
+const DEFAULT_ADV_ROWS = [
+  { desc: 'Press Kits & Mailers', months: [300,300,300,300,300,300,300,300,300,300,300,300] },
+  { desc: 'Influencer', months: [3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000] },
+  { desc: 'Product Samples', months: [0,0,0,0,0,0,0,0,0,0,0,0] }
+];
+const DEFAULT_PROMO_ROWS = [
+  { desc: 'UGC/Affiliate', months: [1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000] },
+  { desc: 'Google (PMAX, Search, YouTube)', months: [0,0,0,0,0,0,0,0,0,0,0,0] },
+  { desc: 'Meta', months: [0,0,0,0,0,0,0,0,0,0,0,0] },
+  { desc: 'Advertorial', months: [0,0,0,0,0,0,0,0,0,0,0,0] },
+  { desc: 'Retailer Media Buys', months: [0,0,0,0,0,0,0,0,0,0,0,0] },
+  { desc: 'Instacart', months: [0,0,0,0,0,0,0,0,0,0,0,0] }
+];
+const DEFAULT_NW_ROWS = [
+  { desc: 'Klaviyo', months: [1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200] }
+];
+
+// Sample brands to start
+let brands = [
+  { id:'brand-001', name:'NutriPure Foods', category:'Food & Beverage', contact:'Sarah Chen', email:'sarah@nutripure.com', revenue:'$3.2M', retailer:"Sam's Club", model:'Roadshow', phase:5, score:88, color:'#3ddc97', notes:[], files:[], budget:{ adv:JSON.parse(JSON.stringify(DEFAULT_ADV_ROWS)), promo:JSON.parse(JSON.stringify(DEFAULT_PROMO_ROWS)), nw:JSON.parse(JSON.stringify(DEFAULT_NW_ROWS)) } },
+  { id:'brand-002', name:'VitaBlend Wellness', category:'Health & Wellness', contact:'Marcus Lee', email:'marcus@vitablend.co', revenue:'$1.8M', retailer:"Sam's Club", model:'Inline', phase:3, score:82, color:'#47c2ff', notes:[], files:[], budget:{ adv:JSON.parse(JSON.stringify(DEFAULT_ADV_ROWS)), promo:JSON.parse(JSON.stringify(DEFAULT_PROMO_ROWS)), nw:JSON.parse(JSON.stringify(DEFAULT_NW_ROWS)) } },
+  { id:'brand-003', name:'PetPlex Brands', category:'Pet Products', contact:'Jordan Kim', email:'jordan@petplex.com', revenue:'$7.4M', retailer:"Sam's Club", model:'Roadshow', phase:8, score:91, color:'#ff6b47', notes:[], files:[], budget:{ adv:JSON.parse(JSON.stringify(DEFAULT_ADV_ROWS)), promo:JSON.parse(JSON.stringify(DEFAULT_PROMO_ROWS)), nw:JSON.parse(JSON.stringify(DEFAULT_NW_ROWS)) } }
+];
+
+let activeBrandId = null;
+let activeDetailTab = 'overview';
+
+function getBrand(id) { return brands.find(b => b.id === id); }
+function getActiveBrand() { return getBrand(activeBrandId); }
+
+// ─── SIDEBAR ───────────────────────────────────────────────────────────────
+function renderSidebar(filter='') {
+  const list = document.getElementById('brand-list');
+  const filtered = brands.filter(b => b.name.toLowerCase().includes(filter.toLowerCase()));
+  document.getElementById('sidebar-count').textContent = filtered.length;
+  list.innerHTML = filtered.map(b => `
+    <div class="brand-item ${b.id===activeBrandId?'active':''}" onclick="showBrand('${b.id}')">
+      <div>
+        <div class="brand-item-name">${b.name}</div>
+        <div class="brand-item-phase">Phase ${b.phase} · ${PHASE_LABELS[b.phase-1]}</div>
+      </div>
+      <div class="brand-item-score" style="color:${scoreColor(b.score)}">${b.score}</div>
+    </div>
+  `).join('') || '<div style="padding:1.25rem;text-align:center;color:var(--muted);font-size:.8rem;">No brands found</div>';
+}
+
+function filterBrands(q) { renderSidebar(q); }
+
+// ─── LIST VIEW ─────────────────────────────────────────────────────────────
+function renderListView() {
+  document.getElementById('portfolio-sub').textContent = `${brands.length} ACTIVE BRANDS · CLICK TO VIEW DETAIL`;
+  const phases = [1,2,3,4,5].map(p => brands.filter(b=>b.phase===p).length);
+  document.getElementById('pipeline-summary').innerHTML = [
+    { label:'Phase 1-2', n: brands.filter(b=>b.phase<=2).length, sub:'Early Stage' },
+    { label:'Phase 3-4', n: brands.filter(b=>b.phase>=3&&b.phase<=4).length, sub:'Evaluation' },
+    { label:'Phase 5-6', n: brands.filter(b=>b.phase>=5&&b.phase<=6).length, sub:'Planning' },
+    { label:'Phase 7-8', n: brands.filter(b=>b.phase>=7&&b.phase<=8).length, sub:'Execution' },
+    { label:'Phase 9-10', n: brands.filter(b=>b.phase>=9).length, sub:'Scale' }
+  ].map(t=>`<div class="pipeline-tile"><div class="pipeline-tile-n">${t.n}</div><div class="pipeline-tile-label">${t.label}<br>${t.sub}</div></div>`).join('');
+
+  document.getElementById('brand-grid').innerHTML = brands.map(b => {
+    const pct = (b.phase/10)*100;
+    const initials = b.name.split(' ').map(w=>w[0]).join('').slice(0,2);
+    return `<div class="brand-card" onclick="showBrand('${b.id}')" style="--bc:${b.color};">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${b.color};border-radius:8px 8px 0 0;"></div>
+      <div class="bc-top">
+        <div style="display:flex;align-items:center;gap:.7rem;">
+          <div class="bc-initials" style="background:${b.color}20;color:${b.color}">${initials}</div>
+          <div><div class="bc-name">${b.name}</div><div class="bc-cat">${b.category}</div></div>
+        </div>
+        <div><div class="bc-score-num" style="color:${scoreColor(b.score)}">${b.score}</div><div class="bc-score-lbl">Score</div></div>
+      </div>
+      <div class="bc-progress"><div class="bc-progress-fill" style="width:${pct}%;background:${b.color};"></div></div>
+      <div class="bc-bottom"><span class="bc-phase-name">Phase ${b.phase}: ${PHASE_NAMES[b.phase-1]}</span><span class="bc-retailer">${b.retailer}</span></div>
+    </div>`;
+  }).join('');
+}
+
+// ─── BRAND DETAIL ──────────────────────────────────────────────────────────
+function showBrand(id) {
+  activeBrandId = id;
+  const b = getBrand(id);
+  if (!b) return;
+
+  document.getElementById('view-list').style.display = 'none';
+  document.getElementById('view-detail').style.display = 'flex';
+  document.getElementById('btn-back').classList.remove('hidden');
+  renderSidebar(document.getElementById('brand-search').value);
+
+  // Hero
+  const initials = b.name.split(' ').map(w=>w[0]).join('').slice(0,2);
+  document.getElementById('d-initials').style.background = b.color+'22';
+  document.getElementById('d-initials').style.color = b.color;
+  document.getElementById('d-initials').textContent = initials;
+  document.getElementById('d-name').textContent = b.name;
+  document.getElementById('d-score').textContent = b.score;
+  document.getElementById('d-score').style.color = scoreColor(b.score);
+  document.getElementById('d-meta').innerHTML = [
+    b.category, b.retailer, b.model, b.revenue
+  ].filter(Boolean).map(v=>`<span class="detail-tag">${v}</span>`).join('');
+
+  renderTimeline(b);
+  switchDetailTab(activeDetailTab || 'overview', null);
+  renderOverview(b);
+  renderNotes(b);
+  renderFiles(b);
+  renderBudget(b);
+  updateRAGLabels(b);
+}
+
+function showListView() {
+  activeBrandId = null;
+  document.getElementById('view-list').style.display = 'block';
+  document.getElementById('view-detail').style.display = 'none';
+  document.getElementById('btn-back').classList.add('hidden');
+  renderSidebar();
+  renderListView();
+}
+
+function renderTimeline(b) {
+  const track = document.getElementById('timeline-track');
+  track.innerHTML = PHASE_NAMES.map((name, i) => {
+    const phase = i + 1;
+    const cls = phase < b.phase ? 'done' : phase === b.phase ? 'active' : 'pending';
+    return `
+      <div class="tl-step">
+        <div class="tl-dot-wrap" onclick="advanceToPhase(${phase})">
+          <div class="tl-dot ${cls}">${phase < b.phase ? '✓' : phase}</div>
+          <div class="tl-label ${cls}">${PHASE_LABELS[i]}</div>
+        </div>
+        ${phase < 10 ? `<div class="tl-line ${phase < b.phase ? 'done' : ''}"></div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+function advanceToPhase(n) {
+  const b = getActiveBrand();
+  if (!b) return;
+  b.phase = n;
+  renderTimeline(b);
+  renderSidebar();
+  renderOverview(b);
+  notify('Phase Updated', `${b.name} moved to Phase ${n}: ${PHASE_NAMES[n-1]}`);
+}
+
+function renderOverview(b) {
+  document.getElementById('overview-grid').innerHTML = [
+    { label:'Contact', value: b.contact || '—' },
+    { label:'Email', value: b.email || '—' },
+    { label:'Revenue', value: b.revenue || '—' },
+    { label:'Target Retailer', value: b.retailer || '—' },
+    { label:'Economic Model', value: b.model || '—' },
+    { label:'Current Phase', value: `Phase ${b.phase}: ${PHASE_NAMES[b.phase-1]}` },
+    { label:'Readiness Score', value: b.score + ' / 100' },
+    { label:'Brand ID', value: b.id },
+    { label:'Pinecone Namespace', value: `brands/${b.id}` },
+    { label:'Files / Assets', value: (b.files?.length || 0) + ' items' }
+  ].map(r=>`<div class="info-row"><div class="info-label">${r.label}</div><div class="info-value">${r.value}</div></div>`).join('');
+}
+
+// ─── NOTES ─────────────────────────────────────────────────────────────────
+function renderNotes(b) {
+  const list = document.getElementById('notes-list');
+  if (!b.notes || b.notes.length === 0) {
+    list.innerHTML = '<div class="empty-state"><h3>No Notes Yet</h3><p style="font-size:.8rem;">Add your first call note below.</p></div>';
+    return;
+  }
+  list.innerHTML = b.notes.slice().reverse().map((n,i) => `
+    <div class="note-item">
+      <div class="note-header">
+        <div style="display:flex;gap:.5rem;align-items:center;">
+          <span class="note-type ${n.type}">${n.type.toUpperCase()}</span>
+          <span style="font-weight:600;font-size:.82rem;">${n.title}</span>
+        </div>
+        <span class="note-date">${n.date}</span>
+      </div>
+      <div class="note-text">${n.text.replace(/\n/g,'<br>')}</div>
+      <button class="note-del" onclick="deleteNote('${b.id}',${b.notes.length-1-i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function addNote() {
+  const b = getActiveBrand();
+  if (!b) return;
+  const type = document.getElementById('new-note-type').value;
+  const title = document.getElementById('new-note-title').value.trim();
+  const text = document.getElementById('new-note-text').value.trim();
+  if (!text) return;
+  if (!b.notes) b.notes = [];
+  b.notes.push({ type, title: title || 'Note', text, date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}) });
+  document.getElementById('new-note-title').value = '';
+  document.getElementById('new-note-text').value = '';
+  renderNotes(b);
+  notify('Note Added', `${type.toUpperCase()} note saved to ${b.name}`);
+  // Trigger RAG sync
+  fetch(`${N8N_BASE}/webhook/ascenda/rag-sync`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ brandId: b.id, type:'note', data: b.notes[b.notes.length-1] }) }).catch(()=>{});
+}
+
+function deleteNote(brandId, idx) {
+  const b = getBrand(brandId);
+  if (!b) return;
+  b.notes.splice(idx, 1);
+  renderNotes(b);
+}
+
+// ─── FILES ─────────────────────────────────────────────────────────────────
+function renderFiles(b) {
+  const grid = document.getElementById('files-grid');
+  const ns = `brands/${b.id}`;
+  document.getElementById('file-rag-ns').textContent = ns;
+  document.getElementById('file-rag-count').textContent = (b.files?.length||0) + ' items';
+
+  if (!b.files || b.files.length === 0) {
+    grid.innerHTML = '<div class="empty-state" style="padding:1.5rem;grid-column:1/-1;"><h3>No Files Yet</h3></div>';
+    return;
+  }
+  const icons = { 'Two-Pager':'📄','COI':'🛡️','Financial Model':'📊','LOI':'✍️','Product Photo':'🖼️','Compliance Doc':'✅','Other':'📎' };
+  grid.innerHTML = b.files.map((f,i)=>`
+    <div class="file-card">
+      <div class="file-icon">${icons[f.type]||'📎'}</div>
+      <div class="file-name">${f.name}</div>
+      <div class="file-meta">${f.type} · ${f.date}</div>
+      <div class="file-actions">
+        <a href="${f.url}" target="_blank" class="file-btn">↗ Open</a>
+        <button class="file-btn" onclick="deleteFile('${b.id}',${i})">× Remove</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function handleFileSelect(e) {
+  const b = getActiveBrand();
+  if (!b) return;
+  Array.from(e.target.files).forEach(f => {
+    if (!b.files) b.files=[];
+    b.files.push({ name:f.name, type:'Other', url:'#', date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), size:f.size });
+  });
+  renderFiles(b);
+  notify('File Added', `${e.target.files.length} file(s) added to ${b.name}`);
+}
+
+function handleFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag');
+  const b = getActiveBrand();
+  if (!b) return;
+  Array.from(e.dataTransfer.files).forEach(f => {
+    if (!b.files) b.files=[];
+    b.files.push({ name:f.name, type:'Other', url:'#', date:new Date().toLocaleDateString(), size:f.size });
+  });
+  renderFiles(b);
+  notify('File Dropped', `Files added to ${b.name}`);
+}
+
+function addFileLink() {
+  const url = document.getElementById('link-url').value.trim();
+  const type = document.getElementById('link-type').value;
+  if (!url) return;
+  const b = getActiveBrand();
+  if (!b) return;
+  if (!b.files) b.files=[];
+  const name = url.split('/').pop().split('?')[0] || type;
+  b.files.push({ name, type, url, date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) });
+  document.getElementById('link-url').value='';
+  renderFiles(b);
+  notify('Link Added', `${type} linked to ${b.name}`);
+}
+
+function deleteFile(brandId, idx) {
+  const b = getBrand(brandId);
+  if (!b) return;
+  b.files.splice(idx,1);
+  renderFiles(b);
+}
+
+// ─── A&P BUDGET ────────────────────────────────────────────────────────────
+function renderBudget(b) {
+  document.getElementById('budget-brand-label').textContent = `${b.name} · FY ${new Date().getFullYear()}`;
+  if (!b.budget) b.budget = { adv: JSON.parse(JSON.stringify(DEFAULT_ADV_ROWS)), promo: JSON.parse(JSON.stringify(DEFAULT_PROMO_ROWS)), nw: JSON.parse(JSON.stringify(DEFAULT_NW_ROWS)) };
+  renderBudgetSection('adv', b.budget.adv, 'adv-body', 'adv-total');
+  renderBudgetSection('promo', b.budget.promo, 'promo-body', 'promo-total');
+  renderBudgetSection('nw', b.budget.nw, 'nw-body', 'nw-total');
+  updateGrandTotal(b);
+}
+
+const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+function renderBudgetSection(prefix, rows, bodyId, totalId) {
+  const tbody = document.getElementById(bodyId);
+  tbody.innerHTML = rows.map((row, ri) => `
+    <tr>
+      <td><input class="ap-input" style="width:130px;text-align:left;" value="${row.desc}" onchange="updateBudgetDesc('${prefix}',${ri},this.value)"></td>
+      ${row.months.map((v,mi) => `<td><input class="ap-input" type="number" value="${v}" min="0" onchange="updateBudgetCell('${prefix}',${ri},${mi},this.value)"></td>`).join('')}
+      <td style="font-family:'DM Mono',monospace;font-weight:600;">$${rowTotal(row).toLocaleString()}</td>
+    </tr>
+  `).join('');
+  document.getElementById(totalId).textContent = '$' + rows.reduce((s,r)=>s+rowTotal(r),0).toLocaleString();
+}
+
+function rowTotal(row) { return row.months.reduce((s,v)=>s+(parseFloat(v)||0),0); }
+
+function updateBudgetCell(prefix, ri, mi, val) {
+  const b = getActiveBrand();
+  if (!b||!b.budget) return;
+  b.budget[prefix][ri].months[mi] = parseFloat(val)||0;
+  const totalId = prefix+'total'; // wrong — fix below
+  const totalMap = {adv:'adv-total', promo:'promo-total', nw:'nw-total'};
+  document.getElementById(totalMap[prefix]).textContent = '$' + b.budget[prefix].reduce((s,r)=>s+rowTotal(r),0).toLocaleString();
+  // Update row total inline
+  const tbody = document.getElementById(prefix+'-body');
+  const rowCells = tbody.rows[ri];
+  const rt = b.budget[prefix][ri].months.reduce((s,v)=>s+v,0);
+  rowCells.cells[rowCells.cells.length-1].textContent = '$'+rt.toLocaleString();
+  updateGrandTotal(b);
+}
+
+function updateBudgetDesc(prefix, ri, val) {
+  const b = getActiveBrand();
+  if (!b||!b.budget) return;
+  b.budget[prefix][ri].desc = val;
+}
+
+function addBudgetRow(prefix) {
+  const b = getActiveBrand();
+  if (!b||!b.budget) return;
+  b.budget[prefix].push({ desc: 'New Line Item', months: new Array(12).fill(0) });
+  renderBudgetSection(prefix, b.budget[prefix], prefix+'-body', prefix+'-total');
+  updateGrandTotal(b);
+}
+
+function updateGrandTotal(b) {
+  if (!b.budget) return;
+  const allRows = [...(b.budget.adv||[]),...(b.budget.promo||[]),...(b.budget.nw||[])];
+  const annual = allRows.reduce((s,r)=>s+rowTotal(r),0);
+  const monthly = Math.round(annual/12);
+  document.getElementById('grand-total').textContent = '$'+annual.toLocaleString();
+  document.getElementById('monthly-total').textContent = '$'+monthly.toLocaleString()+' / month';
+  // Update splits
+  const adv = (b.budget.adv||[]).reduce((s,r)=>s+rowTotal(r),0);
+  const promo = (b.budget.promo||[]).reduce((s,r)=>s+rowTotal(r),0);
+  const nw = (b.budget.nw||[]).reduce((s,r)=>s+rowTotal(r),0);
+  if (annual > 0) {
+    document.getElementById('adv-split').textContent = Math.round(adv/annual*100)+'%';
+    document.getElementById('promo-split').textContent = Math.round(promo/annual*100)+'%';
+    document.getElementById('nw-split').textContent = Math.round(nw/annual*100)+'%';
+  }
+}
+
+function exportBudget() {
+  const b = getActiveBrand();
+  if (!b) return;
+  let csv = `A&P MARKETING BUDGET TRACKER — ${b.name}\n`;
+  csv += `Description,JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC,TOTAL\n`;
+  csv += `\nADVERTISING\n`;
+  (b.budget?.adv||[]).forEach(r => { csv += `"${r.desc}",${r.months.join(',')},${rowTotal(r)}\n`; });
+  csv += `\nPROMOTIONAL\n`;
+  (b.budget?.promo||[]).forEach(r => { csv += `"${r.desc}",${r.months.join(',')},${rowTotal(r)}\n`; });
+  csv += `\nNON WORKING\n`;
+  (b.budget?.nw||[]).forEach(r => { csv += `"${r.desc}",${r.months.join(',')},${rowTotal(r)}\n`; });
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${b.name}-AP-Budget.csv`; a.click();
+  notify('Exported', 'A&P Budget CSV downloaded');
+}
+
+// ─── SAM'S CLUB BUILDER ────────────────────────────────────────────────────
+function toggleOption(el) { el.classList.toggle('selected'); }
+
+function runSubmissionBuilder() {
+  const b = getActiveBrand();
+  if (!b) return;
+  const twoPager = document.getElementById('opt-twopager').classList.contains('selected');
+  const deck = document.getElementById('opt-deck').classList.contains('selected');
+  const form = document.getElementById('opt-form').classList.contains('selected');
+  if (!twoPager && !deck && !form) { notify('Select Outputs', 'Choose at least one output type'); return; }
+
+  const steps = [];
+  if (twoPager) steps.push({ label: 'Generating Two-Pager PDF via Claude', status: 'running' });
+  if (deck) steps.push({ label: 'Building PowerPoint Deck', status: 'pending' });
+  if (form) steps.push({ label: "Pre-filling Sam's Club Submission Form", status: 'pending' });
+  steps.push({ label: 'Uploading to Google Drive', status: 'pending' });
+  steps.push({ label: 'Syncing to Pinecone RAG', status: 'pending' });
+
+  const prog = document.getElementById('sb-progress');
+  prog.style.display = 'block';
+
+  let currentStep = 0;
+  const renderSteps = () => {
+    document.getElementById('sb-steps').innerHTML = steps.map((s,i)=>`
+      <div class="sb-step">
+        <div class="sb-step-dot ${s.status}">${s.status==='done'?'✓':s.status==='running'?'…':i+1}</div>
+        <div class="sb-step-label" style="color:${s.status==='done'?'var(--success)':s.status==='running'?'var(--warning)':'var(--muted)'}">${s.label}</div>
+        <div class="sb-step-status">${s.status==='running'?'Processing...':s.status==='done'?'Complete':'Waiting'}</div>
+      </div>
+    `).join('');
+  };
+
+  renderSteps();
+
+  const advance = () => {
+    if (currentStep < steps.length) {
+      if (currentStep > 0) steps[currentStep-1].status = 'done';
+      if (currentStep < steps.length) steps[currentStep].status = 'running';
+      currentStep++;
+      renderSteps();
+      if (currentStep < steps.length) setTimeout(advance, 1200 + Math.random()*800);
+      else {
+        steps[steps.length-1].status = 'done';
+        renderSteps();
+        notify('Package Ready', `Sam's Club submission built for ${b.name}`);
+        // Trigger n8n workflow
+        fetch(`${N8N_BASE}/webhook/ascenda/loi-signed`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ brandId:b.id, brandName:b.name, ...b, sbDiff: document.getElementById('sb-diff').value, sbPrice: document.getElementById('sb-price').value, sbUnits: document.getElementById('sb-units').value, sbRev: document.getElementById('sb-rev').value, sbNarrative: document.getElementById('sb-narrative').value, sbMember: document.getElementById('sb-member').value }) }).catch(()=>{});
+      }
+    }
+  };
+  setTimeout(advance, 400);
+}
+
+function clearBuilder() {
+  ['sb-diff','sb-price','sb-units','sb-rev','sb-narrative','sb-member'].forEach(id => { document.getElementById(id).value=''; });
+  document.getElementById('sb-progress').style.display = 'none';
+  ['opt-twopager','opt-deck','opt-form'].forEach(id => document.getElementById(id).classList.add('selected'));
+}
+
+// ─── RAG ───────────────────────────────────────────────────────────────────
+function updateRAGLabels(b) {
+  const ns = `brands/${b.id}`;
+  document.getElementById('rag-ns-label').textContent = ns;
+  document.getElementById('rag-console-label').textContent = `${b.id} · ${ns}`;
+  document.getElementById('rag-vector-count').textContent = (b.files?.length||0)+(b.notes?.length||0)+1 + ' vectors';
+}
+
+function setRAGQuery(q) { document.getElementById('rag-query-input').value=q; }
+
+function queryBrandRAG() {
+  const b = getActiveBrand();
+  const q = document.getElementById('rag-query-input').value.trim();
+  if (!q||!b) return;
+  const el = document.getElementById('rag-result');
+  el.textContent = `// Querying namespace: brands/${b.id}\n// Query: "${q}"\n// Searching ${(b.files?.length||0)+(b.notes?.length||0)+1} vectors...`;
+  setTimeout(()=>{
+    el.textContent = `// Namespace: brands/${b.id} | k=5 | cosine\n// Query: "${q}"\n\n[0.94] ${b.name} — Brand Profile\n       Score: ${b.score} | Phase: ${b.phase} | ${b.category}\n\n[0.87] Call Notes (${b.notes?.length||0} entries)\n       Last note: ${b.notes?.length ? b.notes[b.notes.length-1].date : 'No notes yet'}\n\n[0.82] Files & Assets (${b.files?.length||0} items)\n       ${b.files?.length ? b.files[0].name : 'No files uploaded'}\n\n// Namespace is isolated to this brand only`;
+  }, 700);
+}
+
+function syncToRAG() {
+  const b = getActiveBrand();
+  if (!b) return;
+  fetch(`${N8N_BASE}/webhook/ascenda/rag-sync`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ brandId:b.id, namespace:`brands/${b.id}`, data:{ brandName:b.name, score:b.score, phase:b.phase, category:b.category, notes:b.notes?.length||0, files:b.files?.length||0, synced:new Date().toISOString() } }) }).catch(()=>{});
+  notify('RAG Sync', `${b.name} synced to Pinecone namespace brands/${b.id}`);
+}
+
+// ─── MODAL / ADD BRAND ─────────────────────────────────────────────────────
+function openAddBrand() { document.getElementById('modal-add').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function saveBrand() {
+  const name = document.getElementById('m-name').value.trim();
+  const category = document.getElementById('m-category').value;
+  if (!name||!category) { notify('Missing Fields','Brand Name and Category required'); return; }
+  const id = 'brand-' + Date.now();
+  const color = COLORS[brands.length % COLORS.length];
+  brands.push({
+    id, name, category, color,
+    contact: document.getElementById('m-contact').value,
+    email: document.getElementById('m-email').value,
+    revenue: document.getElementById('m-revenue').value,
+    retailer: document.getElementById('m-retailer').value,
+    model: document.getElementById('m-model').value,
+    phase: parseInt(document.getElementById('m-phase').value)||1,
+    score: parseInt(document.getElementById('m-score').value)||0,
+    notes: document.getElementById('m-notes').value ? [{ type:'internal', title:'Initial Notes', text:document.getElementById('m-notes').value, date:new Date().toLocaleDateString() }] : [],
+    files: [],
+    budget: { adv:JSON.parse(JSON.stringify(DEFAULT_ADV_ROWS)), promo:JSON.parse(JSON.stringify(DEFAULT_PROMO_ROWS)), nw:JSON.parse(JSON.stringify(DEFAULT_NW_ROWS)) }
+  });
+  closeModal('modal-add');
+  renderSidebar();
+  renderListView();
+  notify('Brand Created', `${name} added to portfolio`);
+  // Clear modal
+  ['m-name','m-contact','m-email','m-score','m-notes'].forEach(id=>{ const el=document.getElementById(id); if(el)el.value=''; });
+}
+
+// ─── TABS ──────────────────────────────────────────────────────────────────
+function switchDetailTab(name, el) {
+  activeDetailTab = name;
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.detail-tab-content').forEach(t=>t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  else document.querySelectorAll('.dtab')[['overview','notes','files','budget','builder','rag'].indexOf(name)]?.classList.add('active');
+  document.getElementById('dtab-'+name)?.classList.add('active');
+}
+
+// ─── UTILS ─────────────────────────────────────────────────────────────────
+function scoreColor(s) { return s>=80?'var(--success)':s>=65?'var(--warning)':'var(--danger)'; }
+
+function notify(title, body) {
+  const n=document.getElementById('notif');
+  document.getElementById('notif-title').textContent=title;
+  document.getElementById('notif-body').textContent=body;
+  n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'),3500);
+}
+
+// ─── INIT ──────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', ()=>{
+  renderSidebar();
+  renderListView();
+});
+</script>
+</body>
+</html>

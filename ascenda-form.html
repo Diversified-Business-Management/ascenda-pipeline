@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feasibility Snapshot — Ascenda Group</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f1f3d;
+    --navy-mid: #1a3260;
+    --gold: #c8962a;
+    --gold-light: #e8b84b;
+    --white: #ffffff;
+    --off-white: #f8f7f4;
+    --light-gray: #edecea;
+    --mid-gray: #9a9690;
+    --text: #1c1a18;
+    --text-light: #5a5652;
+    --success: #2d7a5f;
+    --error: #c0392b;
+    --border: #dddbd7;
+    --shadow: 0 4px 24px rgba(15,31,61,0.10);
+    --shadow-lg: 0 16px 60px rgba(15,31,61,0.16);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--off-white);
+    color: var(--text);
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .site-header {
+    background: var(--navy);
+    padding: 0 2rem;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+  }
+
+  .site-header img {
+    height: 36px;
+    width: auto;
+  }
+
+  .header-tagline {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+
+  /* HERO */
+  .form-hero {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #1f3d7a 100%);
+    color: white;
+    text-align: center;
+    padding: 4rem 2rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .form-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  .form-hero-eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 1rem;
+    font-weight: 700;
+  }
+
+  .form-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+
+  .form-hero p {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.75);
+    max-width: 520px;
+    margin: 0 auto 0;
+    font-weight: 300;
+  }
+
+  /* PROGRESS */
+  .progress-wrapper {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 2rem;
+    position: sticky;
+    top: 68px;
+    z-index: 90;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  .progress-inner {
+    max-width: 780px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .progress-step {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+
+  .step-dot-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    flex-shrink: 0;
+  }
+
+  .step-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--mid-gray);
+    transition: all 0.3s ease;
+    cursor: default;
+  }
+
+  .step-dot.active {
+    border-color: var(--gold);
+    background: var(--gold);
+    color: white;
+    box-shadow: 0 0 0 4px rgba(200,150,42,0.15);
+  }
+
+  .step-dot.complete {
+    border-color: var(--success);
+    background: var(--success);
+    color: white;
+  }
+
+  .step-dot.complete::after { content: '✓'; }
+
+  .step-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--mid-gray);
+    text-align: center;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .step-label.active { color: var(--gold); font-weight: 700; }
+  .step-label.complete { color: var(--success); }
+
+  .step-line {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    margin: 0 6px;
+    margin-bottom: 20px;
+    transition: background 0.3s;
+  }
+  .step-line.complete { background: var(--success); }
+
+  /* MAIN FORM AREA */
+  .form-main {
+    max-width: 780px;
+    margin: 2.5rem auto 4rem;
+    padding: 0 1.5rem;
+  }
+
+  /* PHASE CARD */
+  .phase-panel {
+    display: none;
+    animation: fadeSlideIn 0.4s ease forwards;
+  }
+  .phase-panel.active { display: block; }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .phase-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .phase-badge {
+    display: inline-block;
+    background: var(--navy);
+    color: var(--gold-light);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.75rem;
+    border-radius: 2px;
+    margin-bottom: 0.6rem;
+  }
+
+  .phase-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 0.4rem;
+  }
+
+  .phase-desc {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    max-width: 600px;
+  }
+
+  /* FORM CARD */
+  .form-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 2rem;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow);
+  }
+
+  .card-section-title {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 2px solid var(--light-gray);
+  }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.1rem;
+  }
+
+  .field-grid.single { grid-template-columns: 1fr; }
+  .field-grid .full { grid-column: 1 / -1; }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .form-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: 0.03em;
+  }
+
+  .form-label .req { color: var(--gold); margin-left: 2px; }
+  .form-label .hint { font-weight: 400; color: var(--mid-gray); font-size: 0.72rem; margin-left: 4px; }
+
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(200,150,42,0.12);
+  }
+
+  .form-input.error { border-color: var(--error); }
+
+  .form-textarea { resize: vertical; min-height: 90px; }
+
+  .char-count {
+    font-size: 0.68rem;
+    color: var(--mid-gray);
+    text-align: right;
+    margin-top: 0.15rem;
+  }
+
+  .char-count.warn { color: var(--gold); }
+  .char-count.good { color: var(--success); }
+
+  /* RADIO/CHECKBOX GROUPS */
+  .radio-group, .check-group {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .radio-label, .check-label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.88rem;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .radio-label:has(input:checked),
+  .check-label:has(input:checked) {
+    border-color: var(--gold);
+    background: rgba(200,150,42,0.06);
+    color: var(--navy);
+    font-weight: 700;
+  }
+
+  .radio-label input, .check-label input { display: none; }
+
+  /* MARGIN CALC */
+  .margin-calc {
+    background: var(--off-white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+  }
+  .margin-calc .calc-label { color: var(--text-light); }
+  .margin-calc .calc-val {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--navy);
+    font-family: 'Playfair Display', serif;
+  }
+  .margin-calc .calc-val.pos { color: var(--success); }
+  .margin-calc .calc-val.neg { color: var(--error); }
+
+  /* SHIPPING BOX */
+  .shipping-box {
+    background: var(--off-white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--gold);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .shipping-box strong { color: var(--navy); display: block; margin-bottom: 0.25rem; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* DIVIDER */
+  .field-divider {
+    height: 1px;
+    background: var(--light-gray);
+    margin: 1.25rem 0;
+  }
+
+  /* NOTICE */
+  .phase-notice {
+    background: rgba(200,150,42,0.08);
+    border: 1px solid rgba(200,150,42,0.25);
+    border-radius: 8px;
+    padding: 0.9rem 1.1rem;
+    font-size: 0.82rem;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0.6rem;
+  }
+  .phase-notice svg { flex-shrink: 0; margin-top: 1px; }
+
+  /* NAVIGATION BUTTONS */
+  .form-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    gap: 1rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 2rem;
+    border-radius: 6px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--gold);
+    color: white;
+  }
+  .btn-primary:hover { background: #b8861e; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,150,42,0.3); }
+
+  .btn-primary.navy { background: var(--navy); }
+  .btn-primary.navy:hover { background: var(--navy-mid); box-shadow: 0 6px 20px rgba(15,31,61,0.25); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-light);
+    border: 1.5px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--navy); color: var(--navy); }
+
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+  /* SUCCESS STATE */
+  .success-panel {
+    display: none;
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+
+  .success-panel.active { display: block; animation: fadeSlideIn 0.5s ease; }
+
+  .success-icon {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: var(--success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+  }
+
+  .success-panel h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--navy);
+    margin-bottom: 0.75rem;
+  }
+
+  .success-panel p {
+    color: var(--text-light);
+    max-width: 480px;
+    margin: 0 auto 2rem;
+    font-size: 0.95rem;
+  }
+
+  .prospect-id-box {
+    display: inline-block;
+    background: var(--navy);
+    color: var(--gold-light);
+    font-family: monospace;
+    font-size: 1.1rem;
+    padding: 0.6rem 1.5rem;
+    border-radius: 6px;
+    letter-spacing: 0.1em;
+    margin-bottom: 2rem;
+  }
+
+  /* ERROR MSG */
+  .field-error {
+    font-size: 0.72rem;
+    color: var(--error);
+    margin-top: 0.2rem;
+  }
+
+  /* FOOTER */
+  .form-footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--mid-gray);
+    font-size: 0.72rem;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+    letter-spacing: 0.05em;
+  }
+
+  .form-footer a { color: var(--gold); text-decoration: none; }
+
+  @media (max-width: 620px) {
+    .field-grid { grid-template-columns: 1fr; }
+    .field-grid .full { grid-column: 1; }
+    .progress-inner { gap: 0; }
+    .step-label { display: none; }
+    .form-card { padding: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SITE HEADER -->
+<header class="site-header">
+  <img src="https://ascendagrp.com/wp-content/uploads/2025/12/Group-2.png" alt="Ascenda Group" onerror="this.style.display='none';this.nextSibling.style.display='block'">
+  <span style="display:none;font-size:1.2rem;font-weight:700;color:white;letter-spacing:0.1em;">ASCENDA GROUP</span>
+  <span class="header-tagline">Sam's Club Roadshow Application</span>
+</header>
+
+<!-- HERO -->
+<div class="form-hero">
+  <div class="form-hero-eyebrow">Start Your Retail Journey</div>
+  <h1>Sam's Club Roadshow<br>Application</h1>
+  <p>A clear, staged process that respects your time. No fluff — just the right questions to determine if your brand is ready for club retail.</p>
+</div>
+
+<!-- PROGRESS BAR -->
+<div class="progress-wrapper">
+  <div class="progress-inner">
+    <div class="progress-step">
+      <div class="step-dot-wrap">
+        <div class="step-dot active" id="dot-1">1</div>
+        <div class="step-label active" id="lbl-1">Quick<br>Feasibility</div>
+      </div>
+    </div>
+    <div class="step-line" id="line-1"></div>
+    <div class="progress-step">
+      <div class="step-dot-wrap">
+        <div class="step-dot" id="dot-2">2</div>
+        <div class="step-label" id="lbl-2">Preliminary<br>Validation</div>
+      </div>
+    </div>
+    <div class="step-line" id="line-2"></div>
+    <div class="progress-step">
+      <div class="step-dot-wrap">
+        <div class="step-dot" id="dot-3">3</div>
+        <div class="step-label" id="lbl-3">Full<br>Evaluation</div>
+      </div>
+    </div>
+    <div class="step-line" id="line-3"></div>
+    <div class="progress-step">
+      <div class="step-dot-wrap">
+        <div class="step-dot" id="dot-4">4</div>
+        <div class="step-label" id="lbl-4">Sample<br>Shipment</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN FORM -->
+<main class="form-main">
+
+  <!-- PHASE 1 -->
+  <div class="phase-panel active" id="phase-1">
+    <div class="phase-header">
+      <div class="phase-badge">Phase 1 of 4</div>
+      <div class="phase-title">Quick Feasibility</div>
+      <div class="phase-desc">This quick form helps us determine if your product is a good fit for Sam's Club roadshows. No documents required — just answer honestly.</div>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Company Information</div>
+      <div class="field-grid">
+        <div class="form-group">
+          <label class="form-label">Company Name <span class="req">*</span></label>
+          <input type="text" class="form-input" id="p1-company" placeholder="Your company name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Website</label>
+          <input type="url" class="form-input" id="p1-website" placeholder="https://yoursite.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">First Name <span class="req">*</span></label>
+          <input type="text" class="form-input" id="p1-first" placeholder="First name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name <span class="req">*</span></label>
+          <input type="text" class="form-input" id="p1-last" placeholder="Last name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email <span class="req">*</span></label>
+          <input type="email" class="form-input" id="p1-email" placeholder="you@company.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input type="tel" class="form-input" id="p1-phone" placeholder="+1 (555) 000-0000">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Product Information</div>
+      <div class="field-grid">
+        <div class="form-group">
+          <label class="form-label">Product Name <span class="req">*</span></label>
+          <input type="text" class="form-input" id="p1-product-name" placeholder="Your product name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Product Category <span class="req">*</span></label>
+          <select class="form-select" id="p1-category">
+            <option value="">Select a category...</option>
+            <option>Food & Beverage</option>
+            <option>Health & Beauty</option>
+            <option>Home & Kitchen</option>
+            <option>Electronics</option>
+            <option>Apparel</option>
+            <option>Toys & Games</option>
+            <option>Pet Supplies</option>
+            <option>Automotive</option>
+            <option>Office Supplies</option>
+            <option>Wellness / Supplements</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Brief Product Description <span class="req">*</span></label>
+          <textarea class="form-textarea" id="p1-desc" maxlength="500" placeholder="Describe your product..." oninput="updateCount('p1-desc','p1-desc-count',500)"></textarea>
+          <div class="char-count" id="p1-desc-count">0 / 500</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Compliance</div>
+      <div class="field-grid">
+        <div class="form-group full">
+          <label class="form-label">Do you have a Nutritional / Supplemental Label?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="p1-label" value="yes"> Yes</label>
+            <label class="radio-label"><input type="radio" name="p1-label" value="no"> No</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Third-party Testing Agency</label>
+          <input type="text" class="form-input" id="p1-testing" placeholder="e.g. NSF, Informed Sport">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Certifications Held</label>
+          <input type="text" class="form-input" id="p1-certs" placeholder="e.g. USDA Organic, Non-GMO, Kosher">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Feasibility Questions</div>
+      <div class="field-grid single">
+        <div class="form-group">
+          <label class="form-label">What makes your product different from competitors? <span class="req">*</span> <span class="hint">Aim for 100+ characters</span></label>
+          <textarea class="form-textarea" id="p1-diff" placeholder="Describe your unique differentiation..." oninput="updateCount('p1-diff','p1-diff-count',1000)"></textarea>
+          <div class="char-count" id="p1-diff-count">0 / 1000</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">What value does it provide to Sam's Club members? <span class="req">*</span></label>
+          <textarea class="form-textarea" id="p1-value" placeholder="Why will Sam's Club members love this product?"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Who are your main competitors and what's your advantage?</label>
+          <textarea class="form-textarea" id="p1-competitors" placeholder="Name competitors and explain your edge..." style="min-height:75px;"></textarea>
+        </div>
+      </div>
+      <div class="field-divider"></div>
+      <div class="field-grid">
+        <div class="form-group">
+          <label class="form-label">Can you deliver 20% perceived value vs competitors?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="p1-value20" value="yes"> Yes</label>
+            <label class="radio-label"><input type="radio" name="p1-value20" value="no"> No</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ready for consignment-based roadshows?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="p1-consignment" value="yes"> Yes</label>
+            <label class="radio-label"><input type="radio" name="p1-consignment" value="no"> No</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Can you activate in multiple clubs simultaneously?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="p1-multi" value="yes"> Yes</label>
+            <label class="radio-label"><input type="radio" name="p1-multi" value="no"> No</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Does your pricing work for the Sam's Club model?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="p1-pricing" value="yes"> Yes</label>
+            <label class="radio-label"><input type="radio" name="p1-pricing" value="no"> No</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Economics</div>
+      <div class="field-grid">
+        <div class="form-group">
+          <label class="form-label">Can you provide COGS ranges?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="p1-cogs" value="yes"> Yes</label>
+            <label class="radio-label"><input type="radio" name="p1-cogs" value="no"> No</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Can you break even during roadshows?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="p1-breakeven" value="yes"> Yes</label>
+            <label class="radio-label"><input type="radio" name="p1-breakeven" value="no"> No</label>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Economics Notes</label>
+          <textarea class="form-textarea" id="p1-econ-notes" placeholder="Any notes on COGS, margins, or pricing flexibility..." style="min-height:75px;"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Can you maintain acceptable margins?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="p1-margins" value="yes"> Yes</label>
+            <label class="radio-label"><input type="radio" name="p1-margins" value="no"> No</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Insurance & Operations</div>
+      <div class="field-grid">
+        <div class="form-group">
+          <label class="form-label">Do you have liability insurance?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="p1-insurance" value="yes"> Yes</label>
+            <label class="radio-label"><input type="radio" name="p1-insurance" value="no"> No</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Coverage Details</label>
+          <input type="text" class="form-input" id="p1-coverage" placeholder="e.g. $2M general liability">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Any Operational Constraints?</label>
+          <textarea class="form-textarea" id="p1-constraints" placeholder="Lead times, production capacity limits, geographic restrictions..." style="min-height:75px;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <div></div>
+      <button class="btn btn-primary navy" onclick="submitPhase1()">
+        Submit Phase 1 &nbsp;→
+      </button>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase-panel" id="phase-2">
+    <div class="phase-header">
+      <div class="phase-badge">Phase 2 of 4</div>
+      <div class="phase-title">Preliminary Validation</div>
+      <div class="phase-desc">You've passed Phase 1! Please provide the following documentation for preliminary validation.</div>
+    </div>
+
+    <div class="phase-notice">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c8962a" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Your Prospect ID: <strong id="p2-prospect-display" style="font-family:monospace;margin-left:4px;color:#0f1f3d;"></strong>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Competitive Comparison</div>
+      <div class="field-grid single">
+        <div class="form-group">
+          <label class="form-label">Document URL <span class="hint">(Google Drive, Dropbox, etc.)</span></label>
+          <input type="url" class="form-input" id="p2-comp-url" placeholder="https://drive.google.com/...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Summary Notes</label>
+          <textarea class="form-textarea" id="p2-comp-notes" placeholder="Brief summary of competitive analysis..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Pricing Structure</div>
+      <div class="field-grid">
+        <div class="form-group">
+          <label class="form-label">Retail Price (MSRP)</label>
+          <input type="number" class="form-input" id="p2-msrp" placeholder="0.00" step="0.01" oninput="calcMargin()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Proposed Sam's Club Price</label>
+          <input type="number" class="form-input" id="p2-sams-price" placeholder="0.00" step="0.01" oninput="calcMargin()">
+        </div>
+        <div class="form-group full">
+          <div class="margin-calc">
+            <span class="calc-label">Calculated Margin</span>
+            <span class="calc-val" id="margin-display">—</span>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Pricing Document URL</label>
+          <input type="url" class="form-input" id="p2-pricing-url" placeholder="https://drive.google.com/...">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Roadshow Feasibility</div>
+      <div class="field-grid">
+        <div class="form-group full">
+          <label class="form-label">Feasibility Document URL</label>
+          <input type="url" class="form-input" id="p2-feasibility-url" placeholder="https://drive.google.com/...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estimated Locations Count</label>
+          <input type="number" class="form-input" id="p2-locations" placeholder="e.g. 10">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Feasibility Notes</label>
+          <input type="text" class="form-input" id="p2-feasibility-notes" placeholder="Any constraints or notes...">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Third-Party Testing</div>
+      <div class="field-grid">
+        <div class="form-group">
+          <label class="form-label">Testing Available?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="p2-testing" value="yes"> Yes</label>
+            <label class="radio-label"><input type="radio" name="p2-testing" value="no"> No</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Document URL</label>
+          <input type="url" class="form-input" id="p2-testing-url" placeholder="https://drive.google.com/...">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Additional Notes</label>
+          <textarea class="form-textarea" id="p2-testing-notes" placeholder="Any additional testing information..." style="min-height:70px;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn btn-ghost" onclick="goToPhase(1)">← Back</button>
+      <button class="btn btn-primary navy" onclick="submitPhase2()">Next: Phase 3 &nbsp;→</button>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase-panel" id="phase-3">
+    <div class="phase-header">
+      <div class="phase-badge">Phase 3 of 4</div>
+      <div class="phase-title">Full Evaluation</div>
+      <div class="phase-desc">Your product has been validated! Please provide complete documentation for final evaluation.</div>
+    </div>
+
+    <div class="phase-notice">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c8962a" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Your Prospect ID: <strong id="p3-prospect-display" style="font-family:monospace;margin-left:4px;color:#0f1f3d;"></strong>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Brand Two-Pager</div>
+      <div class="field-grid single">
+        <div class="form-group">
+          <label class="form-label">Upload URL <span class="hint">(PDF preferred)</span></label>
+          <input type="url" class="form-input" id="p3-twopager-url" placeholder="https://drive.google.com/...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Brand Description</label>
+          <textarea class="form-textarea" id="p3-brand-desc" placeholder="Brief brand narrative for retail presentation..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Financial Documentation</div>
+      <div class="field-grid">
+        <div class="form-group full">
+          <label class="form-label">Cost Structure Document URL</label>
+          <input type="url" class="form-input" id="p3-cost-url" placeholder="https://drive.google.com/...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Landed Cost Per Unit ($)</label>
+          <input type="number" class="form-input" id="p3-landed-cost" placeholder="0.00" step="0.01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vendor Margin (%)</label>
+          <input type="number" class="form-input" id="p3-vendor-margin" placeholder="0" step="0.1">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Insurance</div>
+      <div class="field-grid">
+        <div class="form-group">
+          <label class="form-label">Certificate of Insurance URL</label>
+          <input type="url" class="form-input" id="p3-coi-url" placeholder="https://drive.google.com/...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expiry Date</label>
+          <input type="date" class="form-input" id="p3-coi-expiry">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Food Safety <span style="font-weight:400;color:var(--mid-gray);font-size:0.78rem;">(if applicable)</span></div>
+      <div class="field-grid">
+        <div class="form-group full">
+          <label class="form-label">Food Safety Required?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="p3-food-safety" value="yes" onclick="toggleFoodSafety(true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="p3-food-safety" value="no" onclick="toggleFoodSafety(false)"> No</label>
+          </div>
+        </div>
+        <div id="food-safety-fields" style="display:none;grid-column:1/-1;">
+          <div class="field-grid">
+            <div class="form-group">
+              <label class="form-label">GFSI / Audit Certification URL</label>
+              <input type="url" class="form-input" id="p3-gfsi-url" placeholder="https://drive.google.com/...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Health Department Permits URL</label>
+              <input type="url" class="form-input" id="p3-health-url" placeholder="https://drive.google.com/...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Food Safety Manager Certification URL</label>
+              <input type="url" class="form-input" id="p3-fsm-url" placeholder="https://drive.google.com/...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">SOPs URL</label>
+              <input type="url" class="form-input" id="p3-sops-url" placeholder="https://drive.google.com/...">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Production</div>
+      <div class="field-grid">
+        <div class="form-group full">
+          <label class="form-label">Production Plan URL</label>
+          <input type="url" class="form-input" id="p3-prod-url" placeholder="https://drive.google.com/...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Production Capacity (units/day)</label>
+          <input type="number" class="form-input" id="p3-capacity" placeholder="e.g. 5000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Lead Time (days)</label>
+          <input type="number" class="form-input" id="p3-lead-time" placeholder="e.g. 14">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ingredient List URL</label>
+          <input type="url" class="form-input" id="p3-ingredients-url" placeholder="https://drive.google.com/...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Allergen Information</label>
+          <input type="text" class="form-input" id="p3-allergens" placeholder="e.g. Contains: Tree Nuts, Soy">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn btn-ghost" onclick="goToPhase(2)">← Back</button>
+      <button class="btn btn-primary navy" onclick="submitPhase3()">Next: Phase 4 &nbsp;→</button>
+    </div>
+  </div>
+
+  <!-- PHASE 4 -->
+  <div class="phase-panel" id="phase-4">
+    <div class="phase-header">
+      <div class="phase-badge">Phase 4 of 4</div>
+      <div class="phase-title">Sample Shipment</div>
+      <div class="phase-desc">Almost there! Ship your samples and provide tracking information to complete your application.</div>
+    </div>
+
+    <div class="phase-notice">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c8962a" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Your Prospect ID: <strong id="p4-prospect-display" style="font-family:monospace;margin-left:4px;color:#0f1f3d;"></strong>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Shipping Information</div>
+      <div class="field-grid">
+        <div class="form-group full">
+          <label class="form-label">Sample Type</label>
+          <div class="radio-group" id="sample-type-group">
+            <label class="radio-label"><input type="radio" name="p4-sample-type" value="general" onchange="updateShipAddress()"> General Merchandise</label>
+            <label class="radio-label"><input type="radio" name="p4-sample-type" value="cold" onchange="updateShipAddress()"> Cold Chain</label>
+          </div>
+        </div>
+        <div class="form-group full">
+          <div class="shipping-box" id="ship-address-box">
+            <strong>Ship To Address</strong>
+            Select a sample type above to see the shipping address.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="card-section-title">Shipping Details</div>
+      <div class="field-grid">
+        <div class="form-group">
+          <label class="form-label">Ship Date</label>
+          <input type="date" class="form-input" id="p4-ship-date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tracking Number</label>
+          <input type="text" class="form-input" id="p4-tracking" placeholder="e.g. 1Z999AA10123456784">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Carrier</label>
+          <select class="form-select" id="p4-carrier">
+            <option value="">Select carrier...</option>
+            <option>UPS</option>
+            <option>FedEx</option>
+            <option>USPS</option>
+            <option>DHL</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expiration Date on Product</label>
+          <input type="date" class="form-input" id="p4-expiry">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Final Two-Pager URL</label>
+          <input type="url" class="form-input" id="p4-twopager-url" placeholder="https://drive.google.com/...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Packing List Included?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="p4-packing" value="yes"> Yes</label>
+            <label class="radio-label"><input type="radio" name="p4-packing" value="no"> No</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Lot Code</label>
+          <input type="text" class="form-input" id="p4-lot-code" placeholder="e.g. LOT-2024-03-A">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Additional Shipping Notes</label>
+          <textarea class="form-textarea" id="p4-notes" placeholder="Special handling, temperature requirements, or other notes..." style="min-height:75px;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn btn-ghost" onclick="goToPhase(3)">← Back</button>
+      <button class="btn btn-primary" onclick="submitFinal()" style="background:var(--success);">
+        ✓ Submit Final Application
+      </button>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-panel" id="success-panel">
+    <div class="success-icon">✓</div>
+    <h2>Application Submitted!</h2>
+    <p>Thank you for applying to the Ascenda Group Sam's Club Roadshow Program. Our team will review your application and be in touch within 2–3 business days.</p>
+    <div class="prospect-id-box" id="final-prospect-id"></div>
+    <p style="font-size:0.82rem;color:var(--mid-gray);margin-bottom:1rem;">Keep this ID for your records. You'll need it to reference your application.</p>
+    <a href="https://ascendagrp.com" class="btn btn-primary navy">← Return to Ascenda Group</a>
+  </div>
+
+</main>
+
+<footer class="form-footer">
+  © Ascenda Group. All Rights Reserved. &nbsp;|&nbsp; <a href="https://ascendagrp.com">ascendagrp.com</a> &nbsp;|&nbsp; <a href="mailto:contact@ascendahealth.com">contact@ascendahealth.com</a>
+</footer>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const N8N_WEBHOOK = 'https://YOUR_N8N_INSTANCE.com/webhook/ascenda/intake';
+// Update this URL after importing workflows to n8n
+
+// ── STATE ───────────────────────────────────────────────────────────────────
+let prospectId = '';
+let currentPhase = 1;
+const formData = { phase1: {}, phase2: {}, phase3: {}, phase4: {} };
+
+// ── UTILITIES ────────────────────────────────────────────────────────────────
+function generateId() {
+  const ts = Date.now().toString(36).toUpperCase();
+  const rand = Math.random().toString(36).slice(2,6).toUpperCase();
+  return `ASC-${ts}-${rand}`;
+}
+
+function updateCount(inputId, countId, max) {
+  const el = document.getElementById(inputId);
+  const cnt = document.getElementById(countId);
+  const len = el.value.length;
+  cnt.textContent = `${len} / ${max}`;
+  cnt.className = 'char-count ' + (len >= max*0.9 ? 'warn' : len >= 100 ? 'good' : '');
+}
+
+function calcMargin() {
+  const msrp = parseFloat(document.getElementById('p2-msrp').value) || 0;
+  const sams = parseFloat(document.getElementById('p2-sams-price').value) || 0;
+  const el = document.getElementById('margin-display');
+  if (msrp > 0 && sams > 0) {
+    const margin = ((msrp - sams) / msrp * 100).toFixed(1);
+    el.textContent = `${margin}%`;
+    el.className = 'calc-val ' + (parseFloat(margin) >= 20 ? 'pos' : 'neg');
+  } else {
+    el.textContent = '—';
+    el.className = 'calc-val';
+  }
+}
+
+function toggleFoodSafety(show) {
+  document.getElementById('food-safety-fields').style.display = show ? 'block' : 'none';
+}
+
+function updateShipAddress() {
+  const type = document.querySelector('input[name="p4-sample-type"]:checked')?.value;
+  const box = document.getElementById('ship-address-box');
+  if (type === 'general') {
+    box.innerHTML = `<strong>Ship to (General Merchandise)</strong>Studio 83<br>2400 SE S Street<br>Bentonville, AR 72712<br>Attn: Alex Judy, Category 63`;
+  } else if (type === 'cold') {
+    box.innerHTML = `<strong>Ship to (Cold Chain)</strong>Sam's Club Home Office<br>2101 SE Simple Savings Drive<br>Bentonville, AR 72712`;
+  }
+}
+
+function goToPhase(n) {
+  document.getElementById(`phase-${currentPhase}`).classList.remove('active');
+  document.getElementById(`phase-${n}`).classList.add('active');
+  currentPhase = n;
+  updateProgress(n);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress(n) {
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.getElementById(`dot-${i}`);
+    const lbl = document.getElementById(`lbl-${i}`);
+    dot.className = 'step-dot ' + (i < n ? 'complete' : i === n ? 'active' : '');
+    lbl.className = 'step-label ' + (i < n ? 'complete' : i === n ? 'active' : '');
+    if (i < 4) {
+      document.getElementById(`line-${i}`).className = 'step-line ' + (i < n ? 'complete' : '');
+    }
+  }
+}
+
+// ── PHASE SUBMISSIONS ────────────────────────────────────────────────────────
+function submitPhase1() {
+  const required = ['p1-company','p1-first','p1-last','p1-email','p1-product-name','p1-category','p1-desc','p1-diff','p1-value'];
+  let valid = true;
+  required.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.value.trim()) {
+      el.classList.add('error');
+      el.addEventListener('input', () => el.classList.remove('error'), { once: true });
+      valid = false;
+    }
+  });
+  if (!valid) { alert('Please fill in all required fields marked with *.'); return; }
+
+  prospectId = generateId();
+  formData.phase1 = {
+    id: prospectId,
+    company: document.getElementById('p1-company').value,
+    website: document.getElementById('p1-website').value,
+    firstName: document.getElementById('p1-first').value,
+    lastName: document.getElementById('p1-last').value,
+    email: document.getElementById('p1-email').value,
+    phone: document.getElementById('p1-phone').value,
+    productName: document.getElementById('p1-product-name').value,
+    category: document.getElementById('p1-category').value,
+    description: document.getElementById('p1-desc').value,
+    differentiation: document.getElementById('p1-diff').value,
+    memberValue: document.getElementById('p1-value').value,
+    competitors: document.getElementById('p1-competitors').value,
+    has20PctValue: document.querySelector('input[name="p1-value20"]:checked')?.value,
+    consignmentReady: document.querySelector('input[name="p1-consignment"]:checked')?.value,
+    multiClub: document.querySelector('input[name="p1-multi"]:checked')?.value,
+    pricingWorks: document.querySelector('input[name="p1-pricing"]:checked')?.value,
+    canProvideCOGS: document.querySelector('input[name="p1-cogs"]:checked')?.value,
+    canBreakEven: document.querySelector('input[name="p1-breakeven"]:checked')?.value,
+    econNotes: document.getElementById('p1-econ-notes').value,
+    hasInsurance: document.querySelector('input[name="p1-insurance"]:checked')?.value,
+    coverage: document.getElementById('p1-coverage').value,
+    constraints: document.getElementById('p1-constraints').value,
+    nutritionalLabel: document.querySelector('input[name="p1-label"]:checked')?.value,
+    testing: document.getElementById('p1-testing').value,
+    certifications: document.getElementById('p1-certs').value,
+    submittedAt: new Date().toISOString()
+  };
+
+  // POST to n8n
+  fetch(N8N_WEBHOOK, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phase: 1, ...formData.phase1 })
+  }).catch(() => {}); // Non-blocking
+
+  // Update prospect ID displays
+  document.getElementById('p2-prospect-display').textContent = prospectId;
+  document.getElementById('p3-prospect-display').textContent = prospectId;
+  document.getElementById('p4-prospect-display').textContent = prospectId;
+  document.getElementById('final-prospect-id').textContent = prospectId;
+
+  goToPhase(2);
+}
+
+function submitPhase2() {
+  formData.phase2 = {
+    id: prospectId,
+    compUrl: document.getElementById('p2-comp-url').value,
+    compNotes: document.getElementById('p2-comp-notes').value,
+    msrp: document.getElementById('p2-msrp').value,
+    samsPrice: document.getElementById('p2-sams-price').value,
+    pricingUrl: document.getElementById('p2-pricing-url').value,
+    feasibilityUrl: document.getElementById('p2-feasibility-url').value,
+    locationsCount: document.getElementById('p2-locations').value,
+    feasibilityNotes: document.getElementById('p2-feasibility-notes').value,
+    testingAvailable: document.querySelector('input[name="p2-testing"]:checked')?.value,
+    testingUrl: document.getElementById('p2-testing-url').value,
+    testingNotes: document.getElementById('p2-testing-notes').value,
+    submittedAt: new Date().toISOString()
+  };
+  fetch(N8N_WEBHOOK + '/phase2', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phase:2, ...formData.phase2 }) }).catch(()=>{});
+  goToPhase(3);
+}
+
+function submitPhase3() {
+  formData.phase3 = {
+    id: prospectId,
+    twoPagerUrl: document.getElementById('p3-twopager-url').value,
+    brandDesc: document.getElementById('p3-brand-desc').value,
+    costUrl: document.getElementById('p3-cost-url').value,
+    landedCost: document.getElementById('p3-landed-cost').value,
+    vendorMargin: document.getElementById('p3-vendor-margin').value,
+    coiUrl: document.getElementById('p3-coi-url').value,
+    coiExpiry: document.getElementById('p3-coi-expiry').value,
+    foodSafetyRequired: document.querySelector('input[name="p3-food-safety"]:checked')?.value,
+    gfsiUrl: document.getElementById('p3-gfsi-url').value,
+    healthUrl: document.getElementById('p3-health-url').value,
+    fsmUrl: document.getElementById('p3-fsm-url').value,
+    sopsUrl: document.getElementById('p3-sops-url').value,
+    prodUrl: document.getElementById('p3-prod-url').value,
+    capacity: document.getElementById('p3-capacity').value,
+    leadTime: document.getElementById('p3-lead-time').value,
+    ingredientsUrl: document.getElementById('p3-ingredients-url').value,
+    allergens: document.getElementById('p3-allergens').value,
+    submittedAt: new Date().toISOString()
+  };
+  fetch(N8N_WEBHOOK + '/phase3', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phase:3, ...formData.phase3 }) }).catch(()=>{});
+  goToPhase(4);
+}
+
+function submitFinal() {
+  formData.phase4 = {
+    id: prospectId,
+    sampleType: document.querySelector('input[name="p4-sample-type"]:checked')?.value,
+    shipDate: document.getElementById('p4-ship-date').value,
+    tracking: document.getElementById('p4-tracking').value,
+    carrier: document.getElementById('p4-carrier').value,
+    expiry: document.getElementById('p4-expiry').value,
+    twoPagerUrl: document.getElementById('p4-twopager-url').value,
+    packingList: document.querySelector('input[name="p4-packing"]:checked')?.value,
+    lotCode: document.getElementById('p4-lot-code').value,
+    notes: document.getElementById('p4-notes').value,
+    submittedAt: new Date().toISOString()
+  };
+  fetch(N8N_WEBHOOK + '/phase4', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phase:4, complete:true, ...formData }) }).catch(()=>{});
+
+  document.getElementById('phase-4').classList.remove('active');
+  document.getElementById('success-panel').classList.add('active');
+  updateProgress(5);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

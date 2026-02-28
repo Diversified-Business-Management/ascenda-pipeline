@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ascenda | Retail Expansion Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0b;
+    --surface: #111115;
+    --card: #16161c;
+    --border: #1f1f2a;
+    --accent: #e8ff47;
+    --accent2: #47c2ff;
+    --accent3: #ff6b47;
+    --text: #f0f0f5;
+    --muted: #6b6b7e;
+    --success: #3ddc97;
+    --warning: #ffbe3d;
+    --danger: #ff4757;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.5;
+  }
+
+  /* HEADER */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,11,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+  }
+  .logo span { color: var(--text); }
+
+  nav { display: flex; gap: 2rem; }
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  nav a:hover, nav a.active { color: var(--accent); }
+
+  .header-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--success);
+    font-family: 'DM Mono', monospace;
+  }
+  .pulse {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* HERO */
+  .hero {
+    padding: 4rem 2rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    color: var(--muted);
+    font-size: 1rem;
+    max-width: 600px;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+  .btn {
+    padding: 0.75rem 1.75rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--black);
+  }
+  .btn-primary:hover {
+    background: #fff;
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    max-width: 1400px;
+    margin: 0 auto 3rem;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .stat-item {
+    background: var(--card);
+    padding: 1.25rem 1.5rem;
+  }
+  .stat-label {
+    font-size: 0.65rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.05em;
+    color: var(--text);
+  }
+  .stat-value.green { color: var(--success); }
+  .stat-value.yellow { color: var(--warning); }
+  .stat-value.blue { color: var(--accent2); }
+  .stat-delta {
+    font-size: 0.7rem;
+    color: var(--success);
+    margin-top: 0.2rem;
+  }
+
+  /* SECTION */
+  .section {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+  }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.05em;
+  }
+  .section-sub {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* PIPELINE VISUALIZATION */
+  .pipeline-container {
+    overflow-x: auto;
+    padding-bottom: 1rem;
+  }
+
+  .pipeline-track {
+    display: flex;
+    gap: 0;
+    min-width: 900px;
+    position: relative;
+  }
+
+  .phase-node {
+    flex: 1;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .phase-connector {
+    position: absolute;
+    top: 40px;
+    right: -18px;
+    z-index: 10;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 1.2rem;
+  }
+
+  .phase-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin: 0 6px;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .phase-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+
+  .phase-card.status-active::before { background: var(--accent); }
+  .phase-card.status-complete::before { background: var(--success); }
+  .phase-card.status-review::before { background: var(--warning); }
+  .phase-card.status-blocked::before { background: var(--danger); }
+  .phase-card.status-pending::before { background: var(--border); }
+
+  .phase-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+
+  .phase-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+
+  .phase-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+    margin-bottom: 0.75rem;
+    min-height: 2.2rem;
+  }
+
+  .phase-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 0.25rem;
+  }
+
+  .phase-count-label {
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .phase-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 0.75rem;
+  }
+  .badge-active { background: rgba(232,255,71,0.15); color: var(--accent); }
+  .badge-complete { background: rgba(61,220,151,0.15); color: var(--success); }
+  .badge-review { background: rgba(255,190,61,0.15); color: var(--warning); }
+  .badge-blocked { background: rgba(255,71,87,0.15); color: var(--danger); }
+  .badge-pending { background: rgba(107,107,126,0.15); color: var(--muted); }
+
+  /* BRAND CARDS */
+  .brands-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+  }
+
+  .brand-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.25s;
+    cursor: pointer;
+    position: relative;
+  }
+  .brand-card:hover {
+    border-color: var(--accent2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+
+  .brand-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .brand-initials {
+    width: 44px; height: 44px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+  }
+
+  .brand-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.2rem;
+  }
+  .brand-category {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .brand-score-ring {
+    text-align: right;
+  }
+  .score-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    line-height: 1;
+  }
+  .score-label {
+    font-size: 0.6rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .brand-progress {
+    background: var(--surface);
+    height: 4px;
+    border-radius: 2px;
+    margin: 1rem 0;
+    overflow: hidden;
+  }
+  .brand-progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+
+  .brand-phase {
+    font-size: 0.72rem;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+  .brand-phase-name { color: var(--text); font-weight: 500; }
+
+  .brand-meta {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .brand-meta-item {
+    font-size: 0.68rem;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .brand-meta-val {
+    color: var(--text);
+    font-weight: 500;
+    font-size: 0.8rem;
+  }
+
+  /* SYSTEM HEALTH */
+  .health-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+
+  .service-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s;
+  }
+  .service-card:hover {
+    border-color: var(--border);
+    transform: translateY(-2px);
+  }
+
+  .service-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .service-card.healthy::after {
+    background: radial-gradient(ellipse at top left, rgba(61,220,151,0.05), transparent 70%);
+    opacity: 1;
+  }
+  .service-card.warning::after {
+    background: radial-gradient(ellipse at top left, rgba(255,190,61,0.05), transparent 70%);
+    opacity: 1;
+  }
+  .service-card.down::after {
+    background: radial-gradient(ellipse at top left, rgba(255,71,87,0.07), transparent 70%);
+    opacity: 1;
+  }
+
+  .service-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .service-icon {
+    font-size: 1.5rem;
+  }
+  .service-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.65rem;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .indicator-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+  }
+  .dot-healthy { background: var(--success); box-shadow: 0 0 8px var(--success); animation: pulse 2s infinite; }
+  .dot-warning { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+  .dot-down { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+
+  .service-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+  .service-url {
+    font-size: 0.65rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .service-metrics {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+  .svc-metric {
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+  .svc-metric-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text);
+    margin-top: 0.15rem;
+  }
+
+  /* WORKFLOW TABLE */
+  .workflow-list {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .workflow-row {
+    display: grid;
+    grid-template-columns: 40px 1fr 160px 100px 100px 80px;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    font-size: 0.82rem;
+  }
+  .workflow-row:last-child { border-bottom: none; }
+  .workflow-row:hover { background: rgba(232,255,71,0.02); }
+  .workflow-row.header {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    background: var(--surface);
+  }
+  .workflow-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+  .workflow-name { font-weight: 500; }
+  .workflow-trigger {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .workflow-last {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .workflow-runs {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent2);
+  }
+
+  .wf-toggle {
+    width: 36px; height: 20px;
+    background: var(--success);
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .wf-toggle::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    background: white;
+    border-radius: 50%;
+    top: 3px; right: 3px;
+    transition: right 0.2s;
+  }
+  .wf-toggle.off { background: var(--border); }
+  .wf-toggle.off::after { right: auto; left: 3px; }
+
+  /* RAG QUERY CONSOLE */
+  .rag-console {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .console-header {
+    background: var(--surface);
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .console-dots { display: flex; gap: 0.4rem; }
+  .console-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .cd-red { background: #ff5f57; }
+  .cd-yellow { background: #ffbd2e; }
+  .cd-green { background: #28ca41; }
+  .console-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .console-body { padding: 1.25rem; }
+
+  .console-input-wrap {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .console-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .console-input:focus { border-color: var(--accent); }
+  .console-input::placeholder { color: var(--muted); }
+
+  .console-results {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem;
+    min-height: 120px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    line-height: 1.8;
+  }
+  .result-line { margin-bottom: 0.25rem; }
+  .result-score { color: var(--accent); }
+  .result-name { color: var(--accent2); }
+  .result-meta { color: var(--muted); }
+  .result-thinking { color: var(--warning); }
+
+  /* INTAKE FORM */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  @media (max-width: 768px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .workflow-row { grid-template-columns: 1fr; gap: 0.5rem; }
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  .form-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .form-input, .form-select, .form-textarea {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--accent);
+  }
+  .form-select option { background: var(--card); }
+  .form-textarea { resize: vertical; min-height: 100px; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+  .tab {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in { animation: fadeInUp 0.5s ease forwards; }
+  .delay-1 { animation-delay: 0.1s; opacity: 0; }
+  .delay-2 { animation-delay: 0.2s; opacity: 0; }
+  .delay-3 { animation-delay: 0.3s; opacity: 0; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+    z-index: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  .modal-close {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+  .modal-body { margin-top: 1.5rem; }
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-label { color: var(--muted); }
+  .detail-value { font-weight: 500; }
+
+  .notif {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    font-size: 0.8rem;
+    z-index: 999;
+    transform: translateX(200%);
+    transition: transform 0.3s ease;
+    max-width: 300px;
+  }
+  .notif.show { transform: translateX(0); }
+  .notif-title { font-weight: 600; color: var(--accent); margin-bottom: 0.25rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ASCENDA<span>·PIPELINE</span></div>
+  <nav>
+    <a href="#pipeline" class="active" onclick="showTab('pipeline')">Pipeline</a>
+    <a href="#brands" onclick="showTab('brands')">Brands</a>
+    <a href="#workflows" onclick="showTab('workflows')">Workflows</a>
+    <a href="#rag" onclick="showTab('rag')">RAG Console</a>
+    <a href="#health" onclick="showTab('health')">System Health</a>
+    <a href="#intake" onclick="showTab('intake')">New Intake</a>
+  </nav>
+  <div class="header-status">
+    <div class="pulse"></div>
+    ALL SYSTEMS OPERATIONAL
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero animate-in">
+  <div class="hero-eyebrow">▸ Ascenda Retail Expansion Intelligence · v2.0</div>
+  <h1>RETAIL<br><em>EXPANSION</em><br>COMMAND CENTER</h1>
+  <p class="hero-sub">10-phase brand pipeline from Opportunity Identification through Investment Scale. Powered by n8n automation, Pinecone RAG, and Claude AI.</p>
+  <div class="hero-actions">
+    <button class="btn btn-primary" onclick="showTab('intake')">+ Submit New Brand</button>
+    <button class="btn btn-ghost" onclick="showTab('rag')">⟡ Query Intelligence</button>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar animate-in delay-1">
+  <div class="stat-item">
+    <div class="stat-label">Active Brands</div>
+    <div class="stat-value blue" id="stat-active">14</div>
+    <div class="stat-delta">↑ 3 this month</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Pipeline Value</div>
+    <div class="stat-value green" id="stat-value">$2.4M</div>
+    <div class="stat-delta">↑ 18% vs last quarter</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Avg Readiness Score</div>
+    <div class="stat-value yellow" id="stat-score">73</div>
+    <div class="stat-delta">↑ 5 pts from automation</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Workflows Active</div>
+    <div class="stat-value" id="stat-workflows">10</div>
+    <div class="stat-delta">100% uptime</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">RAG Embeddings</div>
+    <div class="stat-value blue" id="stat-rag">847</div>
+    <div class="stat-delta">Pinecone synced</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Time Saved / Wk</div>
+    <div class="stat-value green">22hrs</div>
+    <div class="stat-delta">vs manual baseline</div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT TABS -->
+<div class="section">
+
+  <!-- TAB: PIPELINE -->
+  <div id="tab-pipeline" class="tab-content active">
+    <div class="section-header">
+      <div class="section-title">PIPELINE VIEW</div>
+      <div class="section-sub">LIVE · 10 PHASES · COMMITTEE-DRIVEN</div>
+    </div>
+    <div class="pipeline-container">
+      <div class="pipeline-track" id="pipelineTrack"></div>
+    </div>
+    <div style="margin-top:1.5rem; display:flex; gap:1rem; flex-wrap:wrap; font-size:0.7rem; font-family:'DM Mono',monospace;">
+      <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:12px;height:3px;background:var(--accent);display:inline-block;border-radius:2px;"></span> ACTIVE</span>
+      <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:12px;height:3px;background:var(--success);display:inline-block;border-radius:2px;"></span> COMPLETE</span>
+      <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:12px;height:3px;background:var(--warning);display:inline-block;border-radius:2px;"></span> REVIEW</span>
+      <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:12px;height:3px;background:var(--danger);display:inline-block;border-radius:2px;"></span> BLOCKED</span>
+      <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:12px;height:3px;background:var(--border);display:inline-block;border-radius:2px;"></span> PENDING</span>
+    </div>
+  </div>
+
+  <!-- TAB: BRANDS -->
+  <div id="tab-brands" class="tab-content">
+    <div class="section-header">
+      <div class="section-title">BRAND PORTFOLIO</div>
+      <div class="section-sub">14 ACTIVE · 3 PENDING REVIEW</div>
+    </div>
+    <div class="brands-grid" id="brandsGrid"></div>
+  </div>
+
+  <!-- TAB: WORKFLOWS -->
+  <div id="tab-workflows" class="tab-content">
+    <div class="section-header">
+      <div class="section-title">N8N WORKFLOWS</div>
+      <div class="section-sub">10 WORKFLOWS · ALL ACTIVE</div>
+    </div>
+    <div class="workflow-list">
+      <div class="workflow-row header">
+        <span>#</span>
+        <span>Workflow</span>
+        <span>Trigger</span>
+        <span>Last Run</span>
+        <span>Total Runs</span>
+        <span>Status</span>
+      </div>
+      <div id="workflowList"></div>
+    </div>
+    <div style="margin-top:2rem;">
+      <div class="section-header" style="margin-bottom:1rem;">
+        <div class="section-title" style="font-size:1.4rem;">EXPORT WORKFLOWS</div>
+      </div>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem;">Download individual workflow JSON files for import into your n8n instance.</p>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;" id="downloadButtons"></div>
+    </div>
+  </div>
+
+  <!-- TAB: RAG CONSOLE -->
+  <div id="tab-rag" class="tab-content">
+    <div class="section-header">
+      <div class="section-title">PINECONE RAG CONSOLE</div>
+      <div class="section-sub">847 VECTORS · 6 NAMESPACES</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:2rem;">
+      <div>
+        <div style="font-size:0.7rem;font-family:'DM Mono',monospace;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-bottom:1rem;">Namespace Status</div>
+        <div id="namespaceList"></div>
+      </div>
+      <div>
+        <div style="font-size:0.7rem;font-family:'DM Mono',monospace;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-bottom:1rem;">Query Volume (7 days)</div>
+        <canvas id="ragChart" height="120"></canvas>
+      </div>
+    </div>
+    <div class="rag-console">
+      <div class="console-header">
+        <div class="console-dots">
+          <div class="console-dot cd-red"></div>
+          <div class="console-dot cd-yellow"></div>
+          <div class="console-dot cd-green"></div>
+        </div>
+        <div class="console-title">ascenda-rag · cosine similarity search</div>
+      </div>
+      <div class="console-body">
+        <div class="console-input-wrap">
+          <input class="console-input" id="ragInput" placeholder="Ask anything: 'Find brands similar to NutriPure that succeeded at Sam's Club...'" onkeydown="if(event.key==='Enter')queryRAG()"/>
+          <button class="btn btn-primary" onclick="queryRAG()" style="white-space:nowrap;">⟡ Query</button>
+        </div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;">
+          <button class="btn btn-ghost" style="padding:0.4rem 0.8rem;font-size:0.65rem;" onclick="setQuery('Brands similar to successful Sam\'s Club CPG entries')">Similar brands</button>
+          <button class="btn btn-ghost" style="padding:0.4rem 0.8rem;font-size:0.65rem;" onclick="setQuery('Common compliance gaps for first-time roadshow brands')">Compliance gaps</button>
+          <button class="btn btn-ghost" style="padding:0.4rem 0.8rem;font-size:0.65rem;" onclick="setQuery('Average Phase 3 readiness score for approved brands')">Score benchmarks</button>
+          <button class="btn btn-ghost" style="padding:0.4rem 0.8rem;font-size:0.65rem;" onclick="setQuery('Post-show performance top quartile attributes')">Top performers</button>
+        </div>
+        <div class="console-results" id="ragResults">
+          <span style="color:var(--muted);">// Enter a query above to search the Ascenda intelligence database</span><br>
+          <span style="color:var(--muted);">// Pinecone index: ascenda-retail-intelligence | 847 vectors loaded</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: SYSTEM HEALTH -->
+  <div id="tab-health" class="tab-content">
+    <div class="section-header">
+      <div class="section-title">SYSTEM HEALTH</div>
+      <div class="section-sub" id="healthTime">LAST CHECK: —</div>
+    </div>
+    <div class="health-grid" id="healthGrid"></div>
+    <div style="margin-top:2rem;">
+      <div class="section-header" style="margin-bottom:1rem;">
+        <div class="section-title" style="font-size:1.4rem;">ARCHITECTURE DIAGRAM</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:2rem;overflow-x:auto;">
+        <svg id="archDiagram" width="900" height="420" viewBox="0 0 900 420" style="max-width:100%;"></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: INTAKE -->
+  <div id="tab-intake" class="tab-content">
+    <div class="section-header">
+      <div class="section-title">BRAND INTAKE FORM</div>
+      <div class="section-sub">PHASE 1 · AUTO-SCORED · INSTANT RESPONSE</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:2rem;max-width:900px;">
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:2rem;line-height:1.7;">Submit a new brand opportunity for automated Phase 1 scoring. Brands scoring ≥70 are auto-approved and advance to Phase 2. Scores 60-69 are flagged for committee review. Below 60 receive an automated rejection with feedback.</p>
+      <div class="form-grid" id="intakeForm">
+        <div class="form-group">
+          <label class="form-label">Brand Name *</label>
+          <input class="form-input" id="f-brand" placeholder="e.g. NutriPure Foods" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contact Name *</label>
+          <input class="form-input" id="f-contact" placeholder="Full name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input class="form-input" id="f-email" type="email" placeholder="founder@brand.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="form-input" id="f-phone" placeholder="+1 (555) 000-0000" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Product Category *</label>
+          <select class="form-select" id="f-category">
+            <option value="">Select category...</option>
+            <option>Food & Beverage</option>
+            <option>Health & Wellness</option>
+            <option>Beauty & Personal Care</option>
+            <option>Household Products</option>
+            <option>Electronics & Gadgets</option>
+            <option>Outdoor & Sports</option>
+            <option>Pet Products</option>
+            <option>Baby & Kids</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Annual Revenue *</label>
+          <select class="form-select" id="f-revenue">
+            <option value="">Select range...</option>
+            <option>Under $500K</option>
+            <option>$500K – $1M</option>
+            <option>$1M – $5M</option>
+            <option>$5M – $20M</option>
+            <option>Over $20M</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Target Retailer *</label>
+          <select class="form-select" id="f-retailer">
+            <option value="">Select retailer...</option>
+            <option>Sam's Club</option>
+            <option>Costco</option>
+            <option>Both</option>
+            <option>Other Big Box</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Preferred Model</label>
+          <select class="form-select" id="f-model">
+            <option value="">Select model...</option>
+            <option>Roadshow</option>
+            <option>Inline / Permanent</option>
+            <option>Commission/Brokerage</option>
+            <option>Private Label</option>
+            <option>Not Sure</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Describe your product and why it's right for club retail *</label>
+          <textarea class="form-textarea" id="f-product" placeholder="Tell us about your product, its unique value proposition, price points, and why you believe it fits the Sam's Club / Costco member..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Current retail / DTC footprint</label>
+          <textarea class="form-textarea" id="f-footprint" placeholder="Where are you currently selling? What's your DTC revenue? Any existing retail relationships?..." style="min-height:80px;"></textarea>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Readiness & timeline</label>
+          <textarea class="form-textarea" id="f-timeline" placeholder="Are you ready for roadshow now or planning? Any hard launch dates? Current inventory levels?..." style="min-height:80px;"></textarea>
+        </div>
+        <div class="form-group full" style="margin-top:0.5rem;">
+          <button class="btn btn-primary" onclick="submitIntake()" style="font-size:0.9rem;padding:1rem 2.5rem;">Submit Brand for Evaluation →</button>
+        </div>
+      </div>
+      <!-- Scoring result panel -->
+      <div id="scoreResult" style="display:none;margin-top:2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.5rem;">
+        <div style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:0.5rem;">PHASE 1 SCORING RESULT</div>
+        <div id="scoreDisplay"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title" id="modalTitle">Phase Detail</div>
+    <div id="modalSubtitle" style="color:var(--muted);font-size:0.8rem;margin-bottom:0.5rem;font-family:'DM Mono',monospace;"></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif">
+  <div class="notif-title" id="notifTitle">Notification</div>
+  <div id="notifBody"></div>
+</div>
+
+<footer>ASCENDA SALES · RETAIL EXPANSION INTELLIGENCE · POWERED BY N8N + PINECONE + CLAUDE · GITHUB PAGES</footer>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const PHASES = [
+  { num:'01', name:'Opportunity\nIdentification', status:'complete', count:47, label:'Evaluated', keyAction:'Portfolio intelligence & web form intake' },
+  { num:'02', name:'Compliance &\nDue Diligence', status:'complete', count:31, label:'Cleared', keyAction:'NDA, financials, retailer schema normalization' },
+  { num:'03', name:'Retail Readiness\nEvaluation', status:'active', count:14, label:'In Progress', keyAction:'Readiness Score + checklist automation' },
+  { num:'04', name:'Go / No-Go\nDecision', status:'review', count:5, label:'Awaiting Review', keyAction:'Committee scoring & economic model selection' },
+  { num:'05', name:'Business &\nInvestment Plan', status:'active', count:8, label:'In Planning', keyAction:'Financial model, SPV setup, LOI execution' },
+  { num:'06', name:'Retail & Roadshow\nReadiness', status:'active', count:6, label:'In Prep', keyAction:'Two-pager, submission automation' },
+  { num:'07', name:'Roadshow\nLogistics', status:'pending', count:4, label:'Scheduling', keyAction:'Staffing, samples, calendar setup' },
+  { num:'08', name:'Execute\nRoadshow', status:'active', count:3, label:'Live Events', keyAction:'In-club activation, field data capture' },
+  { num:'09', name:'Evaluate &\nIterate', status:'complete', count:18, label:'Completed', keyAction:'Post-show report, RAG feedback loop' },
+  { num:'10', name:'Growth &\nInvestment Scale', status:'pending', count:9, label:'Qualifying', keyAction:'SPV reinvestment, expansion path' },
+];
+
+const BRANDS = [
+  { name:'NutriPure Foods', cat:'Food & Beverage', score:88, phase:5, phaseName:'Investment Planning', color:'#3ddc97', bg:'rgba(61,220,151,0.15)', rev:'$3.2M', retailer:"Sam's Club", model:'Roadshow' },
+  { name:'VitaBlend Wellness', cat:'Health & Wellness', score:82, phase:3, phaseName:'Readiness Eval', color:'#47c2ff', bg:'rgba(71,194,255,0.15)', rev:'$1.8M', retailer:"Sam's Club", model:'Inline' },
+  { name:'CleanHome Co.', cat:'Household Products', score:75, phase:6, phaseName:'Retail Readiness', color:'#e8ff47', bg:'rgba(232,255,71,0.15)', rev:'$5.1M', retailer:'Costco', model:'Inline' },
+  { name:'PetPlex Brands', cat:'Pet Products', score:91, phase:8, phaseName:'Live Roadshow', color:'#ff6b47', bg:'rgba(255,107,71,0.15)', rev:'$7.4M', retailer:"Sam's Club", model:'Roadshow' },
+  { name:'GlowUp Beauty', cat:'Beauty & Personal Care', score:69, phase:4, phaseName:'Go/No-Go Review', color:'#ffbe3d', bg:'rgba(255,190,61,0.15)', rev:'$900K', retailer:"Sam's Club", model:'Roadshow' },
+  { name:'TechEdge Gadgets', cat:'Electronics', score:77, phase:5, phaseName:'Investment Planning', color:'#47c2ff', bg:'rgba(71,194,255,0.15)', rev:'$2.3M', retailer:'Costco', model:'Brokerage' },
+  { name:'FreshFarm Direct', cat:'Food & Beverage', score:84, phase:7, phaseName:'Logistics', color:'#3ddc97', bg:'rgba(61,220,151,0.15)', rev:'$4.7M', retailer:"Sam's Club", model:'Roadshow' },
+  { name:'BabyFirst Products', cat:'Baby & Kids', score:80, phase:3, phaseName:'Readiness Eval', color:'#e8ff47', bg:'rgba(232,255,71,0.15)', rev:'$2.1M', retailer:"Sam's Club", model:'Inline' },
+];
+
+const WORKFLOWS = [
+  { n:'01', name:'Brand Intake & Auto-Scoring', trigger:'Webhook: Form Submit', last:'2 min ago', runs:1247, active:true },
+  { n:'02', name:'Compliance Ingestion', trigger:'Phase 1 Approval', last:'1 hr ago', runs:312, active:true },
+  { n:'03', name:'Readiness Scoring Engine', trigger:'Compliance Cleared', last:'3 hr ago', runs:287, active:true },
+  { n:'04', name:'Committee Go/No-Go Router', trigger:'Score Computed', last:'Yesterday', runs:198, active:true },
+  { n:'05', name:'Financial Model & LOI Gen', trigger:'Go Decision', last:'2 days ago', runs:144, active:true },
+  { n:'06', name:'Retail Submission Automation', trigger:'LOI Signed', last:'3 days ago', runs:119, active:true },
+  { n:'07', name:'Logistics & Event Scheduling', trigger:'Retailer Approved', last:'1 wk ago', runs:87, active:true },
+  { n:'08', name:'Post-Show Report Generation', trigger:'Event Close Date', last:'2 wk ago', runs:74, active:true },
+  { n:'09', name:'Growth Trigger & SPV Flow', trigger:'KPI Threshold Met', last:'1 mo ago', runs:41, active:true },
+  { n:'10', name:'Pinecone RAG Sync', trigger:'Phase Gate Transition', last:'12 min ago', runs:3891, active:true },
+];
+
+const SERVICES = [
+  { icon:'⚙️', name:'n8n Automation', url:'n8n.yourdomain.com', status:'healthy', latency:'42ms', uptime:'99.9%', lastCheck:'1 min ago' },
+  { icon:'🔷', name:'Pinecone RAG', url:'api.pinecone.io', status:'healthy', latency:'38ms', uptime:'100%', lastCheck:'1 min ago' },
+  { icon:'🤖', name:'Claude API', url:'api.anthropic.com', status:'healthy', latency:'890ms', uptime:'99.8%', lastCheck:'1 min ago' },
+  { icon:'📊', name:'Google Sheets', url:'sheets.googleapis.com', status:'healthy', latency:'120ms', uptime:'99.9%', lastCheck:'2 min ago' },
+  { icon:'📁', name:'Google Drive', url:'drive.googleapis.com', status:'healthy', latency:'98ms', uptime:'99.9%', lastCheck:'2 min ago' },
+  { icon:'📧', name:'Gmail / SMTP', url:'smtp.gmail.com:587', status:'healthy', latency:'55ms', uptime:'100%', lastCheck:'2 min ago' },
+  { icon:'💬', name:'Slack Webhooks', url:'hooks.slack.com', status:'healthy', latency:'61ms', uptime:'99.7%', lastCheck:'3 min ago' },
+  { icon:'📅', name:'Google Calendar', url:'calendar.googleapis.com', status:'warning', latency:'245ms', uptime:'98.2%', lastCheck:'3 min ago' },
+  { icon:'📄', name:'GitHub Pages', url:'yourusername.github.io', status:'healthy', latency:'22ms', uptime:'100%', lastCheck:'5 min ago' },
+  { icon:'🔐', name:'DocuSign / LOI', url:'api.docusign.com', status:'warning', latency:'310ms', uptime:'97.5%', lastCheck:'5 min ago' },
+];
+
+const NAMESPACES = [
+  { name:'brands', vectors:312, color:'var(--accent)' },
+  { name:'portfolio-kpis', vectors:87, color:'var(--accent2)' },
+  { name:'compliance-docs', vectors:201, color:'var(--success)' },
+  { name:'roadshow-results', vectors:143, color:'var(--warning)' },
+  { name:'market-intel', vectors:74, color:'var(--accent3)' },
+  { name:'templates', vectors:30, color:'var(--muted)' },
+];
+
+// ============================================================
+// RENDER FUNCTIONS
+// ============================================================
+
+function renderPipeline() {
+  const container = document.getElementById('pipelineTrack');
+  container.innerHTML = PHASES.map((p, i) => `
+    <div class="phase-node" onclick="showPhaseModal(${i})">
+      <div class="phase-card status-${p.status}">
+        <div class="phase-number">PHASE ${p.num}</div>
+        <div class="phase-name">${p.name}</div>
+        <div class="phase-count">${p.count}</div>
+        <div class="phase-count-label">${p.label}</div>
+        <div class="phase-badge badge-${p.status}">${p.status}</div>
+      </div>
+      ${i < PHASES.length - 1 ? '<div class="phase-connector">›</div>' : ''}
+    </div>
+  `).join('');
+}
+
+function renderBrands() {
+  const container = document.getElementById('brandsGrid');
+  container.innerHTML = BRANDS.map(b => {
+    const pct = (b.phase / 10) * 100;
+    const scoreColor = b.score >= 80 ? 'var(--success)' : b.score >= 70 ? 'var(--warning)' : 'var(--danger)';
+    const initials = b.name.split(' ').map(w=>w[0]).join('').slice(0,2);
+    return `
+    <div class="brand-card" onclick="showBrandModal('${b.name}')">
+      <div class="brand-header">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <div class="brand-initials" style="background:${b.bg};color:${b.color}">${initials}</div>
+          <div>
+            <div class="brand-name">${b.name}</div>
+            <div class="brand-category">${b.cat}</div>
+          </div>
+        </div>
+        <div class="brand-score-ring">
+          <div class="score-number" style="color:${scoreColor}">${b.score}</div>
+          <div class="score-label">Score</div>
+        </div>
+      </div>
+      <div class="brand-progress">
+        <div class="brand-progress-fill" style="width:${pct}%;background:${b.color}"></div>
+      </div>
+      <div class="brand-phase">
+        <span>Phase ${b.phase}/10</span>
+        <span class="brand-phase-name">${b.phaseName}</span>
+      </div>
+      <div class="brand-meta">
+        <div class="brand-meta-item"><span>Revenue</span><span class="brand-meta-val">${b.rev}</span></div>
+        <div class="brand-meta-item"><span>Retailer</span><span class="brand-meta-val">${b.retailer}</span></div>
+        <div class="brand-meta-item"><span>Model</span><span class="brand-meta-val">${b.model}</span></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderWorkflows() {
+  const list = document.getElementById('workflowList');
+  list.innerHTML = WORKFLOWS.map(w => `
+    <div class="workflow-row">
+      <span class="workflow-num">${w.n}</span>
+      <span class="workflow-name">${w.name}</span>
+      <span class="workflow-trigger">${w.trigger}</span>
+      <span class="workflow-last">${w.last}</span>
+      <span class="workflow-runs">${w.runs.toLocaleString()}</span>
+      <div class="wf-toggle ${w.active?'':'off'}" onclick="toggleWorkflow(this)"></div>
+    </div>
+  `).join('');
+
+  const dlContainer = document.getElementById('downloadButtons');
+  dlContainer.innerHTML = WORKFLOWS.map(w => `
+    <button class="btn btn-ghost" onclick="downloadWorkflow('${w.n}','${w.name}')" style="font-size:0.7rem;padding:0.5rem 0.9rem;">
+      ↓ WF-${w.n}
+    </button>
+  `).join('');
+}
+
+function renderRAG() {
+  const ns = document.getElementById('namespaceList');
+  ns.innerHTML = NAMESPACES.map(n => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:0.6rem;">
+        <div style="width:8px;height:8px;border-radius:50%;background:${n.color};"></div>
+        <span style="font-family:'DM Mono',monospace;font-size:0.75rem;">${n.name}</span>
+      </div>
+      <span style="font-family:'DM Mono',monospace;font-size:0.75rem;color:${n.color};">${n.vectors} vectors</span>
+    </div>
+  `).join('');
+  drawRAGChart();
+}
+
+function drawRAGChart() {
+  const canvas = document.getElementById('ragChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const data = [42,38,67,51,89,73,94];
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const w = canvas.offsetWidth || 400;
+  const h = 120;
+  canvas.width = w; canvas.height = h;
+  const max = Math.max(...data);
+  const barW = (w / data.length) * 0.6;
+  const gap = (w / data.length) * 0.4;
+  ctx.clearRect(0,0,w,h);
+  data.forEach((v, i) => {
+    const barH = (v / max) * (h - 24);
+    const x = i * (w / data.length) + gap/2;
+    const y = h - barH - 16;
+    const grd = ctx.createLinearGradient(0, y, 0, y+barH);
+    grd.addColorStop(0, 'rgba(232,255,71,0.8)');
+    grd.addColorStop(1, 'rgba(232,255,71,0.1)');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.roundRect(x, y, barW, barH, 3);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(107,107,126,0.7)';
+    ctx.font = '10px DM Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(days[i], x + barW/2, h - 2);
+  });
+}
+
+function renderHealth() {
+  const grid = document.getElementById('healthGrid');
+  document.getElementById('healthTime').textContent = 'LAST CHECK: ' + new Date().toLocaleTimeString();
+  grid.innerHTML = SERVICES.map(s => `
+    <div class="service-card ${s.status}">
+      <div class="service-top">
+        <span class="service-icon">${s.icon}</span>
+        <div class="service-indicator" style="color:${s.status==='healthy'?'var(--success)':s.status==='warning'?'var(--warning)':'var(--danger)'}">
+          <div class="indicator-dot dot-${s.status}"></div>
+          ${s.status.toUpperCase()}
+        </div>
+      </div>
+      <div class="service-name">${s.name}</div>
+      <div class="service-url">${s.url}</div>
+      <div class="service-metrics">
+        <div class="svc-metric"><span>Latency</span><div class="svc-metric-val">${s.latency}</div></div>
+        <div class="svc-metric"><span>Uptime</span><div class="svc-metric-val">${s.uptime}</div></div>
+        <div class="svc-metric"><span>Last Check</span><div class="svc-metric-val">${s.lastCheck}</div></div>
+      </div>
+    </div>
+  `).join('');
+  drawArchDiagram();
+}
+
+function drawArchDiagram() {
+  const svg = document.getElementById('archDiagram');
+  const nodes = [
+    { id:'form', label:'Web Form\n(GitHub Pages)', x:80, y:200, color:'#e8ff47' },
+    { id:'n8n', label:'n8n\nWorkflows', x:250, y:200, color:'#47c2ff' },
+    { id:'claude', label:'Claude API\n(Anthropic)', x:420, y:100, color:'#ff6b47' },
+    { id:'pinecone', label:'Pinecone\nRAG', x:420, y:300, color:'#3ddc97' },
+    { id:'sheets', label:'Google\nSheets', x:600, y:140, color:'#ffbe3d' },
+    { id:'drive', label:'Google\nDrive', x:600, y:260, color:'#ffbe3d' },
+    { id:'slack', label:'Slack\nAlerts', x:770, y:120, color:'#47c2ff' },
+    { id:'email', label:'Gmail\nNotify', x:770, y:200, color:'#47c2ff' },
+    { id:'calendar', label:'Google\nCalendar', x:770, y:280, color:'#47c2ff' },
+    { id:'dash', label:'Dashboard\n(Leader)', x:420, y:200, color:'#e8ff47' },
+  ];
+  const edges = [
+    ['form','n8n'],['n8n','claude'],['n8n','pinecone'],['n8n','dash'],
+    ['claude','n8n'],['pinecone','n8n'],['n8n','sheets'],['n8n','drive'],
+    ['n8n','slack'],['n8n','email'],['n8n','calendar'],['sheets','dash'],
+  ];
+  
+  let s = '';
+  // Draw edges
+  edges.forEach(([a,b]) => {
+    const na = nodes.find(n=>n.id===a), nb = nodes.find(n=>n.id===b);
+    if (!na||!nb) return;
+    s += `<line x1="${na.x}" y1="${na.y}" x2="${nb.x}" y2="${nb.y}" stroke="#1f1f2a" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  });
+  // Draw nodes
+  nodes.forEach(n => {
+    const lines = n.label.split('\n');
+    s += `
+      <rect x="${n.x-55}" y="${n.y-28}" width="110" height="${lines.length*18+16}" rx="6"
+            fill="#16161c" stroke="${n.color}" stroke-width="1.5"/>
+      ${lines.map((l,i)=>`<text x="${n.x}" y="${n.y-6+(i*18)}" text-anchor="middle" 
+        font-family="'DM Mono',monospace" font-size="11" fill="${i===0?n.color:'#6b6b7e'}">${l}</text>`).join('')}
+    `;
+  });
+  svg.innerHTML = s;
+}
+
+// ============================================================
+// INTERACTIONS
+// ============================================================
+
+function showTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(el=>el.classList.remove('active'));
+  const target = document.getElementById('tab-'+name);
+  if (target) target.classList.add('active');
+  if (name === 'health') renderHealth();
+}
+
+function showPhaseModal(i) {
+  const p = PHASES[i];
+  document.getElementById('modalTitle').textContent = `PHASE ${p.num}: ${p.name.replace('\n',' ')}`;
+  document.getElementById('modalSubtitle').textContent = `STATUS: ${p.status.toUpperCase()} · ${p.count} ${p.label}`;
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-row"><span class="detail-label">Key Action</span><span class="detail-value">${p.keyAction}</span></div>
+    <div class="detail-row"><span class="detail-label">Brands in Phase</span><span class="detail-value" style="color:var(--accent)">${p.count}</span></div>
+    <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value">${p.status.toUpperCase()}</span></div>
+    <div class="detail-row"><span class="detail-label">n8n Workflow</span><span class="detail-value" style="color:var(--accent2)">workflow-${p.num.padStart(2,'0')}-*.json</span></div>
+    <div style="margin-top:1.5rem;">
+      <button class="btn btn-primary" onclick="closeModal();showTab('workflows')">View Workflow →</button>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function showBrandModal(name) {
+  const b = BRANDS.find(x=>x.name===name);
+  if (!b) return;
+  const scoreColor = b.score>=80?'var(--success)':b.score>=70?'var(--warning)':'var(--danger)';
+  document.getElementById('modalTitle').textContent = b.name;
+  document.getElementById('modalSubtitle').textContent = `${b.cat} · Phase ${b.phase}/10`;
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-row"><span class="detail-label">Readiness Score</span><span class="detail-value" style="color:${scoreColor};font-family:'Bebas Neue';font-size:1.8rem;">${b.score}</span></div>
+    <div class="detail-row"><span class="detail-label">Current Phase</span><span class="detail-value">${b.phaseName}</span></div>
+    <div class="detail-row"><span class="detail-label">Annual Revenue</span><span class="detail-value">${b.rev}</span></div>
+    <div class="detail-row"><span class="detail-label">Target Retailer</span><span class="detail-value">${b.retailer}</span></div>
+    <div class="detail-row"><span class="detail-label">Economic Model</span><span class="detail-value">${b.model}</span></div>
+    <div style="margin-top:1.5rem;display:flex;gap:0.75rem;">
+      <button class="btn btn-primary" onclick="closeModal()">Close</button>
+      <button class="btn btn-ghost" onclick="closeModal();setQuery('Performance data for ${name}');showTab(\'rag\')">Query RAG →</button>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function toggleWorkflow(el) {
+  el.classList.toggle('off');
+  notify('Workflow Updated', `Workflow ${el.classList.contains('off')?'paused':'activated'}`);
+}
+
+function downloadWorkflow(num, name) {
+  const workflow = generateWorkflowJSON(num, name);
+  const blob = new Blob([JSON.stringify(workflow, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `workflow-${num}-ascenda.json`;
+  a.click();
+  notify('Downloaded', `workflow-${num}-ascenda.json`);
+}
+
+function generateWorkflowJSON(num, name) {
+  return {
+    name: `Ascenda WF-${num}: ${name}`,
+    nodes: [
+      { id:'start', type:'n8n-nodes-base.start', name:'Start', position:[100,200] },
+      { id:'webhook', type:'n8n-nodes-base.webhook', name:'Trigger', position:[280,200],
+        parameters: { path:`/ascenda/wf${num}`, method:'POST' } },
+      { id:'code', type:'n8n-nodes-base.code', name:'Scoring Logic', position:[460,200],
+        parameters: { jsCode:`// WF-${num}: ${name}\n// Ascenda Phase Logic\nconst data = $input.first().json;\n\n// Score calculation\nconst score = Object.values(data).filter(v => typeof v === 'string' && v.length > 50).length * 15;\n\nreturn [{ json: { ...data, score, phase: ${parseInt(num)}, timestamp: new Date().toISOString() } }];` } },
+      { id:'sheets', type:'n8n-nodes-base.googleSheets', name:'Log to Sheets', position:[640,200],
+        parameters: { operation:'append', spreadsheetId:'YOUR_SHEET_ID', range:'A:Z' } },
+      { id:'pinecone', type:'n8n-nodes-base.httpRequest', name:'Sync to Pinecone', position:[640,340],
+        parameters: { url:'https://YOUR_PINECONE_HOST/vectors/upsert', method:'POST',
+          body:`{"vectors":[{"id":"{{$json.id}}","values":[],"metadata":{{JSON.stringify($json)}}}]}` } },
+      { id:'email', type:'n8n-nodes-base.gmail', name:'Send Notification', position:[820,200] },
+    ],
+    connections: {
+      'Start':{main:[[{node:'Trigger',type:'main',index:0}]]},
+      'Trigger':{main:[[{node:'Scoring Logic',type:'main',index:0}]]},
+      'Scoring Logic':{main:[[{node:'Log to Sheets',type:'main',index:0},{node:'Sync to Pinecone',type:'main',index:0}]]},
+      'Log to Sheets':{main:[[{node:'Send Notification',type:'main',index:0}]]},
+    },
+    settings: { saveManualExecutions:true, callerPolicy:'workflowsFromSameOwner' },
+    meta: { instanceId:'ascenda-n8n', workflowPhase: parseInt(num) }
+  };
+}
+
+function setQuery(q) {
+  document.getElementById('ragInput').value = q;
+}
+
+function queryRAG() {
+  const q = document.getElementById('ragInput').value.trim();
+  if (!q) return;
+  const results = document.getElementById('ragResults');
+  results.innerHTML = `<span class="result-thinking">// Querying Pinecone index: ascenda-retail-intelligence...</span>`;
+  setTimeout(() => {
+    const mockResults = getMockResults(q);
+    results.innerHTML = `<span style="color:var(--muted)">// Query: "${q}"</span>\n<span style="color:var(--muted)">// Namespace: auto-detect | k=5 | cosine similarity</span>\n\n${mockResults}`;
+  }, 800);
+}
+
+function getMockResults(q) {
+  const ql = q.toLowerCase();
+  if (ql.includes('similar') || ql.includes('brand')) {
+    return `<span class="result-score">[0.94]</span> <span class="result-name">NutriPure Foods</span> <span class="result-meta">· Phase 5 · Score:88 · Sam's Club Roadshow · $3.2M ARR</span>
+<span class="result-score">[0.91]</span> <span class="result-name">FreshFarm Direct</span> <span class="result-meta">· Phase 7 · Score:84 · Sam's Club Roadshow · $4.7M ARR</span>
+<span class="result-score">[0.87]</span> <span class="result-name">VitaBlend Wellness</span> <span class="result-meta">· Phase 3 · Score:82 · Sam's Club Inline · $1.8M ARR</span>
+<span class="result-score">[0.82]</span> <span class="result-name">CleanHome Co.</span> <span class="result-meta">· Phase 6 · Score:75 · Costco Inline · $5.1M ARR</span>
+<span class="result-score">[0.79]</span> <span class="result-name">BabyFirst Products</span> <span class="result-meta">· Phase 3 · Score:80 · Sam's Club Inline · $2.1M ARR</span>`;
+  } else if (ql.includes('compliance')) {
+    return `<span class="result-score">[0.96]</span> <span class="result-name">Sam's Club Compliance Gap Report</span> <span class="result-meta">· 47 brands analyzed</span>
+<span style="color:var(--muted)">  ↳ Top gap: Missing UPC/GS1 registration (38% of brands)</span>
+<span style="color:var(--muted)">  ↳ Gap 2: Product liability insurance below $2M threshold (29%)</span>
+<span style="color:var(--muted)">  ↳ Gap 3: No FDA/USDA compliance documentation (22%)</span>
+<span style="color:var(--muted)">  ↳ Gap 4: Retail-ready packaging not certified (18%)</span>
+<span class="result-score">[0.88]</span> <span class="result-name">Costco Compliance Checklist v4</span> <span class="result-meta">· Updated Jan 2026</span>`;
+  } else if (ql.includes('score') || ql.includes('benchmark')) {
+    return `<span class="result-score">[0.97]</span> <span class="result-name">Portfolio KPI Benchmark Report</span> <span class="result-meta">· 31 approved brands</span>
+<span style="color:var(--muted)">  ↳ Avg Phase 3 readiness score: 73.2 / 100</span>
+<span style="color:var(--muted)">  ↳ Min score for approval: 65 (committee override)</span>
+<span style="color:var(--muted)">  ↳ Auto-approve threshold: 70+</span>
+<span style="color:var(--muted)">  ↳ Top scoring category: Health & Wellness (avg 81)</span>`;
+  } else {
+    return `<span class="result-score">[0.89]</span> <span class="result-name">Post-Show Performance Analysis Q4 2025</span> <span class="result-meta">· 18 completed roadshows</span>
+<span style="color:var(--muted)">  ↳ Avg revenue per event: $142K</span>
+<span style="color:var(--muted)">  ↳ Avg units sold: 847</span>
+<span class="result-score">[0.85]</span> <span class="result-name">Market Intelligence: Sam's Club 2026 Category Focus</span>
+<span class="result-score">[0.81]</span> <span class="result-name">Brand Playbook: Successful Roadshow Attributes</span>`;
+  }
+}
+
+function submitIntake() {
+  const brand = document.getElementById('f-brand').value;
+  const email = document.getElementById('f-email').value;
+  const category = document.getElementById('f-category').value;
+  const revenue = document.getElementById('f-revenue').value;
+  const retailer = document.getElementById('f-retailer').value;
+  const product = document.getElementById('f-product').value;
+
+  if (!brand || !email || !category || !revenue || !retailer || !product) {
+    notify('Missing Fields', 'Please fill all required fields');
+    return;
+  }
+
+  // Simulate scoring
+  let score = 0;
+  if (revenue.includes('$5M') || revenue.includes('$20M') || revenue.includes('Over')) score += 25;
+  else if (revenue.includes('$1M')) score += 20;
+  else if (revenue.includes('$500K')) score += 12;
+  else score += 5;
+
+  if (retailer.includes("Sam's") || retailer.includes('Both')) score += 20;
+  else score += 15;
+
+  score += Math.min(product.length / 8, 25);
+  score += category !== '' ? 15 : 0;
+  score = Math.round(Math.min(score, 100));
+
+  let status, statusColor, message;
+  if (score >= 70) {
+    status = 'AUTO-APPROVED'; statusColor = 'var(--success)';
+    message = `Congratulations! ${brand} has been auto-approved to advance to Phase 2: Compliance & Due Diligence. Expect an email within 5 minutes with your document checklist.`;
+  } else if (score >= 60) {
+    status = 'MANUAL REVIEW'; statusColor = 'var(--warning)';
+    message = `${brand} has been flagged for committee review. A member of the Ascenda team will contact you within 48 hours.`;
+  } else {
+    status = 'NOT APPROVED'; statusColor = 'var(--danger)';
+    message = `At this time, ${brand} does not meet our minimum threshold. Key areas for improvement: Revenue scale, product-retailer fit, and pitch clarity.`;
+  }
+
+  document.getElementById('scoreResult').style.display = 'block';
+  document.getElementById('scoreDisplay').innerHTML = `
+    <div style="display:flex;align-items:center;gap:2rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+      <div>
+        <div style="font-family:'Bebas Neue';font-size:4rem;color:${statusColor};line-height:1;">${score}</div>
+        <div style="font-size:0.65rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.1em;">READINESS SCORE</div>
+      </div>
+      <div>
+        <div style="font-family:'Bebas Neue';font-size:1.4rem;color:${statusColor};">${status}</div>
+        <div style="font-size:0.82rem;color:var(--muted);max-width:400px;margin-top:0.5rem;line-height:1.6;">${message}</div>
+      </div>
+    </div>
+  `;
+  document.getElementById('scoreResult').scrollIntoView({behavior:'smooth'});
+  notify('Intake Processed', `${brand} scored ${score}/100 — ${status}`);
+}
+
+function notify(title, body) {
+  const n = document.getElementById('notif');
+  document.getElementById('notifTitle').textContent = title;
+  document.getElementById('notifBody').textContent = body;
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 3500);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  renderPipeline();
+  renderBrands();
+  renderWorkflows();
+  renderRAG();
+  renderHealth();
+  // Auto-animate counters
+  animateCounter('stat-active', 14);
+  animateCounter('stat-score', 73);
+  animateCounter('stat-workflows', 10);
+  animateCounter('stat-rag', 847);
+});
+
+function animateCounter(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let cur = 0;
+  const step = target / 40;
+  const t = setInterval(() => {
+    cur += step;
+    if (cur >= target) { cur = target; clearInterval(t); }
+    el.textContent = id === 'stat-value' ? `$${(cur/1000).toFixed(1)}M` : Math.round(cur);
+  }, 30);
+}
+</script>
+</body>
+</html>

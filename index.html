@@ -3,26 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ascenda | Retail Expansion Intelligence</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Ascenda Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --black: #0a0a0b;
-    --surface: #111115;
-    --card: #16161c;
-    --border: #1f1f2a;
-    --accent: #e8ff47;
-    --accent2: #47c2ff;
-    --accent3: #ff6b47;
-    --text: #f0f0f5;
-    --muted: #6b6b7e;
+    --black: #0a0e17;
+    --surface: #0f1420;
+    --card: #141b2a;
+    --border: #1c2640;
+    --accent: #4A9BE8;
+    --accent-light: #6BB5FF;
+    --accent-dim: #2a5a8f;
+    --accent2: #3478C6;
+    --accent3: #8BC4FF;
+    --text: #e8ecf4;
+    --muted: #6881a3;
     --success: #3ddc97;
     --warning: #ffbe3d;
     --danger: #ff4757;
   }
 
   * { margin:0; padding:0; box-sizing:border-box; }
-  
   html { scroll-behavior: smooth; }
 
   body {
@@ -33,7 +34,6 @@
     overflow-x: hidden;
   }
 
-  /* NOISE TEXTURE OVERLAY */
   body::before {
     content: '';
     position: fixed;
@@ -41,7 +41,7 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 1000;
-    opacity: 0.5;
+    opacity: 0.4;
   }
 
   /* HEADER */
@@ -49,7 +49,7 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(10,10,11,0.92);
+    background: rgba(10,14,23,0.94);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border);
     padding: 0 2rem;
@@ -59,25 +59,41 @@
     justify-content: space-between;
   }
 
-  .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.6rem;
-    letter-spacing: 0.1em;
-    color: var(--accent);
+  .logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    cursor: pointer;
   }
-  .logo span { color: var(--text); }
+  .logo-img {
+    height: 36px;
+    width: auto;
+    border-radius: 4px;
+    filter: brightness(1.1) saturate(0.3) sepia(0.2) hue-rotate(180deg) brightness(1.3);
+    opacity: 0.85;
+    transition: opacity 0.2s;
+  }
+  .logo-img:hover { opacity: 1; }
+  .logo-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.35rem;
+    letter-spacing: 0.08em;
+    color: var(--accent-light);
+  }
+  .logo-text span { color: var(--muted); font-size: 1.1rem; }
 
-  nav { display: flex; gap: 2rem; }
+  nav { display: flex; gap: 1.75rem; }
   nav a {
     color: var(--muted);
     text-decoration: none;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     transition: color 0.2s;
   }
-  nav a:hover, nav a.active { color: var(--accent); }
+  nav a:hover, nav a.active { color: var(--accent-light); }
 
   .header-status {
     display: flex;
@@ -123,7 +139,7 @@
   }
   .hero h1 em {
     font-style: normal;
-    color: var(--accent);
+    color: var(--accent-light);
   }
 
   .hero-sub {
@@ -153,10 +169,10 @@
   }
   .btn-primary {
     background: var(--accent);
-    color: var(--black);
+    color: #fff;
   }
   .btn-primary:hover {
-    background: #fff;
+    background: var(--accent-light);
     transform: translateY(-1px);
   }
   .btn-ghost {
@@ -166,7 +182,11 @@
   }
   .btn-ghost:hover {
     border-color: var(--accent);
-    color: var(--accent);
+    color: var(--accent-light);
+  }
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.7rem;
   }
 
   /* STATS BAR */
@@ -202,7 +222,7 @@
   }
   .stat-value.green { color: var(--success); }
   .stat-value.yellow { color: var(--warning); }
-  .stat-value.blue { color: var(--accent2); }
+  .stat-value.blue { color: var(--accent-light); }
   .stat-delta {
     font-size: 0.7rem;
     color: var(--success);
@@ -234,39 +254,26 @@
     font-family: 'DM Mono', monospace;
   }
 
-  /* PIPELINE VISUALIZATION */
-  .pipeline-container {
-    overflow-x: auto;
-    padding-bottom: 1rem;
-  }
-
+  /* PIPELINE */
+  .pipeline-container { overflow-x: auto; padding-bottom: 1rem; }
   .pipeline-track {
     display: flex;
     gap: 0;
     min-width: 900px;
     position: relative;
   }
-
-  .phase-node {
-    flex: 1;
-    position: relative;
-    cursor: pointer;
-  }
-
+  .phase-node { flex: 1; position: relative; cursor: pointer; }
   .phase-connector {
     position: absolute;
-    top: 40px;
-    right: -18px;
+    top: 40px; right: -18px;
     z-index: 10;
-    width: 36px;
-    height: 36px;
+    width: 36px; height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--muted);
     font-size: 1.2rem;
   }
-
   .phase-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -277,7 +284,6 @@
     position: relative;
     overflow: hidden;
   }
-
   .phase-card::before {
     content: '';
     position: absolute;
@@ -286,19 +292,16 @@
     background: var(--border);
     transition: background 0.3s;
   }
-
   .phase-card.status-active::before { background: var(--accent); }
   .phase-card.status-complete::before { background: var(--success); }
   .phase-card.status-review::before { background: var(--warning); }
   .phase-card.status-blocked::before { background: var(--danger); }
   .phase-card.status-pending::before { background: var(--border); }
-
   .phase-card:hover {
     border-color: var(--accent);
     transform: translateY(-3px);
     box-shadow: 0 12px 40px rgba(0,0,0,0.4);
   }
-
   .phase-number {
     font-family: 'DM Mono', monospace;
     font-size: 0.6rem;
@@ -306,7 +309,6 @@
     letter-spacing: 0.1em;
     margin-bottom: 0.5rem;
   }
-
   .phase-name {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 1rem;
@@ -315,22 +317,19 @@
     margin-bottom: 0.75rem;
     min-height: 2.2rem;
   }
-
   .phase-count {
     font-family: 'DM Mono', monospace;
     font-size: 1.4rem;
     font-weight: 500;
-    color: var(--accent);
+    color: var(--accent-light);
     margin-bottom: 0.25rem;
   }
-
   .phase-count-label {
     font-size: 0.65rem;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.1em;
   }
-
   .phase-badge {
     display: inline-block;
     padding: 0.2rem 0.6rem;
@@ -341,11 +340,11 @@
     text-transform: uppercase;
     margin-top: 0.75rem;
   }
-  .badge-active { background: rgba(232,255,71,0.15); color: var(--accent); }
+  .badge-active { background: rgba(74,155,232,0.15); color: var(--accent-light); }
   .badge-complete { background: rgba(61,220,151,0.15); color: var(--success); }
   .badge-review { background: rgba(255,190,61,0.15); color: var(--warning); }
   .badge-blocked { background: rgba(255,71,87,0.15); color: var(--danger); }
-  .badge-pending { background: rgba(107,107,126,0.15); color: var(--muted); }
+  .badge-pending { background: rgba(104,129,163,0.15); color: var(--muted); }
 
   /* BRAND CARDS */
   .brands-grid {
@@ -353,7 +352,6 @@
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 1rem;
   }
-
   .brand-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -364,18 +362,16 @@
     position: relative;
   }
   .brand-card:hover {
-    border-color: var(--accent2);
+    border-color: var(--accent);
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 30px rgba(74,155,232,0.12);
   }
-
   .brand-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 1rem;
   }
-
   .brand-initials {
     width: 44px; height: 44px;
     border-radius: 8px;
@@ -386,34 +382,16 @@
     font-size: 1.1rem;
     letter-spacing: 0.05em;
   }
-
-  .brand-name {
-    font-weight: 600;
-    font-size: 0.95rem;
-    margin-bottom: 0.2rem;
-  }
+  .brand-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem; }
   .brand-category {
     font-size: 0.7rem;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
-
-  .brand-score-ring {
-    text-align: right;
-  }
-  .score-number {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2rem;
-    line-height: 1;
-  }
-  .score-label {
-    font-size: 0.6rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
+  .brand-score-ring { text-align: right; }
+  .score-number { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; line-height: 1; }
+  .score-label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
   .brand-progress {
     background: var(--surface);
     height: 4px;
@@ -421,12 +399,7 @@
     margin: 1rem 0;
     overflow: hidden;
   }
-  .brand-progress-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 1s ease;
-  }
-
+  .brand-progress-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
   .brand-phase {
     font-size: 0.72rem;
     color: var(--muted);
@@ -434,7 +407,6 @@
     justify-content: space-between;
   }
   .brand-phase-name { color: var(--text); font-weight: 500; }
-
   .brand-meta {
     display: flex;
     gap: 1rem;
@@ -449,10 +421,138 @@
     flex-direction: column;
     gap: 0.2rem;
   }
-  .brand-meta-val {
-    color: var(--text);
-    font-weight: 500;
+  .brand-meta-val { color: var(--text); font-weight: 500; font-size: 0.8rem; }
+
+  /* BRAND DETAIL VIEW */
+  .brand-detail-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--accent);
     font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .brand-detail-back:hover { color: var(--accent-light); }
+
+  .brand-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .brand-detail-avatar {
+    width: 64px; height: 64px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+  }
+  .brand-detail-info h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem;
+    letter-spacing: 0.03em;
+    line-height: 1;
+  }
+  .brand-detail-info .subtitle { color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem; }
+  .brand-detail-score {
+    margin-left: auto;
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+  }
+  .brand-detail-score .big-score {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    line-height: 1;
+  }
+  .brand-detail-score .score-label-text {
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  @media (max-width: 900px) { .detail-grid { grid-template-columns: 1fr; } }
+
+  .detail-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  .detail-card-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .detail-card-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .detail-card-row:last-child { border-bottom: none; }
+  .detail-card-row .label { color: var(--muted); }
+  .detail-card-row .value { font-weight: 500; }
+
+  .timeline-list { list-style: none; }
+  .timeline-item {
+    position: relative;
+    padding: 0 0 1.25rem 1.5rem;
+    border-left: 2px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .timeline-item:last-child { border-left-color: transparent; }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -5px; top: 4px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--card);
+  }
+  .timeline-item .time { font-size: 0.68rem; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 0.15rem; }
+  .timeline-item.completed::before { background: var(--success); }
+  .timeline-item.pending::before { background: var(--muted); }
+
+  .action-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .action-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    background: rgba(74,155,232,0.08);
+    border: 1px solid var(--accent-dim);
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--accent-light);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .action-chip:hover {
+    background: rgba(74,155,232,0.18);
+    border-color: var(--accent);
   }
 
   /* SYSTEM HEALTH */
@@ -461,7 +561,6 @@
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 1rem;
   }
-
   .service-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -471,11 +570,7 @@
     overflow: hidden;
     transition: all 0.25s;
   }
-  .service-card:hover {
-    border-color: var(--border);
-    transform: translateY(-2px);
-  }
-
+  .service-card:hover { border-color: var(--border); transform: translateY(-2px); }
   .service-card::after {
     content: '';
     position: absolute;
@@ -485,73 +580,60 @@
     opacity: 0;
     transition: opacity 0.3s;
   }
-  .service-card.healthy::after {
-    background: radial-gradient(ellipse at top left, rgba(61,220,151,0.05), transparent 70%);
-    opacity: 1;
-  }
-  .service-card.warning::after {
-    background: radial-gradient(ellipse at top left, rgba(255,190,61,0.05), transparent 70%);
-    opacity: 1;
-  }
-  .service-card.down::after {
-    background: radial-gradient(ellipse at top left, rgba(255,71,87,0.07), transparent 70%);
-    opacity: 1;
-  }
-
-  .service-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-  .service-icon {
-    font-size: 1.5rem;
-  }
-  .service-indicator {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.65rem;
-    font-family: 'DM Mono', monospace;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-  .indicator-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-  }
+  .service-card.healthy::after { background: radial-gradient(ellipse at top left, rgba(61,220,151,0.05), transparent 70%); opacity: 1; }
+  .service-card.warning::after { background: radial-gradient(ellipse at top left, rgba(255,190,61,0.05), transparent 70%); opacity: 1; }
+  .service-card.down::after { background: radial-gradient(ellipse at top left, rgba(255,71,87,0.07), transparent 70%); opacity: 1; }
+  .service-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .service-icon { font-size: 1.5rem; }
+  .service-indicator { display: flex; align-items: center; gap: 0.4rem; font-size: 0.65rem; font-family: 'DM Mono', monospace; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+  .indicator-dot { width: 7px; height: 7px; border-radius: 50%; }
   .dot-healthy { background: var(--success); box-shadow: 0 0 8px var(--success); animation: pulse 2s infinite; }
   .dot-warning { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
   .dot-down { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+  .service-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.25rem; }
+  .service-url { font-size: 0.65rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .service-metrics { display: flex; gap: 1rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border); }
+  .svc-metric { font-size: 0.65rem; color: var(--muted); }
+  .svc-metric-val { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--text); margin-top: 0.15rem; }
 
-  .service-name {
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
-  }
-  .service-url {
-    font-size: 0.65rem;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
+  /* FLOW DIAGRAM */
+  .flow-section { margin-top: 2rem; }
+  .flow-container {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    overflow-x: auto;
   }
 
-  .service-metrics {
+  /* AGGREGATE PIPELINE */
+  .aggregate-section { margin-top: 2rem; }
+  .agg-bar-group { margin-bottom: 0.75rem; }
+  .agg-bar-label {
     display: flex;
-    gap: 1rem;
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--border);
-  }
-  .svc-metric {
-    font-size: 0.65rem;
+    justify-content: space-between;
+    font-size: 0.72rem;
     color: var(--muted);
-  }
-  .svc-metric-val {
+    margin-bottom: 0.3rem;
     font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--text);
-    margin-top: 0.15rem;
+  }
+  .agg-bar-track {
+    height: 24px;
+    background: var(--surface);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .agg-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding-left: 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #fff;
+    transition: width 1s ease;
   }
 
   /* WORKFLOW TABLE */
@@ -571,7 +653,7 @@
     font-size: 0.82rem;
   }
   .workflow-row:last-child { border-bottom: none; }
-  .workflow-row:hover { background: rgba(232,255,71,0.02); }
+  .workflow-row:hover { background: rgba(74,155,232,0.03); }
   .workflow-row.header {
     font-size: 0.65rem;
     letter-spacing: 0.12em;
@@ -580,28 +662,11 @@
     font-family: 'DM Mono', monospace;
     background: var(--surface);
   }
-  .workflow-num {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--muted);
-  }
+  .workflow-num { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); }
   .workflow-name { font-weight: 500; }
-  .workflow-trigger {
-    font-size: 0.7rem;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-  }
-  .workflow-last {
-    font-size: 0.7rem;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-  }
-  .workflow-runs {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-    color: var(--accent2);
-  }
-
+  .workflow-trigger { font-size: 0.7rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .workflow-last { font-size: 0.7rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .workflow-runs { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--accent-light); }
   .wf-toggle {
     width: 36px; height: 20px;
     background: var(--success);
@@ -622,7 +687,7 @@
   .wf-toggle.off { background: var(--border); }
   .wf-toggle.off::after { right: auto; left: 3px; }
 
-  /* RAG QUERY CONSOLE */
+  /* RAG CONSOLE */
   .rag-console {
     background: var(--card);
     border: 1px solid var(--border);
@@ -638,27 +703,13 @@
     border-bottom: 1px solid var(--border);
   }
   .console-dots { display: flex; gap: 0.4rem; }
-  .console-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-  }
+  .console-dot { width: 10px; height: 10px; border-radius: 50%; }
   .cd-red { background: #ff5f57; }
   .cd-yellow { background: #ffbd2e; }
   .cd-green { background: #28ca41; }
-  .console-title {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-  }
-
+  .console-title { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; }
   .console-body { padding: 1.25rem; }
-
-  .console-input-wrap {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1.25rem;
-  }
+  .console-input-wrap { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; }
   .console-input {
     flex: 1;
     background: var(--surface);
@@ -673,7 +724,6 @@
   }
   .console-input:focus { border-color: var(--accent); }
   .console-input::placeholder { color: var(--muted); }
-
   .console-results {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -684,34 +734,20 @@
     font-size: 0.75rem;
     line-height: 1.8;
   }
-  .result-line { margin-bottom: 0.25rem; }
-  .result-score { color: var(--accent); }
-  .result-name { color: var(--accent2); }
+  .result-score { color: var(--accent-light); }
+  .result-name { color: var(--accent); }
   .result-meta { color: var(--muted); }
   .result-thinking { color: var(--warning); }
 
   /* INTAKE FORM */
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
   @media (max-width: 768px) {
     .form-grid { grid-template-columns: 1fr; }
     .workflow-row { grid-template-columns: 1fr; gap: 0.5rem; }
   }
-
   .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
   .form-group.full { grid-column: 1 / -1; }
-
-  .form-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
+  .form-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
   .form-input, .form-select, .form-textarea {
     background: var(--card);
     border: 1px solid var(--border);
@@ -724,9 +760,7 @@
     transition: border-color 0.2s;
     width: 100%;
   }
-  .form-input:focus, .form-select:focus, .form-textarea:focus {
-    border-color: var(--accent);
-  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
   .form-select option { background: var(--card); }
   .form-textarea { resize: vertical; min-height: 100px; }
 
@@ -745,7 +779,7 @@
     transition: all 0.2s;
   }
   .tab:hover { color: var(--text); }
-  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab.active { color: var(--accent-light); border-bottom-color: var(--accent); }
 
   .tab-content { display: none; }
   .tab-content.active { display: block; }
@@ -761,7 +795,6 @@
     letter-spacing: 0.08em;
   }
 
-  /* ANIMATIONS */
   @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
@@ -769,7 +802,6 @@
   .animate-in { animation: fadeInUp 0.5s ease forwards; }
   .delay-1 { animation-delay: 0.1s; opacity: 0; }
   .delay-2 { animation-delay: 0.2s; opacity: 0; }
-  .delay-3 { animation-delay: 0.3s; opacity: 0; }
 
   /* MODAL */
   .modal-overlay {
@@ -803,31 +835,18 @@
     color: var(--muted);
     font-size: 1.2rem;
     cursor: pointer;
-    transition: color 0.2s;
   }
   .modal-close:hover { color: var(--text); }
-  .modal-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.8rem;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.5rem;
-  }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
   .modal-body { margin-top: 1.5rem; }
-  .detail-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 0.85rem;
-  }
+  .detail-row { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
   .detail-row:last-child { border-bottom: none; }
   .detail-label { color: var(--muted); }
   .detail-value { font-weight: 500; }
 
   .notif {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
+    bottom: 2rem; right: 2rem;
     background: var(--card);
     border: 1px solid var(--accent);
     border-radius: 8px;
@@ -839,13 +858,16 @@
     max-width: 300px;
   }
   .notif.show { transform: translateX(0); }
-  .notif-title { font-weight: 600; color: var(--accent); margin-bottom: 0.25rem; }
+  .notif-title { font-weight: 600; color: var(--accent-light); margin-bottom: 0.25rem; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">ASCENDA<span>·PIPELINE</span></div>
+  <div class="logo-wrap" onclick="showTab('pipeline')">
+    <img src="YourBrnadHereStockPhoto.png" alt="Ascenda" class="logo-img" />
+    <div class="logo-text">ASCENDA <span>DASHBOARD</span></div>
+  </div>
   <nav>
     <a href="#pipeline" class="active" onclick="showTab('pipeline')">Pipeline</a>
     <a href="#brands" onclick="showTab('brands')">Brands</a>
@@ -862,12 +884,12 @@
 
 <!-- HERO -->
 <div class="hero animate-in">
-  <div class="hero-eyebrow">▸ Ascenda Retail Expansion Intelligence · v2.0</div>
+  <div class="hero-eyebrow">&#9654; Ascenda Sales Dashboard &middot; v2.0</div>
   <h1>RETAIL<br><em>EXPANSION</em><br>COMMAND CENTER</h1>
   <p class="hero-sub">10-phase brand pipeline from Opportunity Identification through Investment Scale. Powered by n8n automation, Pinecone RAG, and Claude AI.</p>
   <div class="hero-actions">
     <button class="btn btn-primary" onclick="showTab('intake')">+ Submit New Brand</button>
-    <button class="btn btn-ghost" onclick="showTab('rag')">⟡ Query Intelligence</button>
+    <button class="btn btn-ghost" onclick="showTab('rag')">&#10033; Query Intelligence</button>
   </div>
 </div>
 
@@ -876,17 +898,17 @@
   <div class="stat-item">
     <div class="stat-label">Active Brands</div>
     <div class="stat-value blue" id="stat-active">14</div>
-    <div class="stat-delta">↑ 3 this month</div>
+    <div class="stat-delta">&uarr; 3 this month</div>
   </div>
   <div class="stat-item">
     <div class="stat-label">Pipeline Value</div>
     <div class="stat-value green" id="stat-value">$2.4M</div>
-    <div class="stat-delta">↑ 18% vs last quarter</div>
+    <div class="stat-delta">&uarr; 18% vs last quarter</div>
   </div>
   <div class="stat-item">
     <div class="stat-label">Avg Readiness Score</div>
-    <div class="stat-value yellow" id="stat-score">73</div>
-    <div class="stat-delta">↑ 5 pts from automation</div>
+    <div class="stat-value blue" id="stat-score">73</div>
+    <div class="stat-delta">&uarr; 5 pts from automation</div>
   </div>
   <div class="stat-item">
     <div class="stat-label">Workflows Active</div>
@@ -912,7 +934,7 @@
   <div id="tab-pipeline" class="tab-content active">
     <div class="section-header">
       <div class="section-title">PIPELINE VIEW</div>
-      <div class="section-sub">LIVE · 10 PHASES · COMMITTEE-DRIVEN</div>
+      <div class="section-sub">LIVE &middot; 10 PHASES &middot; COMMITTEE-DRIVEN</div>
     </div>
     <div class="pipeline-container">
       <div class="pipeline-track" id="pipelineTrack"></div>
@@ -930,16 +952,21 @@
   <div id="tab-brands" class="tab-content">
     <div class="section-header">
       <div class="section-title">BRAND PORTFOLIO</div>
-      <div class="section-sub">14 ACTIVE · 3 PENDING REVIEW</div>
+      <div class="section-sub">14 ACTIVE &middot; 3 PENDING REVIEW</div>
     </div>
     <div class="brands-grid" id="brandsGrid"></div>
+  </div>
+
+  <!-- TAB: BRAND DETAIL (shown when a brand is clicked) -->
+  <div id="tab-brand-detail" class="tab-content">
+    <div id="brandDetailContent"></div>
   </div>
 
   <!-- TAB: WORKFLOWS -->
   <div id="tab-workflows" class="tab-content">
     <div class="section-header">
       <div class="section-title">N8N WORKFLOWS</div>
-      <div class="section-sub">10 WORKFLOWS · ALL ACTIVE</div>
+      <div class="section-sub">10 WORKFLOWS &middot; ALL ACTIVE</div>
     </div>
     <div class="workflow-list">
       <div class="workflow-row header">
@@ -965,7 +992,7 @@
   <div id="tab-rag" class="tab-content">
     <div class="section-header">
       <div class="section-title">PINECONE RAG CONSOLE</div>
-      <div class="section-sub">847 VECTORS · 6 NAMESPACES</div>
+      <div class="section-sub">847 VECTORS &middot; 6 NAMESPACES</div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:2rem;">
       <div>
@@ -984,12 +1011,12 @@
           <div class="console-dot cd-yellow"></div>
           <div class="console-dot cd-green"></div>
         </div>
-        <div class="console-title">ascenda-rag · cosine similarity search</div>
+        <div class="console-title">ascenda-rag &middot; cosine similarity search</div>
       </div>
       <div class="console-body">
         <div class="console-input-wrap">
           <input class="console-input" id="ragInput" placeholder="Ask anything: 'Find brands similar to NutriPure that succeeded at Sam's Club...'" onkeydown="if(event.key==='Enter')queryRAG()"/>
-          <button class="btn btn-primary" onclick="queryRAG()" style="white-space:nowrap;">⟡ Query</button>
+          <button class="btn btn-primary" onclick="queryRAG()" style="white-space:nowrap;">&#10033; Query</button>
         </div>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;">
           <button class="btn btn-ghost" style="padding:0.4rem 0.8rem;font-size:0.65rem;" onclick="setQuery('Brands similar to successful Sam\'s Club CPG entries')">Similar brands</button>
@@ -1009,15 +1036,29 @@
   <div id="tab-health" class="tab-content">
     <div class="section-header">
       <div class="section-title">SYSTEM HEALTH</div>
-      <div class="section-sub" id="healthTime">LAST CHECK: —</div>
+      <div class="section-sub" id="healthTime">LAST CHECK: &mdash;</div>
     </div>
     <div class="health-grid" id="healthGrid"></div>
-    <div style="margin-top:2rem;">
+
+    <!-- Visual Flow Diagram -->
+    <div class="flow-section">
       <div class="section-header" style="margin-bottom:1rem;">
-        <div class="section-title" style="font-size:1.4rem;">ARCHITECTURE DIAGRAM</div>
+        <div class="section-title" style="font-size:1.4rem;">WORKFLOW FLOW DIAGRAM</div>
+        <div class="section-sub">DATA FLOW &middot; 10 PHASES</div>
       </div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:2rem;overflow-x:auto;">
-        <svg id="archDiagram" width="900" height="420" viewBox="0 0 900 420" style="max-width:100%;"></svg>
+      <div class="flow-container">
+        <svg id="flowDiagram" width="1100" height="520" viewBox="0 0 1100 520" style="max-width:100%;"></svg>
+      </div>
+    </div>
+
+    <!-- Aggregate Pipeline View -->
+    <div class="aggregate-section">
+      <div class="section-header" style="margin-bottom:1rem;">
+        <div class="section-title" style="font-size:1.4rem;">BRAND PIPELINE AGGREGATE</div>
+        <div class="section-sub">WHERE BRANDS ARE &middot; ALL PHASES</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:2rem;">
+        <div id="aggregatePipeline"></div>
       </div>
     </div>
   </div>
@@ -1026,10 +1067,10 @@
   <div id="tab-intake" class="tab-content">
     <div class="section-header">
       <div class="section-title">BRAND INTAKE FORM</div>
-      <div class="section-sub">PHASE 1 · AUTO-SCORED · INSTANT RESPONSE</div>
+      <div class="section-sub">PHASE 1 &middot; AUTO-SCORED &middot; INSTANT RESPONSE</div>
     </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:2rem;max-width:900px;">
-      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:2rem;line-height:1.7;">Submit a new brand opportunity for automated Phase 1 scoring. Brands scoring ≥70 are auto-approved and advance to Phase 2. Scores 60-69 are flagged for committee review. Below 60 receive an automated rejection with feedback.</p>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:2rem;line-height:1.7;">Submit a new brand opportunity for automated Phase 1 scoring. Brands scoring &ge;70 are auto-approved and advance to Phase 2. Scores 60-69 are flagged for committee review. Below 60 receive an automated rejection with feedback.</p>
       <div class="form-grid" id="intakeForm">
         <div class="form-group">
           <label class="form-label">Brand Name *</label>
@@ -1051,14 +1092,14 @@
           <label class="form-label">Product Category *</label>
           <select class="form-select" id="f-category">
             <option value="">Select category...</option>
-            <option>Food & Beverage</option>
-            <option>Health & Wellness</option>
-            <option>Beauty & Personal Care</option>
+            <option>Food &amp; Beverage</option>
+            <option>Health &amp; Wellness</option>
+            <option>Beauty &amp; Personal Care</option>
             <option>Household Products</option>
-            <option>Electronics & Gadgets</option>
-            <option>Outdoor & Sports</option>
+            <option>Electronics &amp; Gadgets</option>
+            <option>Outdoor &amp; Sports</option>
             <option>Pet Products</option>
-            <option>Baby & Kids</option>
+            <option>Baby &amp; Kids</option>
             <option>Other</option>
           </select>
         </div>
@@ -1067,9 +1108,9 @@
           <select class="form-select" id="f-revenue">
             <option value="">Select range...</option>
             <option>Under $500K</option>
-            <option>$500K – $1M</option>
-            <option>$1M – $5M</option>
-            <option>$5M – $20M</option>
+            <option>$500K &ndash; $1M</option>
+            <option>$1M &ndash; $5M</option>
+            <option>$5M &ndash; $20M</option>
             <option>Over $20M</option>
           </select>
         </div>
@@ -1103,14 +1144,13 @@
           <textarea class="form-textarea" id="f-footprint" placeholder="Where are you currently selling? What's your DTC revenue? Any existing retail relationships?..." style="min-height:80px;"></textarea>
         </div>
         <div class="form-group full">
-          <label class="form-label">Readiness & timeline</label>
+          <label class="form-label">Readiness &amp; timeline</label>
           <textarea class="form-textarea" id="f-timeline" placeholder="Are you ready for roadshow now or planning? Any hard launch dates? Current inventory levels?..." style="min-height:80px;"></textarea>
         </div>
         <div class="form-group full" style="margin-top:0.5rem;">
-          <button class="btn btn-primary" onclick="submitIntake()" style="font-size:0.9rem;padding:1rem 2.5rem;">Submit Brand for Evaluation →</button>
+          <button class="btn btn-primary" onclick="submitIntake()" style="font-size:0.9rem;padding:1rem 2.5rem;">Submit Brand for Evaluation &rarr;</button>
         </div>
       </div>
-      <!-- Scoring result panel -->
       <div id="scoreResult" style="display:none;margin-top:2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.5rem;">
         <div style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:0.5rem;">PHASE 1 SCORING RESULT</div>
         <div id="scoreDisplay"></div>
@@ -1123,7 +1163,7 @@
 <!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
+    <button class="modal-close" onclick="closeModal()">&#10005;</button>
     <div class="modal-title" id="modalTitle">Phase Detail</div>
     <div id="modalSubtitle" style="color:var(--muted);font-size:0.8rem;margin-bottom:0.5rem;font-family:'DM Mono',monospace;"></div>
     <div class="modal-body" id="modalBody"></div>
@@ -1136,7 +1176,7 @@
   <div id="notifBody"></div>
 </div>
 
-<footer>ASCENDA SALES · RETAIL EXPANSION INTELLIGENCE · POWERED BY N8N + PINECONE + CLAUDE · GITHUB PAGES</footer>
+<footer>ASCENDA SALES &middot; DASHBOARD &middot; POWERED BY N8N + PINECONE + CLAUDE &middot; GITHUB PAGES</footer>
 
 <script>
 // ============================================================
@@ -1156,14 +1196,14 @@ const PHASES = [
 ];
 
 const BRANDS = [
-  { name:'NutriPure Foods', cat:'Food & Beverage', score:88, phase:5, phaseName:'Investment Planning', color:'#3ddc97', bg:'rgba(61,220,151,0.15)', rev:'$3.2M', retailer:"Sam's Club", model:'Roadshow' },
-  { name:'VitaBlend Wellness', cat:'Health & Wellness', score:82, phase:3, phaseName:'Readiness Eval', color:'#47c2ff', bg:'rgba(71,194,255,0.15)', rev:'$1.8M', retailer:"Sam's Club", model:'Inline' },
-  { name:'CleanHome Co.', cat:'Household Products', score:75, phase:6, phaseName:'Retail Readiness', color:'#e8ff47', bg:'rgba(232,255,71,0.15)', rev:'$5.1M', retailer:'Costco', model:'Inline' },
-  { name:'PetPlex Brands', cat:'Pet Products', score:91, phase:8, phaseName:'Live Roadshow', color:'#ff6b47', bg:'rgba(255,107,71,0.15)', rev:'$7.4M', retailer:"Sam's Club", model:'Roadshow' },
-  { name:'GlowUp Beauty', cat:'Beauty & Personal Care', score:69, phase:4, phaseName:'Go/No-Go Review', color:'#ffbe3d', bg:'rgba(255,190,61,0.15)', rev:'$900K', retailer:"Sam's Club", model:'Roadshow' },
-  { name:'TechEdge Gadgets', cat:'Electronics', score:77, phase:5, phaseName:'Investment Planning', color:'#47c2ff', bg:'rgba(71,194,255,0.15)', rev:'$2.3M', retailer:'Costco', model:'Brokerage' },
-  { name:'FreshFarm Direct', cat:'Food & Beverage', score:84, phase:7, phaseName:'Logistics', color:'#3ddc97', bg:'rgba(61,220,151,0.15)', rev:'$4.7M', retailer:"Sam's Club", model:'Roadshow' },
-  { name:'BabyFirst Products', cat:'Baby & Kids', score:80, phase:3, phaseName:'Readiness Eval', color:'#e8ff47', bg:'rgba(232,255,71,0.15)', rev:'$2.1M', retailer:"Sam's Club", model:'Inline' },
+  { name:'NutriPure Foods', cat:'Food & Beverage', score:88, phase:5, phaseName:'Investment Planning', color:'#3ddc97', bg:'rgba(61,220,151,0.15)', rev:'$3.2M', retailer:"Sam's Club", model:'Roadshow', contact:'Sarah Chen', email:'sarah@nutripure.com', events:12, unitsSold:4200, avgROI:'34%' },
+  { name:'VitaBlend Wellness', cat:'Health & Wellness', score:82, phase:3, phaseName:'Readiness Eval', color:'#4A9BE8', bg:'rgba(74,155,232,0.15)', rev:'$1.8M', retailer:"Sam's Club", model:'Inline', contact:'Jake Torres', email:'jake@vitablend.com', events:0, unitsSold:0, avgROI:'â' },
+  { name:'CleanHome Co.', cat:'Household Products', score:75, phase:6, phaseName:'Retail Readiness', color:'#6BB5FF', bg:'rgba(107,181,255,0.12)', rev:'$5.1M', retailer:'Costco', model:'Inline', contact:'Maria Lopez', email:'maria@cleanhome.co', events:3, unitsSold:1800, avgROI:'22%' },
+  { name:'PetPlex Brands', cat:'Pet Products', score:91, phase:8, phaseName:'Live Roadshow', color:'#3ddc97', bg:'rgba(61,220,151,0.12)', rev:'$7.4M', retailer:"Sam's Club", model:'Roadshow', contact:'Dave Wilson', email:'dave@petplex.com', events:24, unitsSold:9800, avgROI:'41%' },
+  { name:'GlowUp Beauty', cat:'Beauty & Personal Care', score:69, phase:4, phaseName:'Go/No-Go Review', color:'#ffbe3d', bg:'rgba(255,190,61,0.12)', rev:'$900K', retailer:"Sam's Club", model:'Roadshow', contact:'Amy Reed', email:'amy@glowup.co', events:0, unitsSold:0, avgROI:'â' },
+  { name:'TechEdge Gadgets', cat:'Electronics', score:77, phase:5, phaseName:'Investment Planning', color:'#4A9BE8', bg:'rgba(74,155,232,0.12)', rev:'$2.3M', retailer:'Costco', model:'Brokerage', contact:'Ryan Park', email:'ryan@techedge.io', events:5, unitsSold:1200, avgROI:'18%' },
+  { name:'FreshFarm Direct', cat:'Food & Beverage', score:84, phase:7, phaseName:'Logistics', color:'#3ddc97', bg:'rgba(61,220,151,0.12)', rev:'$4.7M', retailer:"Sam's Club", model:'Roadshow', contact:'Lisa Nguyen', email:'lisa@freshfarm.com', events:8, unitsSold:3400, avgROI:'29%' },
+  { name:'BabyFirst Products', cat:'Baby & Kids', score:80, phase:3, phaseName:'Readiness Eval', color:'#6BB5FF', bg:'rgba(107,181,255,0.12)', rev:'$2.1M', retailer:"Sam's Club", model:'Inline', contact:'Tom Hayes', email:'tom@babyfirst.co', events:0, unitsSold:0, avgROI:'â' },
 ];
 
 const WORKFLOWS = [
@@ -1180,21 +1220,21 @@ const WORKFLOWS = [
 ];
 
 const SERVICES = [
-  { icon:'⚙️', name:'n8n Automation', url:'n8n.yourdomain.com', status:'healthy', latency:'42ms', uptime:'99.9%', lastCheck:'1 min ago' },
-  { icon:'🔷', name:'Pinecone RAG', url:'api.pinecone.io', status:'healthy', latency:'38ms', uptime:'100%', lastCheck:'1 min ago' },
-  { icon:'🤖', name:'Claude API', url:'api.anthropic.com', status:'healthy', latency:'890ms', uptime:'99.8%', lastCheck:'1 min ago' },
-  { icon:'📊', name:'Google Sheets', url:'sheets.googleapis.com', status:'healthy', latency:'120ms', uptime:'99.9%', lastCheck:'2 min ago' },
-  { icon:'📁', name:'Google Drive', url:'drive.googleapis.com', status:'healthy', latency:'98ms', uptime:'99.9%', lastCheck:'2 min ago' },
-  { icon:'📧', name:'Gmail / SMTP', url:'smtp.gmail.com:587', status:'healthy', latency:'55ms', uptime:'100%', lastCheck:'2 min ago' },
-  { icon:'💬', name:'Slack Webhooks', url:'hooks.slack.com', status:'healthy', latency:'61ms', uptime:'99.7%', lastCheck:'3 min ago' },
-  { icon:'📅', name:'Google Calendar', url:'calendar.googleapis.com', status:'warning', latency:'245ms', uptime:'98.2%', lastCheck:'3 min ago' },
-  { icon:'📄', name:'GitHub Pages', url:'yourusername.github.io', status:'healthy', latency:'22ms', uptime:'100%', lastCheck:'5 min ago' },
-  { icon:'🔐', name:'DocuSign / LOI', url:'api.docusign.com', status:'warning', latency:'310ms', uptime:'97.5%', lastCheck:'5 min ago' },
+  { icon:'\u2699\uFE0F', name:'n8n Automation', url:'edenger.app.n8n.cloud', status:'healthy', latency:'42ms', uptime:'99.9%', lastCheck:'1 min ago' },
+  { icon:'\uD83D\uDD37', name:'Pinecone RAG', url:'api.pinecone.io', status:'healthy', latency:'38ms', uptime:'100%', lastCheck:'1 min ago' },
+  { icon:'\uD83E\uDD16', name:'Claude API', url:'api.anthropic.com', status:'healthy', latency:'890ms', uptime:'99.8%', lastCheck:'1 min ago' },
+  { icon:'\uD83D\uDCCA', name:'Google Sheets', url:'sheets.googleapis.com', status:'healthy', latency:'120ms', uptime:'99.9%', lastCheck:'2 min ago' },
+  { icon:'\uD83D\uDCC1', name:'Google Drive', url:'drive.googleapis.com', status:'healthy', latency:'98ms', uptime:'99.9%', lastCheck:'2 min ago' },
+  { icon:'\uD83D\uDCE7', name:'Gmail / SMTP', url:'smtp.gmail.com:587', status:'healthy', latency:'55ms', uptime:'100%', lastCheck:'2 min ago' },
+  { icon:'\uD83D\uDCAC', name:'Slack Webhooks', url:'hooks.slack.com', status:'healthy', latency:'61ms', uptime:'99.7%', lastCheck:'3 min ago' },
+  { icon:'\uD83D\uDCC5', name:'Google Calendar', url:'calendar.googleapis.com', status:'warning', latency:'245ms', uptime:'98.2%', lastCheck:'3 min ago' },
+  { icon:'\uD83D\uDCC4', name:'GitHub Pages', url:'diversified-business-management.github.io', status:'healthy', latency:'22ms', uptime:'100%', lastCheck:'5 min ago' },
+  { icon:'\uD83D\uDD10', name:'DocuSign / LOI', url:'api.docusign.com', status:'warning', latency:'310ms', uptime:'97.5%', lastCheck:'5 min ago' },
 ];
 
 const NAMESPACES = [
   { name:'brands', vectors:312, color:'var(--accent)' },
-  { name:'portfolio-kpis', vectors:87, color:'var(--accent2)' },
+  { name:'portfolio-kpis', vectors:87, color:'var(--accent-light)' },
   { name:'compliance-docs', vectors:201, color:'var(--success)' },
   { name:'roadshow-results', vectors:143, color:'var(--warning)' },
   { name:'market-intel', vectors:74, color:'var(--accent3)' },
@@ -1216,19 +1256,19 @@ function renderPipeline() {
         <div class="phase-count-label">${p.label}</div>
         <div class="phase-badge badge-${p.status}">${p.status}</div>
       </div>
-      ${i < PHASES.length - 1 ? '<div class="phase-connector">›</div>' : ''}
+      ${i < PHASES.length - 1 ? '<div class="phase-connector">\u203A</div>' : ''}
     </div>
   `).join('');
 }
 
 function renderBrands() {
   const container = document.getElementById('brandsGrid');
-  container.innerHTML = BRANDS.map(b => {
+  container.innerHTML = BRANDS.map((b, idx) => {
     const pct = (b.phase / 10) * 100;
     const scoreColor = b.score >= 80 ? 'var(--success)' : b.score >= 70 ? 'var(--warning)' : 'var(--danger)';
     const initials = b.name.split(' ').map(w=>w[0]).join('').slice(0,2);
     return `
-    <div class="brand-card" onclick="showBrandModal('${b.name}')">
+    <div class="brand-card" onclick="showBrandDetail(${idx})">
       <div class="brand-header">
         <div style="display:flex;align-items:center;gap:0.75rem;">
           <div class="brand-initials" style="background:${b.bg};color:${b.color}">${initials}</div>
@@ -1258,6 +1298,135 @@ function renderBrands() {
   }).join('');
 }
 
+function showBrandDetail(idx) {
+  const b = BRANDS[idx];
+  if (!b) return;
+  const scoreColor = b.score>=80?'var(--success)':b.score>=70?'var(--warning)':'var(--danger)';
+  const initials = b.name.split(' ').map(w=>w[0]).join('').slice(0,2);
+  const pct = (b.phase / 10) * 100;
+
+  // Generate phase timeline
+  let timeline = '';
+  for (let i = 0; i < 10; i++) {
+    const ph = PHASES[i];
+    const cls = i < b.phase ? 'completed' : i === b.phase ? '' : 'pending';
+    const timeLabel = i < b.phase ? 'Completed' : i === b.phase ? 'In Progress' : 'Upcoming';
+    timeline += `<li class="timeline-item ${cls}">
+      <div class="time">Phase ${ph.num} &middot; ${timeLabel}</div>
+      <div>${ph.name.replace('\\n',' ')}</div>
+    </li>`;
+  }
+
+  // Generate team actions
+  const actions = [
+    { icon:'\uD83D\uDCE7', label:'Send Follow-up Email' },
+    { icon:'\uD83D\uDCCA', label:'View Financial Model' },
+    { icon:'\uD83D\uDCC4', label:'Generate LOI' },
+    { icon:'\uD83D\uDD0D', label:'Query RAG Data' },
+    { icon:'\uD83D\uDCC5', label:'Schedule Roadshow' },
+    { icon:'\uD83D\uDCCB', label:'Run Compliance Check' },
+  ];
+
+  const content = document.getElementById('brandDetailContent');
+  content.innerHTML = `
+    <a class="brand-detail-back" onclick="showTab('brands')">&larr; Back to Brands</a>
+
+    <div class="brand-detail-header">
+      <div class="brand-detail-avatar" style="background:${b.bg};color:${b.color}">${initials}</div>
+      <div class="brand-detail-info">
+        <h2>${b.name}</h2>
+        <div class="subtitle">${b.cat} &middot; ${b.retailer} &middot; ${b.model}</div>
+      </div>
+      <div class="brand-detail-score">
+        <div class="big-score" style="color:${scoreColor}">${b.score}</div>
+        <div class="score-label-text">Readiness Score</div>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div style="margin-bottom:2rem;">
+      <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--muted);margin-bottom:0.4rem;">
+        <span>Phase ${b.phase} of 10 â ${b.phaseName}</span>
+        <span>${Math.round(pct)}%</span>
+      </div>
+      <div style="background:var(--surface);height:8px;border-radius:4px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--accent),var(--accent-light));border-radius:4px;transition:width 1s;"></div>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <!-- Data Summary -->
+      <div class="detail-card">
+        <div class="detail-card-title">Brand Summary</div>
+        <div class="detail-card-row"><span class="label">Contact</span><span class="value">${b.contact}</span></div>
+        <div class="detail-card-row"><span class="label">Email</span><span class="value" style="color:var(--accent)">${b.email}</span></div>
+        <div class="detail-card-row"><span class="label">Annual Revenue</span><span class="value">${b.rev}</span></div>
+        <div class="detail-card-row"><span class="label">Target Retailer</span><span class="value">${b.retailer}</span></div>
+        <div class="detail-card-row"><span class="label">Economic Model</span><span class="value">${b.model}</span></div>
+        <div class="detail-card-row"><span class="label">Current Phase</span><span class="value" style="color:var(--accent-light)">${b.phaseName}</span></div>
+      </div>
+
+      <!-- Performance Metrics -->
+      <div class="detail-card">
+        <div class="detail-card-title">Performance Metrics</div>
+        <div class="detail-card-row"><span class="label">Events Completed</span><span class="value" style="color:var(--accent-light)">${b.events}</span></div>
+        <div class="detail-card-row"><span class="label">Total Units Sold</span><span class="value">${b.unitsSold.toLocaleString()}</span></div>
+        <div class="detail-card-row"><span class="label">Avg ROI</span><span class="value" style="color:var(--success)">${b.avgROI}</span></div>
+        <div class="detail-card-row"><span class="label">Readiness Score</span><span class="value" style="color:${scoreColor}">${b.score}/100</span></div>
+        <div class="detail-card-row"><span class="label">Pipeline Stage</span><span class="value">${b.phase}/10</span></div>
+        <div class="detail-card-row"><span class="label">Days in Phase</span><span class="value">${Math.floor(Math.random()*30+5)}</span></div>
+      </div>
+
+      <!-- Sales & Team Actions -->
+      <div class="detail-card">
+        <div class="detail-card-title">Sales &amp; Team Actions</div>
+        <div class="action-chips">
+          ${actions.map(a => `<div class="action-chip" onclick="notify('Action','${a.label} triggered for ${b.name}')">${a.icon} ${a.label}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline & Activity -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+      <div class="detail-card">
+        <div class="detail-card-title">Pipeline Progress</div>
+        <ul class="timeline-list">${timeline}</ul>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card-title">Recent Activity</div>
+        <ul class="timeline-list">
+          <li class="timeline-item completed">
+            <div class="time">Feb 27, 2026 &middot; 4:12 PM</div>
+            <div>Readiness score updated to ${b.score}</div>
+          </li>
+          <li class="timeline-item completed">
+            <div class="time">Feb 25, 2026 &middot; 10:30 AM</div>
+            <div>Compliance documents verified</div>
+          </li>
+          <li class="timeline-item completed">
+            <div class="time">Feb 22, 2026 &middot; 2:15 PM</div>
+            <div>Brand intake form submitted</div>
+          </li>
+          <li class="timeline-item completed">
+            <div class="time">Feb 20, 2026 &middot; 9:00 AM</div>
+            <div>Initial contact with ${b.contact}</div>
+          </li>
+          <li class="timeline-item">
+            <div class="time">Upcoming</div>
+            <div>Phase ${Math.min(b.phase+1,10)} gate review</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  `;
+
+  // Show the brand detail tab
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-brand-detail').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
 function renderWorkflows() {
   const list = document.getElementById('workflowList');
   list.innerHTML = WORKFLOWS.map(w => `
@@ -1273,9 +1442,7 @@ function renderWorkflows() {
 
   const dlContainer = document.getElementById('downloadButtons');
   dlContainer.innerHTML = WORKFLOWS.map(w => `
-    <button class="btn btn-ghost" onclick="downloadWorkflow('${w.n}','${w.name}')" style="font-size:0.7rem;padding:0.5rem 0.9rem;">
-      ↓ WF-${w.n}
-    </button>
+    <button class="btn btn-ghost" onclick="downloadWorkflow('${w.n}','${w.name}')" style="font-size:0.7rem;padding:0.5rem 0.9rem;">\u2193 WF-${w.n}</button>
   `).join('');
 }
 
@@ -1311,13 +1478,13 @@ function drawRAGChart() {
     const x = i * (w / data.length) + gap/2;
     const y = h - barH - 16;
     const grd = ctx.createLinearGradient(0, y, 0, y+barH);
-    grd.addColorStop(0, 'rgba(232,255,71,0.8)');
-    grd.addColorStop(1, 'rgba(232,255,71,0.1)');
+    grd.addColorStop(0, 'rgba(74,155,232,0.85)');
+    grd.addColorStop(1, 'rgba(74,155,232,0.1)');
     ctx.fillStyle = grd;
     ctx.beginPath();
     ctx.roundRect(x, y, barW, barH, 3);
     ctx.fill();
-    ctx.fillStyle = 'rgba(107,107,126,0.7)';
+    ctx.fillStyle = 'rgba(104,129,163,0.7)';
     ctx.font = '10px DM Mono, monospace';
     ctx.textAlign = 'center';
     ctx.fillText(days[i], x + barW/2, h - 2);
@@ -1345,47 +1512,112 @@ function renderHealth() {
       </div>
     </div>
   `).join('');
-  drawArchDiagram();
+  drawFlowDiagram();
+  renderAggregatePipeline();
 }
 
-function drawArchDiagram() {
-  const svg = document.getElementById('archDiagram');
-  const nodes = [
-    { id:'form', label:'Web Form\n(GitHub Pages)', x:80, y:200, color:'#e8ff47' },
-    { id:'n8n', label:'n8n\nWorkflows', x:250, y:200, color:'#47c2ff' },
-    { id:'claude', label:'Claude API\n(Anthropic)', x:420, y:100, color:'#ff6b47' },
-    { id:'pinecone', label:'Pinecone\nRAG', x:420, y:300, color:'#3ddc97' },
-    { id:'sheets', label:'Google\nSheets', x:600, y:140, color:'#ffbe3d' },
-    { id:'drive', label:'Google\nDrive', x:600, y:260, color:'#ffbe3d' },
-    { id:'slack', label:'Slack\nAlerts', x:770, y:120, color:'#47c2ff' },
-    { id:'email', label:'Gmail\nNotify', x:770, y:200, color:'#47c2ff' },
-    { id:'calendar', label:'Google\nCalendar', x:770, y:280, color:'#47c2ff' },
-    { id:'dash', label:'Dashboard\n(Leader)', x:420, y:200, color:'#e8ff47' },
+function drawFlowDiagram() {
+  const svg = document.getElementById('flowDiagram');
+  if (!svg) return;
+
+  // Define the flow: phases in sequence with their services
+  const phaseNodes = [
+    { id:'intake', label:'WF-01\nBrand Intake', x:80, y:80, color:'#4A9BE8', services:['Web Form','Sheets','Claude'] },
+    { id:'compliance', label:'WF-02\nCompliance', x:250, y:80, color:'#3478C6', services:['Claude','Pinecone'] },
+    { id:'readiness', label:'WF-03\nReadiness', x:420, y:80, color:'#4A9BE8', services:['Claude','Sheets'] },
+    { id:'gonogo', label:'WF-04\nGo/No-Go', x:590, y:80, color:'#6BB5FF', services:['Claude','Gmail'] },
+    { id:'financial', label:'WF-05\nFinancial/LOI', x:760, y:80, color:'#3478C6', services:['Claude','Drive'] },
+    { id:'submission', label:'WF-06\nSubmission', x:930, y:80, color:'#4A9BE8', services:['Claude','Pinecone','Drive'] },
+    { id:'logistics', label:'WF-07\nLogistics', x:170, y:260, color:'#6BB5FF', services:['Calendar','Gmail','Slack'] },
+    { id:'roadshow', label:'WF-08\nRoadshow', x:420, y:260, color:'#3ddc97', services:['Claude','Pinecone','Gmail'] },
+    { id:'evaluate', label:'WF-09\nGrowth/SPV', x:670, y:260, color:'#3478C6', services:['Sheets','Gmail'] },
+    { id:'ragsync', label:'WF-10\nRAG Sync', x:920, y:260, color:'#8BC4FF', services:['Pinecone'] },
   ];
-  const edges = [
-    ['form','n8n'],['n8n','claude'],['n8n','pinecone'],['n8n','dash'],
-    ['claude','n8n'],['pinecone','n8n'],['n8n','sheets'],['n8n','drive'],
-    ['n8n','slack'],['n8n','email'],['n8n','calendar'],['sheets','dash'],
+
+  const serviceNodes = [
+    { id:'form', label:'GitHub Pages\nForm', x:80, y:420, color:'#6BB5FF', icon:'\uD83C\uDF10' },
+    { id:'n8n', label:'n8n Engine\n10 Workflows', x:280, y:420, color:'#4A9BE8', icon:'\u2699\uFE0F' },
+    { id:'claude', label:'Claude API\nAnthropic', x:460, y:420, color:'#8BC4FF', icon:'\uD83E\uDD16' },
+    { id:'pinecone', label:'Pinecone\nRAG', x:620, y:420, color:'#3ddc97', icon:'\uD83D\uDD37' },
+    { id:'sheets', label:'Google\nSheets', x:770, y:420, color:'#ffbe3d', icon:'\uD83D\uDCCA' },
+    { id:'dash', label:'Ascenda\nDashboard', x:940, y:420, color:'#6BB5FF', icon:'\uD83D\uDCBB' },
   ];
-  
+
   let s = '';
-  // Draw edges
-  edges.forEach(([a,b]) => {
-    const na = nodes.find(n=>n.id===a), nb = nodes.find(n=>n.id===b);
-    if (!na||!nb) return;
-    s += `<line x1="${na.x}" y1="${na.y}" x2="${nb.x}" y2="${nb.y}" stroke="#1f1f2a" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  // Background grid
+  for (let x = 0; x < 1100; x += 40) {
+    s += `<line x1="${x}" y1="0" x2="${x}" y2="520" stroke="#1c2640" stroke-width="0.3" opacity="0.4"/>`;
+  }
+  for (let y = 0; y < 520; y += 40) {
+    s += `<line x1="0" y1="${y}" x2="1100" y2="${y}" stroke="#1c2640" stroke-width="0.3" opacity="0.4"/>`;
+  }
+
+  // Section labels
+  s += `<text x="20" y="50" font-family="'DM Mono',monospace" font-size="10" fill="#6881a3" letter-spacing="0.15em">PHASE 1â6 WORKFLOWS</text>`;
+  s += `<text x="20" y="230" font-family="'DM Mono',monospace" font-size="10" fill="#6881a3" letter-spacing="0.15em">PHASE 7â10 WORKFLOWS</text>`;
+  s += `<text x="20" y="395" font-family="'DM Mono',monospace" font-size="10" fill="#6881a3" letter-spacing="0.15em">INFRASTRUCTURE SERVICES</text>`;
+
+  // Phase flow arrows (sequential)
+  const phaseEdges = [
+    [0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[4,9]
+  ];
+  phaseEdges.forEach(([a,b]) => {
+    const na = phaseNodes[a], nb = phaseNodes[b];
+    s += `<line x1="${na.x+60}" y1="${na.y}" x2="${nb.x-60}" y2="${nb.y}" stroke="#4A9BE8" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5" marker-end="url(#arrowBlue)"/>`;
   });
-  // Draw nodes
-  nodes.forEach(n => {
+  // Wrap from phase 6 to phase 7
+  s += `<path d="M ${phaseNodes[5].x+60} ${phaseNodes[5].y} Q ${phaseNodes[5].x+90} ${phaseNodes[5].y+90} ${phaseNodes[6].x-60} ${phaseNodes[6].y}" stroke="#4A9BE8" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5" fill="none" marker-end="url(#arrowBlue)"/>`;
+
+  // Connect to services
+  serviceNodes.forEach(sn => {
+    s += `<line x1="${sn.x}" y1="${sn.y-28}" x2="${sn.x}" y2="${sn.y-55}" stroke="#1c2640" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>`;
+  });
+
+  // Arrow marker
+  s = `<defs><marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#4A9BE8" opacity="0.6"/></marker></defs>` + s;
+
+  // Draw phase nodes
+  phaseNodes.forEach(n => {
     const lines = n.label.split('\n');
-    s += `
-      <rect x="${n.x-55}" y="${n.y-28}" width="110" height="${lines.length*18+16}" rx="6"
-            fill="#16161c" stroke="${n.color}" stroke-width="1.5"/>
-      ${lines.map((l,i)=>`<text x="${n.x}" y="${n.y-6+(i*18)}" text-anchor="middle" 
-        font-family="'DM Mono',monospace" font-size="11" fill="${i===0?n.color:'#6b6b7e'}">${l}</text>`).join('')}
-    `;
+    const h = 44;
+    s += `<rect x="${n.x-60}" y="${n.y-22}" width="120" height="${h}" rx="6" fill="#141b2a" stroke="${n.color}" stroke-width="1.5"/>`;
+    lines.forEach((l,i) => {
+      s += `<text x="${n.x}" y="${n.y-2+(i*16)}" text-anchor="middle" font-family="'DM Mono',monospace" font-size="10" fill="${i===0?n.color:'#e8ecf4'}" font-weight="${i===0?'400':'600'}">${l}</text>`;
+    });
   });
+
+  // Draw service nodes
+  serviceNodes.forEach(n => {
+    const lines = n.label.split('\n');
+    s += `<rect x="${n.x-60}" y="${n.y-22}" width="120" height="50" rx="8" fill="#141b2a" stroke="${n.color}" stroke-width="1.5" opacity="0.9"/>`;
+    s += `<text x="${n.x}" y="${n.y-4}" text-anchor="middle" font-family="'DM Mono',monospace" font-size="10" fill="${n.color}">${lines[0]}</text>`;
+    if (lines[1]) s += `<text x="${n.x}" y="${n.y+12}" text-anchor="middle" font-family="'DM Mono',monospace" font-size="9" fill="#6881a3">${lines[1]}</text>`;
+  });
+
   svg.innerHTML = s;
+}
+
+function renderAggregatePipeline() {
+  const container = document.getElementById('aggregatePipeline');
+  if (!container) return;
+  const maxCount = Math.max(...PHASES.map(p=>p.count));
+  const phaseColors = ['#3478C6','#3478C6','#4A9BE8','#6BB5FF','#4A9BE8','#4A9BE8','#8BC4FF','#3ddc97','#3478C6','#8BC4FF'];
+
+  container.innerHTML = PHASES.map((p, i) => {
+    const pct = (p.count / maxCount) * 100;
+    const brandsInPhase = BRANDS.filter(b => b.phase === (i+1));
+    const brandNames = brandsInPhase.length > 0 ? brandsInPhase.map(b => b.name).join(', ') : 'No brands';
+    return `
+    <div class="agg-bar-group">
+      <div class="agg-bar-label">
+        <span>P${p.num} ${p.name.replace('\\n',' ')}</span>
+        <span>${p.count} brands &middot; ${p.status.toUpperCase()}</span>
+      </div>
+      <div class="agg-bar-track" title="${brandNames}">
+        <div class="agg-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${phaseColors[i]},${phaseColors[i]}cc);">${p.count}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ============================================================
@@ -1397,40 +1629,31 @@ function showTab(name) {
   document.querySelectorAll('nav a').forEach(el=>el.classList.remove('active'));
   const target = document.getElementById('tab-'+name);
   if (target) target.classList.add('active');
+  // Highlight nav
+  const navLinks = document.querySelectorAll('nav a');
+  navLinks.forEach(a => { if(a.getAttribute('href') === '#'+name) a.classList.add('active'); });
   if (name === 'health') renderHealth();
 }
 
 function showPhaseModal(i) {
   const p = PHASES[i];
+  const brandsInPhase = BRANDS.filter(b => b.phase === (i+1));
   document.getElementById('modalTitle').textContent = `PHASE ${p.num}: ${p.name.replace('\n',' ')}`;
-  document.getElementById('modalSubtitle').textContent = `STATUS: ${p.status.toUpperCase()} · ${p.count} ${p.label}`;
+  document.getElementById('modalSubtitle').textContent = `STATUS: ${p.status.toUpperCase()} \u00B7 ${p.count} ${p.label}`;
+  let brandList = brandsInPhase.length > 0
+    ? brandsInPhase.map(b => `<div style="display:flex;justify-content:space-between;padding:0.4rem 0;font-size:0.8rem;"><span style="color:var(--accent-light)">${b.name}</span><span style="color:var(--muted)">${b.score}/100</span></div>`).join('')
+    : '<div style="font-size:0.8rem;color:var(--muted);">No brands currently in this phase</div>';
   document.getElementById('modalBody').innerHTML = `
     <div class="detail-row"><span class="detail-label">Key Action</span><span class="detail-value">${p.keyAction}</span></div>
-    <div class="detail-row"><span class="detail-label">Brands in Phase</span><span class="detail-value" style="color:var(--accent)">${p.count}</span></div>
+    <div class="detail-row"><span class="detail-label">Brands in Phase</span><span class="detail-value" style="color:var(--accent-light)">${p.count}</span></div>
     <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value">${p.status.toUpperCase()}</span></div>
-    <div class="detail-row"><span class="detail-label">n8n Workflow</span><span class="detail-value" style="color:var(--accent2)">workflow-${p.num.padStart(2,'0')}-*.json</span></div>
-    <div style="margin-top:1.5rem;">
-      <button class="btn btn-primary" onclick="closeModal();showTab('workflows')">View Workflow →</button>
+    <div class="detail-row"><span class="detail-label">n8n Workflow</span><span class="detail-value" style="color:var(--accent)">WF-${p.num}</span></div>
+    <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);">
+      <div style="font-size:0.7rem;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:0.1em;margin-bottom:0.5rem;">BRANDS IN THIS PHASE</div>
+      ${brandList}
     </div>
-  `;
-  document.getElementById('modalOverlay').classList.add('open');
-}
-
-function showBrandModal(name) {
-  const b = BRANDS.find(x=>x.name===name);
-  if (!b) return;
-  const scoreColor = b.score>=80?'var(--success)':b.score>=70?'var(--warning)':'var(--danger)';
-  document.getElementById('modalTitle').textContent = b.name;
-  document.getElementById('modalSubtitle').textContent = `${b.cat} · Phase ${b.phase}/10`;
-  document.getElementById('modalBody').innerHTML = `
-    <div class="detail-row"><span class="detail-label">Readiness Score</span><span class="detail-value" style="color:${scoreColor};font-family:'Bebas Neue';font-size:1.8rem;">${b.score}</span></div>
-    <div class="detail-row"><span class="detail-label">Current Phase</span><span class="detail-value">${b.phaseName}</span></div>
-    <div class="detail-row"><span class="detail-label">Annual Revenue</span><span class="detail-value">${b.rev}</span></div>
-    <div class="detail-row"><span class="detail-label">Target Retailer</span><span class="detail-value">${b.retailer}</span></div>
-    <div class="detail-row"><span class="detail-label">Economic Model</span><span class="detail-value">${b.model}</span></div>
-    <div style="margin-top:1.5rem;display:flex;gap:0.75rem;">
-      <button class="btn btn-primary" onclick="closeModal()">Close</button>
-      <button class="btn btn-ghost" onclick="closeModal();setQuery('Performance data for ${name}');showTab(\'rag\')">Query RAG →</button>
+    <div style="margin-top:1.5rem;">
+      <button class="btn btn-primary" onclick="closeModal();showTab('workflows')">View Workflow \u2192</button>
     </div>
   `;
   document.getElementById('modalOverlay').classList.add('open');
@@ -1463,28 +1686,22 @@ function generateWorkflowJSON(num, name) {
       { id:'webhook', type:'n8n-nodes-base.webhook', name:'Trigger', position:[280,200],
         parameters: { path:`/ascenda/wf${num}`, method:'POST' } },
       { id:'code', type:'n8n-nodes-base.code', name:'Scoring Logic', position:[460,200],
-        parameters: { jsCode:`// WF-${num}: ${name}\n// Ascenda Phase Logic\nconst data = $input.first().json;\n\n// Score calculation\nconst score = Object.values(data).filter(v => typeof v === 'string' && v.length > 50).length * 15;\n\nreturn [{ json: { ...data, score, phase: ${parseInt(num)}, timestamp: new Date().toISOString() } }];` } },
-      { id:'sheets', type:'n8n-nodes-base.googleSheets', name:'Log to Sheets', position:[640,200],
-        parameters: { operation:'append', spreadsheetId:'YOUR_SHEET_ID', range:'A:Z' } },
-      { id:'pinecone', type:'n8n-nodes-base.httpRequest', name:'Sync to Pinecone', position:[640,340],
-        parameters: { url:'https://YOUR_PINECONE_HOST/vectors/upsert', method:'POST',
-          body:`{"vectors":[{"id":"{{$json.id}}","values":[],"metadata":{{JSON.stringify($json)}}}]}` } },
+        parameters: { jsCode:`// WF-${num}: ${name}\nconst data = $input.first().json;\nconst score = Object.values(data).filter(v => typeof v === 'string' && v.length > 50).length * 15;\nreturn [{ json: { ...data, score, phase: ${parseInt(num)}, timestamp: new Date().toISOString() } }];` } },
+      { id:'sheets', type:'n8n-nodes-base.googleSheets', name:'Log to Sheets', position:[640,200] },
       { id:'email', type:'n8n-nodes-base.gmail', name:'Send Notification', position:[820,200] },
     ],
     connections: {
       'Start':{main:[[{node:'Trigger',type:'main',index:0}]]},
       'Trigger':{main:[[{node:'Scoring Logic',type:'main',index:0}]]},
-      'Scoring Logic':{main:[[{node:'Log to Sheets',type:'main',index:0},{node:'Sync to Pinecone',type:'main',index:0}]]},
+      'Scoring Logic':{main:[[{node:'Log to Sheets',type:'main',index:0}]]},
       'Log to Sheets':{main:[[{node:'Send Notification',type:'main',index:0}]]},
     },
-    settings: { saveManualExecutions:true, callerPolicy:'workflowsFromSameOwner' },
+    settings: { saveManualExecutions:true },
     meta: { instanceId:'ascenda-n8n', workflowPhase: parseInt(num) }
   };
 }
 
-function setQuery(q) {
-  document.getElementById('ragInput').value = q;
-}
+function setQuery(q) { document.getElementById('ragInput').value = q; }
 
 function queryRAG() {
   const q = document.getElementById('ragInput').value.trim();
@@ -1500,28 +1717,27 @@ function queryRAG() {
 function getMockResults(q) {
   const ql = q.toLowerCase();
   if (ql.includes('similar') || ql.includes('brand')) {
-    return `<span class="result-score">[0.94]</span> <span class="result-name">NutriPure Foods</span> <span class="result-meta">· Phase 5 · Score:88 · Sam's Club Roadshow · $3.2M ARR</span>
-<span class="result-score">[0.91]</span> <span class="result-name">FreshFarm Direct</span> <span class="result-meta">· Phase 7 · Score:84 · Sam's Club Roadshow · $4.7M ARR</span>
-<span class="result-score">[0.87]</span> <span class="result-name">VitaBlend Wellness</span> <span class="result-meta">· Phase 3 · Score:82 · Sam's Club Inline · $1.8M ARR</span>
-<span class="result-score">[0.82]</span> <span class="result-name">CleanHome Co.</span> <span class="result-meta">· Phase 6 · Score:75 · Costco Inline · $5.1M ARR</span>
-<span class="result-score">[0.79]</span> <span class="result-name">BabyFirst Products</span> <span class="result-meta">· Phase 3 · Score:80 · Sam's Club Inline · $2.1M ARR</span>`;
+    return `<span class="result-score">[0.94]</span> <span class="result-name">NutriPure Foods</span> <span class="result-meta">\u00B7 Phase 5 \u00B7 Score:88 \u00B7 Sam's Club Roadshow \u00B7 $3.2M ARR</span>
+<span class="result-score">[0.91]</span> <span class="result-name">FreshFarm Direct</span> <span class="result-meta">\u00B7 Phase 7 \u00B7 Score:84 \u00B7 Sam's Club Roadshow \u00B7 $4.7M ARR</span>
+<span class="result-score">[0.87]</span> <span class="result-name">VitaBlend Wellness</span> <span class="result-meta">\u00B7 Phase 3 \u00B7 Score:82 \u00B7 Sam's Club Inline \u00B7 $1.8M ARR</span>
+<span class="result-score">[0.82]</span> <span class="result-name">CleanHome Co.</span> <span class="result-meta">\u00B7 Phase 6 \u00B7 Score:75 \u00B7 Costco Inline \u00B7 $5.1M ARR</span>
+<span class="result-score">[0.79]</span> <span class="result-name">BabyFirst Products</span> <span class="result-meta">\u00B7 Phase 3 \u00B7 Score:80 \u00B7 Sam's Club Inline \u00B7 $2.1M ARR</span>`;
   } else if (ql.includes('compliance')) {
-    return `<span class="result-score">[0.96]</span> <span class="result-name">Sam's Club Compliance Gap Report</span> <span class="result-meta">· 47 brands analyzed</span>
-<span style="color:var(--muted)">  ↳ Top gap: Missing UPC/GS1 registration (38% of brands)</span>
-<span style="color:var(--muted)">  ↳ Gap 2: Product liability insurance below $2M threshold (29%)</span>
-<span style="color:var(--muted)">  ↳ Gap 3: No FDA/USDA compliance documentation (22%)</span>
-<span style="color:var(--muted)">  ↳ Gap 4: Retail-ready packaging not certified (18%)</span>
-<span class="result-score">[0.88]</span> <span class="result-name">Costco Compliance Checklist v4</span> <span class="result-meta">· Updated Jan 2026</span>`;
+    return `<span class="result-score">[0.96]</span> <span class="result-name">Sam's Club Compliance Gap Report</span> <span class="result-meta">\u00B7 47 brands analyzed</span>
+<span style="color:var(--muted)">  \u21B3 Top gap: Missing UPC/GS1 registration (38% of brands)</span>
+<span style="color:var(--muted)">  \u21B3 Gap 2: Product liability insurance below $2M threshold (29%)</span>
+<span style="color:var(--muted)">  \u21B3 Gap 3: No FDA/USDA compliance documentation (22%)</span>
+<span class="result-score">[0.88]</span> <span class="result-name">Costco Compliance Checklist v4</span> <span class="result-meta">\u00B7 Updated Jan 2026</span>`;
   } else if (ql.includes('score') || ql.includes('benchmark')) {
-    return `<span class="result-score">[0.97]</span> <span class="result-name">Portfolio KPI Benchmark Report</span> <span class="result-meta">· 31 approved brands</span>
-<span style="color:var(--muted)">  ↳ Avg Phase 3 readiness score: 73.2 / 100</span>
-<span style="color:var(--muted)">  ↳ Min score for approval: 65 (committee override)</span>
-<span style="color:var(--muted)">  ↳ Auto-approve threshold: 70+</span>
-<span style="color:var(--muted)">  ↳ Top scoring category: Health & Wellness (avg 81)</span>`;
+    return `<span class="result-score">[0.97]</span> <span class="result-name">Portfolio KPI Benchmark Report</span> <span class="result-meta">\u00B7 31 approved brands</span>
+<span style="color:var(--muted)">  \u21B3 Avg Phase 3 readiness score: 73.2 / 100</span>
+<span style="color:var(--muted)">  \u21B3 Min score for approval: 65 (committee override)</span>
+<span style="color:var(--muted)">  \u21B3 Auto-approve threshold: 70+</span>
+<span style="color:var(--muted)">  \u21B3 Top scoring category: Health & Wellness (avg 81)</span>`;
   } else {
-    return `<span class="result-score">[0.89]</span> <span class="result-name">Post-Show Performance Analysis Q4 2025</span> <span class="result-meta">· 18 completed roadshows</span>
-<span style="color:var(--muted)">  ↳ Avg revenue per event: $142K</span>
-<span style="color:var(--muted)">  ↳ Avg units sold: 847</span>
+    return `<span class="result-score">[0.89]</span> <span class="result-name">Post-Show Performance Analysis Q4 2025</span> <span class="result-meta">\u00B7 18 completed roadshows</span>
+<span style="color:var(--muted)">  \u21B3 Avg revenue per event: $142K</span>
+<span style="color:var(--muted)">  \u21B3 Avg units sold: 847</span>
 <span class="result-score">[0.85]</span> <span class="result-name">Market Intelligence: Sam's Club 2026 Category Focus</span>
 <span class="result-score">[0.81]</span> <span class="result-name">Brand Playbook: Successful Roadshow Attributes</span>`;
   }
@@ -1540,16 +1756,13 @@ function submitIntake() {
     return;
   }
 
-  // Simulate scoring
   let score = 0;
   if (revenue.includes('$5M') || revenue.includes('$20M') || revenue.includes('Over')) score += 25;
   else if (revenue.includes('$1M')) score += 20;
   else if (revenue.includes('$500K')) score += 12;
   else score += 5;
-
   if (retailer.includes("Sam's") || retailer.includes('Both')) score += 20;
   else score += 15;
-
   score += Math.min(product.length / 8, 25);
   score += category !== '' ? 15 : 0;
   score = Math.round(Math.min(score, 100));
@@ -1580,7 +1793,7 @@ function submitIntake() {
     </div>
   `;
   document.getElementById('scoreResult').scrollIntoView({behavior:'smooth'});
-  notify('Intake Processed', `${brand} scored ${score}/100 — ${status}`);
+  notify('Intake Processed', `${brand} scored ${score}/100 \u2014 ${status}`);
 }
 
 function notify(title, body) {
@@ -1600,7 +1813,6 @@ window.addEventListener('DOMContentLoaded', () => {
   renderWorkflows();
   renderRAG();
   renderHealth();
-  // Auto-animate counters
   animateCounter('stat-active', 14);
   animateCounter('stat-score', 73);
   animateCounter('stat-workflows', 10);

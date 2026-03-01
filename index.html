@@ -6,1253 +6,503 @@
 <title>Ascenda Group Business Management System</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --black: #0a0e17;
-    --surface: #0f1420;
-    --card: #141b2a;
-    --border: #1c2640;
-    --accent: #4A9BE8;
-    --accent-light: #6BB5FF;
-    --accent-dim: #2a5a8f;
-    --accent2: #3478C6;
-    --accent3: #8BC4FF;
-    --text: #e8ecf4;
-    --muted: #6881a3;
-    --success: #3ddc97;
-    --warning: #ffbe3d;
-    --danger: #ff4757;
-  }
+:root {
+  --black: #0a0e17;
+  --surface: #0f1420;
+  --card: #141b2a;
+  --border: #1c2640;
+  --accent: #4A9BE8;
+  --accent-light: #6BB5FF;
+  --accent-dim: #2a5a8f;
+  --accent2: #3478C6;
+  --accent3: #8BC4FF;
+  --text: #e8ecf4;
+  --muted: #6881a3;
+  --success: #3ddc97;
+  --warning: #ffbe3d;
+  --danger: #ff4757;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--black);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.4;
+}
 
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html { scroll-behavior: smooth; }
+/* HEADER */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10,14,23,0.94);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem; height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo-wrap { display:flex; align-items:center; gap:0.75rem; cursor:pointer; }
+.logo-img { height:36px; width:auto; border-radius:4px; filter:brightness(1.1) saturate(0.3) sepia(0.2) hue-rotate(180deg) brightness(1.3); opacity:0.85; transition:opacity 0.2s; }
+.logo-img:hover { opacity:1; }
+.logo-text { font-family:'Bebas Neue',sans-serif; font-size:1.35rem; letter-spacing:0.08em; color:var(--accent-light); }
+.logo-text span { color:var(--muted); font-size:1.1rem; }
+nav { display:flex; gap:1.75rem; }
+nav a { color:var(--muted); text-decoration:none; font-size:0.78rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; transition:color 0.2s; cursor:pointer; }
+nav a:hover, nav a.active { color:var(--accent-light); }
+.header-status { display:flex; align-items:center; gap:0.5rem; font-size:0.75rem; color:var(--success); font-family:'DM Mono',monospace; }
+.pulse { width:8px; height:8px; border-radius:50%; background:var(--success); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
 
-  body {
-    background: var(--black);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+/* LAYOUT */
+.main-wrap { max-width:1400px; margin:0 auto; padding:0 2rem 4rem; }
+.section-header { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid var(--border); }
+.section-title { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:0.05em; }
+.section-sub { font-size:0.75rem; color:var(--muted); font-family:'DM Mono',monospace; }
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 1000;
-    opacity: 0.4;
-  }
+/* BUTTONS */
+.btn { padding:0.65rem 1.5rem; border-radius:4px; font-size:0.78rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; text-decoration:none; transition:all 0.2s; display:inline-flex; align-items:center; gap:0.5rem; border:none; }
+.btn-primary { background:var(--accent); color:#fff; }
+.btn-primary:hover { background:var(--accent-light); transform:translateY(-1px); }
+.btn-ghost { background:transparent; color:var(--text); border:1px solid var(--border); }
+.btn-ghost:hover { border-color:var(--accent); color:var(--accent-light); }
+.btn-sm { padding:0.4rem 0.8rem; font-size:0.68rem; }
+.btn-success { background:var(--success); color:#0a0e17; }
+.btn-warning { background:var(--warning); color:#0a0e17; }
 
-  /* HEADER */
-  header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(10,14,23,0.94);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+/* CARDS */
+.card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:1.5rem; }
+.card-title { font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:0.15em; color:var(--muted); text-transform:uppercase; margin-bottom:1rem; }
+.card-row { display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid var(--border); font-size:0.82rem; }
+.card-row:last-child { border-bottom:none; }
+.card-row .label { color:var(--muted); }
+.card-row .value { font-weight:500; }
 
-  .logo-wrap {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    text-decoration: none;
-    cursor: pointer;
-  }
-  .logo-img {
-    height: 36px;
-    width: auto;
-    border-radius: 4px;
-    filter: brightness(1.1) saturate(0.3) sepia(0.2) hue-rotate(180deg) brightness(1.3);
-    opacity: 0.85;
-    transition: opacity 0.2s;
-  }
-  .logo-img:hover { opacity: 1; }
-  .logo-text {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.35rem;
-    letter-spacing: 0.08em;
-    color: var(--accent-light);
-  }
-  .logo-text span { color: var(--muted); font-size: 1.1rem; }
+/* TABS */
+.tabs { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:2rem; margin-top:2rem; }
+.tab { padding:0.75rem 1.5rem; font-size:0.75rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all 0.2s; }
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--accent-light); border-bottom-color:var(--accent); }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
 
-  nav { display: flex; gap: 1.75rem; }
-  nav a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 0.78rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    transition: color 0.2s;
-  }
-  nav a:hover, nav a.active { color: var(--accent-light); }
+/* STATS */
+.stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem; }
+.stat-card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:1.25rem; }
+.stat-label { font-size:0.65rem; font-family:'DM Mono',monospace; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase; margin-bottom:0.4rem; }
+.stat-value { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:0.05em; }
+.stat-note { font-size:0.68rem; color:var(--muted); margin-top:0.2rem; }
 
-  .header-status {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.75rem;
-    color: var(--success);
-    font-family: 'DM Mono', monospace;
-  }
-  .pulse {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--success);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
-  }
+/* GRID LAYOUTS */
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.25rem; }
+.grid-4 { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; }
+@media(max-width:900px) { .grid-2,.grid-3 { grid-template-columns:1fr; } }
 
-  /* HERO */
-  .hero {
-    padding: 4rem 2rem 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
+/* CALENDAR */
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+.cal-header { background:var(--surface); padding:0.5rem; text-align:center; font-size:0.65rem; font-family:'DM Mono',monospace; color:var(--muted); letter-spacing:0.1em; }
+.cal-cell { background:var(--card); border:1px solid var(--border); min-height:80px; padding:0.4rem; font-size:0.7rem; position:relative; transition:border-color 0.2s; }
+.cal-cell:hover { border-color:var(--accent-dim); }
+.cal-cell.today { border-color:var(--accent); }
+.cal-cell.other-month { opacity:0.3; }
+.cal-day { font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted); margin-bottom:0.3rem; }
+.cal-event { font-size:0.6rem; padding:0.15rem 0.3rem; border-radius:2px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+.cal-event.presentation { background:rgba(74,155,232,0.2); color:var(--accent-light); }
+.cal-event.instore { background:rgba(61,220,151,0.2); color:var(--success); }
+.cal-event.promo { background:rgba(255,190,61,0.2); color:var(--warning); }
 
-  .hero-eyebrow {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    color: var(--accent);
-    text-transform: uppercase;
-    margin-bottom: 1rem;
-  }
+/* TASK LIST */
+.task-item { display:flex; align-items:center; gap:0.75rem; padding:0.75rem 0; border-bottom:1px solid var(--border); font-size:0.82rem; }
+.task-item:last-child { border-bottom:none; }
+.task-priority { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.task-priority.high { background:var(--danger); }
+.task-priority.medium { background:var(--warning); }
+.task-priority.low { background:var(--success); }
+.task-text { flex:1; }
+.task-due { font-size:0.68rem; font-family:'DM Mono',monospace; color:var(--muted); }
+.task-brand { font-size:0.65rem; color:var(--accent); font-family:'DM Mono',monospace; }
 
-  .hero h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(3rem, 6vw, 5.5rem);
-    line-height: 0.95;
-    letter-spacing: 0.02em;
-    margin-bottom: 1.5rem;
-  }
-  .hero h1 em {
-    font-style: normal;
-    color: var(--accent-light);
-  }
+/* BRAND CARDS */
+.brand-card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:1.5rem; transition:all 0.25s; cursor:pointer; }
+.brand-card:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 8px 30px rgba(74,155,232,0.12); }
+.brand-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; }
+.brand-initials { width:44px; height:44px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:1.1rem; }
+.brand-name { font-weight:600; font-size:0.95rem; margin-bottom:0.2rem; }
+.brand-category { font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; }
+.score-number { font-family:'Bebas Neue',sans-serif; font-size:2rem; line-height:1; }
+.score-label { font-size:0.6rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em; }
+.brand-progress { background:var(--surface); height:4px; border-radius:2px; margin:1rem 0; overflow:hidden; }
+.brand-progress-fill { height:100%; border-radius:2px; transition:width 1s ease; }
+.brand-phase { font-size:0.72rem; color:var(--muted); display:flex; justify-content:space-between; }
+.brand-phase-name { color:var(--text); font-weight:500; }
+.brand-meta { display:flex; gap:1rem; margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border); }
+.brand-meta-item { font-size:0.68rem; color:var(--muted); display:flex; flex-direction:column; gap:0.2rem; }
+.brand-meta-val { color:var(--text); font-weight:500; font-size:0.8rem; }
 
-  .hero-sub {
-    color: var(--muted);
-    font-size: 1rem;
-    max-width: 600px;
-    line-height: 1.6;
-    margin-bottom: 2rem;
-  }
+/* BRAND DETAIL */
+.brand-detail-back { display:inline-flex; align-items:center; gap:0.5rem; color:var(--accent); font-size:0.8rem; font-weight:500; cursor:pointer; margin-bottom:1.5rem; transition:color 0.2s; }
+.brand-detail-back:hover { color:var(--accent-light); }
+.detail-tabs { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:1.5rem; }
+.detail-tab { padding:0.6rem 1.2rem; font-size:0.7rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all 0.2s; }
+.detail-tab:hover { color:var(--text); }
+.detail-tab.active { color:var(--accent-light); border-bottom-color:var(--accent); }
+.detail-content { display:none; }
+.detail-content.active { display:block; }
 
-  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+/* HEALTH */
+.health-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1rem; }
+.service-card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:1.25rem; position:relative; overflow:hidden; transition:all 0.25s; }
+.service-card:hover { transform:translateY(-2px); }
+.service-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; }
+.service-icon { font-size:1.4rem; }
+.service-indicator { display:flex; align-items:center; gap:0.4rem; font-size:0.65rem; font-family:'DM Mono',monospace; font-weight:500; letter-spacing:0.05em; text-transform:uppercase; }
+.indicator-dot { width:7px; height:7px; border-radius:50%; }
+.dot-healthy { background:var(--success); box-shadow:0 0 8px var(--success); animation:pulse 2s infinite; }
+.dot-pending { background:var(--muted); }
+.service-name { font-weight:600; font-size:0.88rem; margin-bottom:0.15rem; }
+.service-url { font-size:0.65rem; color:var(--muted); font-family:'DM Mono',monospace; }
 
-  .btn {
-    padding: 0.75rem 1.75rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    border: none;
-  }
-  .btn-primary {
-    background: var(--accent);
-    color: #fff;
-  }
-  .btn-primary:hover {
-    background: var(--accent-light);
-    transform: translateY(-1px);
-  }
-  .btn-ghost {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border);
-  }
-  .btn-ghost:hover {
-    border-color: var(--accent);
-    color: var(--accent-light);
-  }
-  .btn-sm {
-    padding: 0.5rem 1rem;
-    font-size: 0.7rem;
-  }
+/* FLOW DIAGRAM */
+.flow-container { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:2rem; overflow-x:auto; }
 
-  /* STATS BAR */
-  .stats-bar {
-    max-width: 1400px;
-    margin: 0 auto 3rem;
-    padding: 0 2rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  .stat-item {
-    background: var(--card);
-    padding: 1.25rem 1.5rem;
-  }
-  .stat-label {
-    font-size: 0.65rem;
-    font-family: 'DM Mono', monospace;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 0.4rem;
-  }
-  .stat-value {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2rem;
-    letter-spacing: 0.05em;
-    color: var(--text);
-  }
-  .stat-value.green { color: var(--success); }
-  .stat-value.yellow { color: var(--warning); }
-  .stat-value.blue { color: var(--accent-light); }
-  .stat-delta {
-    font-size: 0.7rem;
-    color: var(--success);
-    margin-top: 0.2rem;
-  }
+/* WORKFLOW TABLE */
+.workflow-list { background:var(--card); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.workflow-row { display:grid; grid-template-columns:40px 1fr 160px 100px 80px; align-items:center; padding:1rem 1.5rem; border-bottom:1px solid var(--border); transition:background 0.15s; font-size:0.82rem; }
+.workflow-row:last-child { border-bottom:none; }
+.workflow-row:hover { background:rgba(74,155,232,0.03); }
+.workflow-row.header { font-size:0.65rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); font-family:'DM Mono',monospace; background:var(--surface); }
 
-  /* SECTION */
-  .section {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 2rem 4rem;
-  }
-  .section-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border);
-  }
-  .section-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2rem;
-    letter-spacing: 0.05em;
-  }
-  .section-sub {
-    font-size: 0.75rem;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-  }
+/* FORM */
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+@media(max-width:768px) { .form-grid { grid-template-columns:1fr; } }
+.form-group { display:flex; flex-direction:column; gap:0.5rem; }
+.form-group.full { grid-column:1/-1; }
+.form-label { font-size:0.7rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
+.form-input,.form-select,.form-textarea { background:var(--card); border:1px solid var(--border); border-radius:4px; padding:0.75rem 1rem; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.85rem; outline:none; transition:border-color 0.2s; width:100%; }
+.form-input:focus,.form-select:focus,.form-textarea:focus { border-color:var(--accent); }
+.form-select option { background:var(--card); }
+.form-textarea { resize:vertical; min-height:100px; }
 
-  /* PIPELINE */
-  .pipeline-container { overflow-x: auto; padding-bottom: 1rem; }
-  .pipeline-track {
-    display: flex;
-    gap: 0;
-    min-width: 900px;
-    position: relative;
-  }
-  .phase-node { flex: 1; position: relative; cursor: pointer; }
-  .phase-connector {
-    position: absolute;
-    top: 40px; right: -18px;
-    z-index: 10;
-    width: 36px; height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    font-size: 1.2rem;
-  }
-  .phase-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1.25rem;
-    margin: 0 6px;
-    transition: all 0.25s;
-    position: relative;
-    overflow: hidden;
-  }
-  .phase-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--border);
-    transition: background 0.3s;
-  }
-  .phase-card.status-active::before { background: var(--accent); }
-  .phase-card.status-complete::before { background: var(--success); }
-  .phase-card.status-review::before { background: var(--warning); }
-  .phase-card.status-blocked::before { background: var(--danger); }
-  .phase-card.status-pending::before { background: var(--border); }
-  .phase-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-3px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-  }
-  .phase-number {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    margin-bottom: 0.5rem;
-  }
-  .phase-name {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1rem;
-    letter-spacing: 0.05em;
-    line-height: 1.1;
-    margin-bottom: 0.75rem;
-    min-height: 2.2rem;
-  }
-  .phase-count {
-    font-family: 'DM Mono', monospace;
-    font-size: 1.4rem;
-    font-weight: 500;
-    color: var(--accent-light);
-    margin-bottom: 0.25rem;
-  }
-  .phase-count-label {
-    font-size: 0.65rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-  .phase-badge {
-    display: inline-block;
-    padding: 0.2rem 0.6rem;
-    border-radius: 3px;
-    font-size: 0.6rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-top: 0.75rem;
-  }
-  .badge-active { background: rgba(74,155,232,0.15); color: var(--accent-light); }
-  .badge-complete { background: rgba(61,220,151,0.15); color: var(--success); }
-  .badge-review { background: rgba(255,190,61,0.15); color: var(--warning); }
-  .badge-blocked { background: rgba(255,71,87,0.15); color: var(--danger); }
-  .badge-pending { background: rgba(104,129,163,0.15); color: var(--muted); }
+/* PROMO TABLE */
+.promo-table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+.promo-table th { text-align:left; font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase; padding:0.6rem 0.75rem; border-bottom:1px solid var(--border); }
+.promo-table td { padding:0.6rem 0.75rem; border-bottom:1px solid var(--border); }
+.promo-table tr:last-child td { border-bottom:none; }
+.promo-table .cat-header td { background:var(--surface); font-weight:600; font-size:0.72rem; letter-spacing:0.06em; color:var(--accent-light); }
+.promo-table .total-row td { font-weight:700; border-top:2px solid var(--border); }
 
-  /* BRAND CARDS */
-  .brands-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1rem;
-  }
-  .brand-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1.5rem;
-    transition: all 0.25s;
-    cursor: pointer;
-    position: relative;
-  }
-  .brand-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(74,155,232,0.12);
-  }
-  .brand-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1rem;
-  }
-  .brand-initials {
-    width: 44px; height: 44px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.1rem;
-    letter-spacing: 0.05em;
-  }
-  .brand-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem; }
-  .brand-category {
-    font-size: 0.7rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-  .brand-score-ring { text-align: right; }
-  .score-number { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; line-height: 1; }
-  .score-label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
-  .brand-progress {
-    background: var(--surface);
-    height: 4px;
-    border-radius: 2px;
-    margin: 1rem 0;
-    overflow: hidden;
-  }
-  .brand-progress-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
-  .brand-phase {
-    font-size: 0.72rem;
-    color: var(--muted);
-    display: flex;
-    justify-content: space-between;
-  }
-  .brand-phase-name { color: var(--text); font-weight: 500; }
-  .brand-meta {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
-  }
-  .brand-meta-item {
-    font-size: 0.68rem;
-    color: var(--muted);
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-  }
-  .brand-meta-val { color: var(--text); font-weight: 500; font-size: 0.8rem; }
+/* EMPTY STATE */
+.empty-state { text-align:center; padding:4rem 2rem; color:var(--muted); }
+.empty-state-icon { font-size:3rem; margin-bottom:1rem; opacity:0.3; }
+.empty-state-title { font-family:'Bebas Neue',sans-serif; font-size:1.6rem; color:var(--text); margin-bottom:0.5rem; }
+.empty-state-text { font-size:0.85rem; max-width:500px; margin:0 auto 1.5rem; line-height:1.6; }
 
-  /* BRAND DETAIL VIEW */
-  .brand-detail-back {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--accent);
-    font-size: 0.8rem;
-    font-weight: 500;
-    cursor: pointer;
-    margin-bottom: 1.5rem;
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-  .brand-detail-back:hover { color: var(--accent-light); }
+/* MODAL */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); z-index:500; display:none; align-items:center; justify-content:center; padding:2rem; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:2rem; max-width:600px; width:100%; max-height:80vh; overflow-y:auto; position:relative; }
+.modal-close { position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--muted); font-size:1.2rem; cursor:pointer; }
+.modal-close:hover { color:var(--text); }
 
-  .brand-detail-header {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-  }
-  .brand-detail-avatar {
-    width: 64px; height: 64px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.6rem;
-  }
-  .brand-detail-info h2 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2.2rem;
-    letter-spacing: 0.03em;
-    line-height: 1;
-  }
-  .brand-detail-info .subtitle { color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem; }
-  .brand-detail-score {
-    margin-left: auto;
-    text-align: center;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1rem 1.5rem;
-  }
-  .brand-detail-score .big-score {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 3.5rem;
-    line-height: 1;
-  }
-  .brand-detail-score .score-label-text {
-    font-size: 0.65rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-  }
+/* NOTIFICATION */
+.notif { position:fixed; bottom:2rem; right:2rem; background:var(--card); border:1px solid var(--accent); border-radius:8px; padding:1rem 1.5rem; font-size:0.8rem; z-index:999; transform:translateX(200%); transition:transform 0.3s ease; max-width:300px; }
+.notif.show { transform:translateX(0); }
+.notif-title { font-weight:600; color:var(--accent-light); margin-bottom:0.25rem; }
 
-  .detail-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 1.25rem;
-    margin-bottom: 2rem;
-  }
-  @media (max-width: 900px) { .detail-grid { grid-template-columns: 1fr; } }
+/* FOOTER */
+footer { border-top:1px solid var(--border); padding:2rem; text-align:center; color:var(--muted); font-size:0.72rem; font-family:'DM Mono',monospace; letter-spacing:0.08em; }
 
-  .detail-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1.5rem;
-  }
-  .detail-card-title {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 1rem;
-  }
-  .detail-card-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 0.82rem;
-  }
-  .detail-card-row:last-child { border-bottom: none; }
-  .detail-card-row .label { color: var(--muted); }
-  .detail-card-row .value { font-weight: 500; }
-
-  .timeline-list { list-style: none; }
-  .timeline-item {
-    position: relative;
-    padding: 0 0 1.25rem 1.5rem;
-    border-left: 2px solid var(--border);
-    font-size: 0.82rem;
-  }
-  .timeline-item:last-child { border-left-color: transparent; }
-  .timeline-item::before {
-    content: '';
-    position: absolute;
-    left: -5px; top: 4px;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-    border: 2px solid var(--card);
-  }
-  .timeline-item .time { font-size: 0.68rem; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 0.15rem; }
-  .timeline-item.completed::before { background: var(--success); }
-  .timeline-item.pending::before { background: var(--muted); }
-
-  .action-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .action-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.45rem 0.9rem;
-    background: rgba(74,155,232,0.08);
-    border: 1px solid var(--accent-dim);
-    border-radius: 6px;
-    font-size: 0.72rem;
-    font-weight: 500;
-    color: var(--accent-light);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .action-chip:hover {
-    background: rgba(74,155,232,0.18);
-    border-color: var(--accent);
-  }
-
-  /* SYSTEM HEALTH */
-  .health-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 1rem;
-  }
-  .service-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1.25rem;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.25s;
-  }
-  .service-card:hover { border-color: var(--border); transform: translateY(-2px); }
-  .service-card::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  .service-card.healthy::after { background: radial-gradient(ellipse at top left, rgba(61,220,151,0.05), transparent 70%); opacity: 1; }
-  .service-card.warning::after { background: radial-gradient(ellipse at top left, rgba(255,190,61,0.05), transparent 70%); opacity: 1; }
-  .service-card.down::after { background: radial-gradient(ellipse at top left, rgba(255,71,87,0.07), transparent 70%); opacity: 1; }
-  .service-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-  .service-icon { font-size: 1.5rem; }
-  .service-indicator { display: flex; align-items: center; gap: 0.4rem; font-size: 0.65rem; font-family: 'DM Mono', monospace; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
-  .indicator-dot { width: 7px; height: 7px; border-radius: 50%; }
-  .dot-healthy { background: var(--success); box-shadow: 0 0 8px var(--success); animation: pulse 2s infinite; }
-  .dot-warning { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
-  .dot-down { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
-  .service-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.25rem; }
-  .service-url { font-size: 0.65rem; color: var(--muted); font-family: 'DM Mono', monospace; }
-  .service-metrics { display: flex; gap: 1rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border); }
-  .svc-metric { font-size: 0.65rem; color: var(--muted); }
-  .svc-metric-val { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--text); margin-top: 0.15rem; }
-
-  /* FLOW DIAGRAM */
-  .flow-section { margin-top: 2rem; }
-  .flow-container {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 2rem;
-    overflow-x: auto;
-  }
-
-  /* AGGREGATE PIPELINE */
-  .aggregate-section { margin-top: 2rem; }
-  .agg-bar-group { margin-bottom: 0.75rem; }
-  .agg-bar-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.72rem;
-    color: var(--muted);
-    margin-bottom: 0.3rem;
-    font-family: 'DM Mono', monospace;
-  }
-  .agg-bar-track {
-    height: 24px;
-    background: var(--surface);
-    border-radius: 4px;
-    overflow: hidden;
-    position: relative;
-  }
-  .agg-bar-fill {
-    height: 100%;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    padding-left: 0.5rem;
-    font-size: 0.65rem;
-    font-weight: 600;
-    color: #fff;
-    transition: width 1s ease;
-  }
-
-  /* WORKFLOW TABLE */
-  .workflow-list {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  .workflow-row {
-    display: grid;
-    grid-template-columns: 40px 1fr 160px 100px 100px 80px;
-    align-items: center;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.15s;
-    font-size: 0.82rem;
-  }
-  .workflow-row:last-child { border-bottom: none; }
-  .workflow-row:hover { background: rgba(74,155,232,0.03); }
-  .workflow-row.header {
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    background: var(--surface);
-  }
-  .workflow-num { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); }
-  .workflow-name { font-weight: 500; }
-  .workflow-trigger { font-size: 0.7rem; color: var(--muted); font-family: 'DM Mono', monospace; }
-  .workflow-last { font-size: 0.7rem; color: var(--muted); font-family: 'DM Mono', monospace; }
-  .workflow-runs { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--accent-light); }
-  .wf-toggle {
-    width: 36px; height: 20px;
-    background: var(--success);
-    border-radius: 10px;
-    position: relative;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .wf-toggle::after {
-    content: '';
-    position: absolute;
-    width: 14px; height: 14px;
-    background: white;
-    border-radius: 50%;
-    top: 3px; right: 3px;
-    transition: right 0.2s;
-  }
-  .wf-toggle.off { background: var(--border); }
-  .wf-toggle.off::after { right: auto; left: 3px; }
-
-  /* RAG CONSOLE */
-  .rag-console {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  .console-header {
-    background: var(--surface);
-    padding: 0.75rem 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    border-bottom: 1px solid var(--border);
-  }
-  .console-dots { display: flex; gap: 0.4rem; }
-  .console-dot { width: 10px; height: 10px; border-radius: 50%; }
-  .cd-red { background: #ff5f57; }
-  .cd-yellow { background: #ffbd2e; }
-  .cd-green { background: #28ca41; }
-  .console-title { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; }
-  .console-body { padding: 1.25rem; }
-  .console-input-wrap { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; }
-  .console-input {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.75rem 1rem;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .console-input:focus { border-color: var(--accent); }
-  .console-input::placeholder { color: var(--muted); }
-  .console-results {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 1rem;
-    min-height: 120px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-    line-height: 1.8;
-  }
-  .result-score { color: var(--accent-light); }
-  .result-name { color: var(--accent); }
-  .result-meta { color: var(--muted); }
-  .result-thinking { color: var(--warning); }
-
-  /* INTAKE FORM */
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-  @media (max-width: 768px) {
-    .form-grid { grid-template-columns: 1fr; }
-    .workflow-row { grid-template-columns: 1fr; gap: 0.5rem; }
-  }
-  .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
-  .form-group.full { grid-column: 1 / -1; }
-  .form-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-  .form-input, .form-select, .form-textarea {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.75rem 1rem;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.85rem;
-    outline: none;
-    transition: border-color 0.2s;
-    width: 100%;
-  }
-  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
-  .form-select option { background: var(--card); }
-  .form-textarea { resize: vertical; min-height: 100px; }
-
-  /* TABS */
-  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
-  .tab {
-    padding: 0.75rem 1.5rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--muted);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    transition: all 0.2s;
-  }
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--accent-light); border-bottom-color: var(--accent); }
-
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-
-  /* FOOTER */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 2rem;
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.72rem;
-    font-family: 'DM Mono', monospace;
-    letter-spacing: 0.08em;
-  }
-
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .animate-in { animation: fadeInUp 0.5s ease forwards; }
-  .delay-1 { animation-delay: 0.1s; opacity: 0; }
-  .delay-2 { animation-delay: 0.2s; opacity: 0; }
-
-  /* MODAL */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.8);
-    backdrop-filter: blur(8px);
-    z-index: 500;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 2rem;
-    max-width: 600px;
-    width: 100%;
-    max-height: 80vh;
-    overflow-y: auto;
-    position: relative;
-  }
-  .modal-close {
-    position: absolute;
-    top: 1rem; right: 1rem;
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 1.2rem;
-    cursor: pointer;
-  }
-  .modal-close:hover { color: var(--text); }
-  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
-  .modal-body { margin-top: 1.5rem; }
-  .detail-row { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
-  .detail-row:last-child { border-bottom: none; }
-  .detail-label { color: var(--muted); }
-  .detail-value { font-weight: 500; }
-
-  .notif {
-    position: fixed;
-    bottom: 2rem; right: 2rem;
-    background: var(--card);
-    border: 1px solid var(--accent);
-    border-radius: 8px;
-    padding: 1rem 1.5rem;
-    font-size: 0.8rem;
-    z-index: 999;
-    transform: translateX(200%);
-    transition: transform 0.3s ease;
-    max-width: 300px;
-  }
-  .notif.show { transform: translateX(0); }
-  .notif-title { font-weight: 600; color: var(--accent-light); margin-bottom: 0.25rem; }
-
-/* === CRM ADDITIONS === */
-.crm-section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border, #1c2640); }
-.crm-section-title { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; color: var(--muted, #6881a3); text-transform: uppercase; margin-bottom: 1rem; }
-.task-list { display: flex; flex-direction: column; gap: 0.5rem; }
-.task-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.75rem; background: var(--surface, #0f1420); border: 1px solid var(--border, #1c2640); border-radius: 6px; font-size: 0.8rem; }
-.task-priority { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.task-priority.high { background: var(--danger, #ff4757); }
-.task-priority.medium { background: var(--warning, #ffbe3d); }
-.task-priority.low { background: var(--success, #3ddc97); }
-.task-text { flex: 1; }
-.task-brand { font-size: 0.68rem; color: var(--accent, #4A9BE8); font-family: 'DM Mono', monospace; }
-.task-due { font-size: 0.62rem; color: var(--muted, #6881a3); }
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
-.cal-header { font-size: 0.62rem; color: var(--muted, #6881a3); text-align: center; padding: 0.4rem; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; }
-.cal-cell { min-height: 60px; padding: 0.3rem; background: var(--surface, #0f1420); border: 1px solid var(--border, #1c2640); font-size: 0.72rem; }
-.cal-cell.today { border-color: var(--accent, #4A9BE8); }
-.cal-cell.other-month { opacity: 0.3; }
-.cal-day { font-size: 0.68rem; font-weight: 600; margin-bottom: 0.2rem; }
-.cal-event { font-size: 0.55rem; padding: 1px 3px; border-radius: 3px; margin-bottom: 1px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.cal-event.presentation { background: rgba(74,155,232,0.2); color: var(--accent-light, #6BB5FF); }
-.cal-event.promo { background: rgba(255,190,61,0.2); color: var(--warning, #ffbe3d); }
-.cal-event.review { background: rgba(255,71,87,0.2); color: var(--danger, #ff4757); }
-.cal-nav { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
-.cal-nav button { background: var(--surface, #0f1420); border: 1px solid var(--border, #1c2640); color: var(--text, #e8ecf4); padding: 0.3rem 0.6rem; border-radius: 4px; cursor: pointer; font-size: 0.72rem; }
-.cal-nav button:hover { border-color: var(--accent, #4A9BE8); }
-.pipeline-bars { margin-top: 1rem; }
-.detail-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border, #1c2640); margin-bottom: 1.5rem; }
-.detail-tab { padding: 0.6rem 1.2rem; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted, #6881a3); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; }
-.detail-tab:hover { color: var(--text, #e8ecf4); }
-.detail-tab.active { color: var(--accent-light, #6BB5FF); border-bottom-color: var(--accent, #4A9BE8); }
-.detail-content { display: none; }
-.detail-content.active { display: block; }
-.promo-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
-.promo-table th { font-size: 0.65rem; font-family: 'DM Mono', monospace; letter-spacing: 0.12em; color: var(--muted, #6881a3); text-transform: uppercase; padding: 0.6rem; text-align: left; border-bottom: 1px solid var(--border, #1c2640); }
-.promo-table td { padding: 0.6rem; border-bottom: 1px solid var(--border, #1c2640); }
-.promo-table .total-row td { font-weight: 600; border-top: 2px solid var(--border, #1c2640); }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
-@media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
-.brand-detail-back { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: var(--accent, #4A9BE8); cursor: pointer; margin-bottom: 1.5rem; }
-.brand-detail-back:hover { color: var(--accent-light, #6BB5FF); }
-.empty-state { text-align: center; padding: 3rem; }
-.empty-state-icon { font-size: 2rem; opacity: 0.3; margin-bottom: 0.75rem; }
-.empty-state-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
-.empty-state-text { font-size: 0.82rem; color: var(--muted, #6881a3); margin-bottom: 1rem; max-width: 400px; margin-left: auto; margin-right: auto; }
-.quick-health { display: flex; flex-direction: column; gap: 0.6rem; }
-
+@keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.animate-in { animation:fadeInUp 0.5s ease forwards; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo-wrap" onclick="showTab('pipeline')">
+  <div class="logo-wrap" onclick="showTab('dashboard')">
     <div class="logo-text">ASCENDA <span>GROUP</span></div>
   </div>
   <nav>
-    <a href="#pipeline" class="active" onclick="showTab('pipeline')">Dashboard</a>
-    <a href="#brands" onclick="showTab('brands')">Brands</a>
-    <a href="#workflows" onclick="showTab('workflows')">Workflows</a>
-    <a href="#rag" onclick="showTab('rag')">RAG Console</a>
-    <a href="#health" onclick="showTab('health')">System Health</a>
-    <a href="#intake" onclick="showTab('intake')">New Intake</a>
+    <a class="active" onclick="showTab('dashboard')">Dashboard</a>
+    <a onclick="showTab('brands')">Brands</a>
+    <a onclick="showTab('workflows')">Workflows</a>
+    <a onclick="showTab('health')">System Health</a>
+    <a onclick="showTab('intake')">New Intake</a>
   </nav>
   <div class="header-status">
     <div class="pulse"></div>
-    ALL SYSTEMS OPERATIONAL
+    <span id="headerStatusText">SYSTEMS ONLINE</span>
   </div>
 </header>
 
-<!-- HERO -->
-<div class="hero animate-in">
-  <div class="hero-eyebrow">&#9654; Ascenda Sales Dashboard &middot; v2.0</div>
-  <h1>RETAIL<br><em>EXPANSION</em><br>COMMAND CENTER</h1>
-  <p class="hero-sub">10-phase brand pipeline from Opportunity Identification through Investment Scale. Powered by n8n automation, Pinecone RAG, and Claude AI.</p>
-  <div class="hero-actions">
-    <button class="btn btn-primary" onclick="showTab('intake')">+ Submit New Brand</button>
-    <button class="btn btn-ghost" onclick="showTab('rag')">&#10033; Query Intelligence</button>
-  </div>
-</div>
+<div class="main-wrap">
 
-<!-- STATS BAR -->
-<div class="stats-bar animate-in delay-1">
-  <div class="stat-item">
-    <div class="stat-label">Active Brands</div>
-    <div class="stat-value blue" id="stat-active">14</div>
-    <div class="stat-delta">&uarr; 3 this month</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-label">Pipeline Value</div>
-    <div class="stat-value green" id="stat-value">$2.4M</div>
-    <div class="stat-delta">&uarr; 18% vs last quarter</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-label">Avg Readiness Score</div>
-    <div class="stat-value blue" id="stat-score">73</div>
-    <div class="stat-delta">&uarr; 5 pts from automation</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-label">Workflows Active</div>
-    <div class="stat-value" id="stat-workflows">—</div>
-    <div class="stat-delta">100% uptime</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-label">RAG Embeddings</div>
-    <div class="stat-value blue" id="stat-rag">847</div>
-    <div class="stat-delta">Pinecone synced</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-label">Time Saved / Wk</div>
-    <div class="stat-value green">22hrs</div>
-    <div class="stat-delta">vs manual baseline</div>
-  </div>
-</div>
-
-<!-- MAIN CONTENT TABS -->
-<div class="section">
-
-  <!-- TAB: PIPELINE -->
-  <div id="tab-pipeline" class="tab-content active">
-    <div class="section-header">
-      <div class="section-title">PIPELINE VIEW</div>
-      <div class="section-sub">LIVE &middot; 10 PHASES &middot; COMMITTEE-DRIVEN</div>
+<!-- ============================================================ -->
+<!-- TAB: DASHBOARD (CRM Overview) -->
+<!-- ============================================================ -->
+<div id="tab-dashboard" class="tab-content active">
+  <div style="padding-top:2rem;">
+    <div style="margin-bottom:0.5rem; font-family:'DM Mono',monospace; font-size:0.7rem; letter-spacing:0.2em; color:var(--accent); text-transform:uppercase;">Ascenda Sales Dashboard</div>
+    <h1 style="font-family:'Bebas Neue',sans-serif; font-size:clamp(2.5rem,5vw,4rem); line-height:0.95; letter-spacing:0.02em; margin-bottom:1rem;">BRAND <span style="color:var(--accent-light)">MANAGEMENT</span></h1>
+    <p style="color:var(--muted); font-size:0.92rem; max-width:640px; line-height:1.6; margin-bottom:2rem;">Pipeline management for Sam's Club and Costco brand partnerships. Track submissions, compliance, roadshow logistics, and performance — all connected to live data.</p>
+    <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:2.5rem;">
+      <button class="btn btn-primary" onclick="showTab('intake')">+ Submit New Brand</button>
+      <a class="btn btn-ghost" href="ascenda-form.html" target="_blank">Open Full Intake Form</a>
     </div>
-    <div class="pipeline-container">
-      <div class="pipeline-track" id="pipelineTrack"></div>
+  </div>
+
+  <!-- KPI Row — populated from Google Sheets data -->
+  <div class="stats-row" id="dashStats">
+    <div class="stat-card"><div class="stat-label">Active Brands</div><div class="stat-value" style="color:var(--accent-light)" id="kpi-brands">—</div><div class="stat-note">From Google Sheets</div></div>
+    <div class="stat-card"><div class="stat-label">Pipeline Value</div><div class="stat-value" style="color:var(--success)" id="kpi-value">—</div><div class="stat-note">Based on submitted data</div></div>
+    <div class="stat-card"><div class="stat-label">Avg Readiness Score</div><div class="stat-value" style="color:var(--accent-light)" id="kpi-score">—</div><div class="stat-note">Phase 1 auto-scoring</div></div>
+    <div class="stat-card"><div class="stat-label">Workflows Active</div><div class="stat-value" id="kpi-workflows">—</div><div class="stat-note">n8n automation engine</div></div>
+    <div class="stat-card"><div class="stat-label">Sam's Club Locations</div><div class="stat-value" style="color:var(--accent-light)" id="kpi-locations">—</div><div class="stat-note">Nationwide coverage</div></div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:2rem;">
+    <!-- KEY TASKS & ACTIONS -->
+    <div class="card">
+      <div class="card-title">Key Tasks &amp; Actions</div>
+      <div id="taskList">
+        <div class="empty-state" style="padding:2rem;">
+          <div style="font-size:1.5rem; opacity:0.3; margin-bottom:0.5rem;">&#9744;</div>
+          <div style="font-size:0.82rem; color:var(--muted);">Tasks populate automatically from brand submissions.<br>Submit a brand via the intake form to get started.</div>
+        </div>
+      </div>
     </div>
-    <div style="margin-top:1.5rem; display:flex; gap:1rem; flex-wrap:wrap; font-size:0.7rem; font-family:'DM Mono',monospace;">
-      <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:12px;height:3px;background:var(--accent);display:inline-block;border-radius:2px;"></span> ACTIVE</span>
-      <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:12px;height:3px;background:var(--success);display:inline-block;border-radius:2px;"></span> COMPLETE</span>
-      <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:12px;height:3px;background:var(--warning);display:inline-block;border-radius:2px;"></span> REVIEW</span>
-      <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:12px;height:3px;background:var(--danger);display:inline-block;border-radius:2px;"></span> BLOCKED</span>
-      <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:12px;height:3px;background:var(--border);display:inline-block;border-radius:2px;"></span> PENDING</span>
+
+    <!-- PIPELINE OVERVIEW -->
+    <div class="card">
+      <div class="card-title">Pipeline by Phase</div>
+      <div id="pipelineOverview"></div>
     </div>
-  
+  </div>
 
-  <!-- TAB: BRANDS -->
-  
-<!-- === CRM ADDITIONS: Tasks, Pipeline Overview, Calendar === -->
-<div class="crm-section" style="margin-bottom:2rem;">
-  <div class="crm-section-title">CRM: Active Tasks & Actions</div>
-  <div id="taskList" class="task-list">
-    <div style="padding:1.5rem; text-align:center; color:var(--muted, #6881a3); font-size:0.82rem;">Loading tasks from pipeline data...</div>
+  <!-- CALENDAR -->
+  <div class="card" style="margin-bottom:2rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+      <div class="card-title" style="margin-bottom:0;">Calendar — <span id="calMonthLabel"></span></div>
+      <div style="display:flex; gap:0.5rem;">
+        <button class="btn btn-ghost btn-sm" onclick="changeMonth(-1)">&larr; Prev</button>
+        <button class="btn btn-ghost btn-sm" onclick="changeMonth(0)">Today</button>
+        <button class="btn btn-ghost btn-sm" onclick="changeMonth(1)">Next &rarr;</button>
+      </div>
+    </div>
+    <div style="display:flex; gap:1rem; margin-bottom:1rem; font-size:0.68rem; font-family:'DM Mono',monospace;">
+      <span style="display:flex;align-items:center;gap:0.3rem;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(74,155,232,0.3);display:inline-block;"></span> Presentation</span>
+      <span style="display:flex;align-items:center;gap:0.3rem;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(61,220,151,0.3);display:inline-block;"></span> In-Store</span>
+      <span style="display:flex;align-items:center;gap:0.3rem;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(255,190,61,0.3);display:inline-block;"></span> Promo Campaign</span>
+    </div>
+    <div id="calendarGrid"></div>
+  </div>
+
+  <!-- SYSTEM HEALTH QUICK VIEW -->
+  <div class="card">
+    <div class="card-title">System Health &mdash; Quick View</div>
+    <div id="quickHealth" style="display:flex; gap:1.5rem; flex-wrap:wrap;"></div>
   </div>
 </div>
 
-<div class="crm-section" style="margin-bottom:2rem;">
-  <div class="crm-section-title">Pipeline Overview</div>
-  <div id="pipelineOverview" class="pipeline-bars">
-    <div style="padding:1.5rem; text-align:center; color:var(--muted, #6881a3); font-size:0.82rem;">Loading pipeline data...</div>
-  </div>
-</div>
-
-<div class="crm-section" style="margin-bottom:2rem;">
-  <div class="crm-section-title">Calendar</div>
-  <div class="cal-nav">
-    <button onclick="changeMonth(-1)">&larr; Prev</button>
-    <span id="calMonthLabel" style="font-size:0.85rem; font-weight:600;">March 2026</span>
-    <button onclick="changeMonth(1)">Next &rarr;</button>
-    <button onclick="changeMonth(0)" style="margin-left:auto;">Today</button>
-  </div>
-  <div id="calendarGrid"></div>
-</div>
-
-<div class="crm-section" style="margin-bottom:2rem;">
-  <div class="crm-section-title">System Quick Health</div>
-  <div id="quickHealth" class="quick-health">
-    <div style="padding:1rem; color:var(--muted, #6881a3); font-size:0.82rem;">Loading service status...</div>
-  </div>
-</div>
-
-</div>
-<!-- End of Dashboard tab additions -->
-</div>
-
-
+<!-- ============================================================ -->
+<!-- TAB: BRANDS -->
+<!-- ============================================================ -->
 <div id="tab-brands" class="tab-content">
+  <div style="padding-top:2rem;">
     <div class="section-header">
       <div class="section-title">BRAND PORTFOLIO</div>
-      <div class="section-sub">14 ACTIVE &middot; 3 PENDING REVIEW</div>
+      <div class="section-sub" id="brandsSubtitle">LOADING FROM GOOGLE SHEETS...</div>
     </div>
-    <div class="brands-grid" id="brandsGrid"></div>
   </div>
 
-  <!-- TAB: BRAND DETAIL (shown when a brand is clicked) -->
-  <div id="tab-brand-detail" class="tab-content">
-    <div id="brandDetailContent"></div>
+  <!-- PROMO BUDGET OVERVIEW — Loaded from Google Sheets -->
+  <div class="card" style="margin-bottom:2rem;">
+    <div class="card-title">A&amp;P Marketing Budget — Annual Overview</div>
+    <p style="font-size:0.78rem; color:var(--muted); margin-bottom:1rem;">Source: <a href="https://docs.google.com/spreadsheets/d/1VZzSugENfTMvA8D2ZSQuSGlDa_NsHq4o5Zz3Qazut6w/edit" target="_blank" style="color:var(--accent)">A&amp;P Marketing Budget Tracker</a> (Google Sheets)</p>
+    <div id="promoBudgetTable">
+      <div class="empty-state" style="padding:2rem;">
+        <div style="font-size:0.82rem; color:var(--muted);">Loading budget data from Google Sheets...</div>
+      </div>
+    </div>
   </div>
 
-  <!-- TAB: WORKFLOWS -->
-  <div id="tab-workflows" class="tab-content">
+  <!-- BRAND GRID — populated from Sheets -->
+  <div id="brandsGrid" class="grid-4"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB: BRAND DETAIL -->
+<!-- ============================================================ -->
+<div id="tab-brand-detail" class="tab-content">
+  <div style="padding-top:2rem;" id="brandDetailContent"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB: WORKFLOWS -->
+<!-- ============================================================ -->
+<div id="tab-workflows" class="tab-content">
+  <div style="padding-top:2rem;">
     <div class="section-header">
       <div class="section-title">N8N WORKFLOWS</div>
-      <div class="section-sub">10 WORKFLOWS &middot; ALL ACTIVE</div>
-    </div>
-    <div class="workflow-list">
-      <div class="workflow-row header">
-        <span>#</span>
-        <span>Workflow</span>
-        <span>Trigger</span>
-        <span>Last Run</span>
-        <span>Total Runs</span>
-        <span>Status</span>
-      </div>
-      <div id="workflowList"></div>
-    </div>
-    <div style="margin-top:2rem;">
-      <div class="section-header" style="margin-bottom:1rem;">
-        <div class="section-title" style="font-size:1.4rem;">EXPORT WORKFLOWS</div>
-      </div>
-      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem;">Download individual workflow JSON files for import into your n8n instance.</p>
-      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;" id="downloadButtons"></div>
+      <div class="section-sub">10 WORKFLOWS &middot; <a href="https://edenger.app.n8n.cloud" target="_blank" style="color:var(--accent);">OPEN N8N &rarr;</a></div>
     </div>
   </div>
-
-  <!-- TAB: RAG CONSOLE -->
-  <div id="tab-rag" class="tab-content">
-    <div class="section-header">
-      <div class="section-title">PINECONE RAG CONSOLE</div>
-      <div class="section-sub">847 VECTORS &middot; 6 NAMESPACES</div>
+  <div class="workflow-list">
+    <div class="workflow-row header">
+      <span>#</span>
+      <span>Workflow</span>
+      <span>Trigger</span>
+      <span>Phase</span>
+      <span>Config</span>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:2rem;">
-      <div>
-        <div style="font-size:0.7rem;font-family:'DM Mono',monospace;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-bottom:1rem;">Namespace Status</div>
-        <div id="namespaceList"></div>
-      </div>
-      <div>
-        <div style="font-size:0.7rem;font-family:'DM Mono',monospace;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-bottom:1rem;">Query Volume (7 days)</div>
-        <canvas id="ragChart" height="120"></canvas>
-      </div>
-    </div>
-    <div class="rag-console">
-      <div class="console-header">
-        <div class="console-dots">
-          <div class="console-dot cd-red"></div>
-          <div class="console-dot cd-yellow"></div>
-          <div class="console-dot cd-green"></div>
-        </div>
-        <div class="console-title">ascenda-rag &middot; cosine similarity search</div>
-      </div>
-      <div class="console-body">
-        <div class="console-input-wrap">
-          <input class="console-input" id="ragInput" placeholder="Ask anything: 'Find brands similar to NutriPure that succeeded at Sam's Club...'" onkeydown="if(event.key==='Enter')queryRAG()"/>
-          <button class="btn btn-primary" onclick="queryRAG()" style="white-space:nowrap;">&#10033; Query</button>
-        </div>
-        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;">
-          <button class="btn btn-ghost" style="padding:0.4rem 0.8rem;font-size:0.65rem;" onclick="setQuery('Brands similar to successful Sam\'s Club CPG entries')">Similar brands</button>
-          <button class="btn btn-ghost" style="padding:0.4rem 0.8rem;font-size:0.65rem;" onclick="setQuery('Common compliance gaps for first-time roadshow brands')">Compliance gaps</button>
-          <button class="btn btn-ghost" style="padding:0.4rem 0.8rem;font-size:0.65rem;" onclick="setQuery('Average Phase 3 readiness score for approved brands')">Score benchmarks</button>
-          <button class="btn btn-ghost" style="padding:0.4rem 0.8rem;font-size:0.65rem;" onclick="setQuery('Post-show performance top quartile attributes')">Top performers</button>
-        </div>
-        <div class="console-results" id="ragResults">
-          <span style="color:var(--muted);">// Enter a query above to search the Ascenda intelligence database</span><br>
-          <span style="color:var(--muted);">// Pinecone index: ascenda-retail-intelligence | 847 vectors loaded</span>
-        </div>
-      </div>
-    </div>
+    <div id="workflowList"></div>
   </div>
+  <div style="margin-top:2rem;">
+    <p style="color:var(--muted); font-size:0.82rem; margin-bottom:1rem;">Download workflow JSON files for import into your n8n instance:</p>
+    <div style="display:flex; gap:0.75rem; flex-wrap:wrap;" id="downloadButtons"></div>
+  </div>
+</div>
 
-  <!-- TAB: SYSTEM HEALTH -->
-  <div id="tab-health" class="tab-content">
+<!-- ============================================================ -->
+<!-- TAB: SYSTEM HEALTH -->
+<!-- ============================================================ -->
+<div id="tab-health" class="tab-content">
+  <div style="padding-top:2rem;">
     <div class="section-header">
       <div class="section-title">SYSTEM HEALTH</div>
-      <div class="section-sub" id="healthTime">LAST CHECK: &mdash;</div>
-    </div>
-    <div class="health-grid" id="healthGrid"></div>
-
-    <!-- Visual Flow Diagram -->
-    <div class="flow-section">
-      <div class="section-header" style="margin-bottom:1rem;">
-        <div class="section-title" style="font-size:1.4rem;">WORKFLOW FLOW DIAGRAM</div>
-        <div class="section-sub">DATA FLOW &middot; 10 PHASES</div>
-      </div>
-      <div class="flow-container">
-        <svg id="flowDiagram" width="1100" height="520" viewBox="0 0 1100 520" style="max-width:100%;"></svg>
-      </div>
-    </div>
-
-    <!-- Aggregate Pipeline View -->
-    <div class="aggregate-section">
-      <div class="section-header" style="margin-bottom:1rem;">
-        <div class="section-title" style="font-size:1.4rem;">BRAND PIPELINE AGGREGATE</div>
-        <div class="section-sub">WHERE BRANDS ARE &middot; ALL PHASES</div>
-      </div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:2rem;">
-        <div id="aggregatePipeline"></div>
-      </div>
+      <div class="section-sub" id="healthTime">LAST CHECK: —</div>
     </div>
   </div>
+  <div class="health-grid" id="healthGrid"></div>
 
-  <!-- TAB: INTAKE -->
-  <div id="tab-intake" class="tab-content">
-    <div class="section-header">
-      <div class="section-title">BRAND INTAKE FORM</div>
-      <div class="section-sub">PHASE 1 &middot; AUTO-SCORED &middot; INSTANT RESPONSE</div>
+  <!-- Flow Diagram -->
+  <div style="margin-top:2rem;">
+    <div class="section-header" style="margin-bottom:1rem;">
+      <div class="section-title" style="font-size:1.4rem;">DATA FLOW</div>
+      <div class="section-sub">10 PHASES &middot; FULLY AUTOMATED</div>
     </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:2rem;max-width:900px;">
-      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:2rem;line-height:1.7;">Submit a new brand opportunity for automated Phase 1 scoring. Brands scoring &ge;70 are auto-approved and advance to Phase 2. Scores 60-69 are flagged for committee review. Below 60 receive an automated rejection with feedback.</p>
-      <div class="form-grid" id="intakeForm">
-        <div class="form-group">
-          <label class="form-label">Brand Name *</label>
-          <input class="form-input" id="f-brand" placeholder="e.g. NutriPure Foods" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Contact Name *</label>
-          <input class="form-input" id="f-contact" placeholder="Full name" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email *</label>
-          <input class="form-input" id="f-email" type="email" placeholder="founder@brand.com" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Phone</label>
-          <input class="form-input" id="f-phone" placeholder="+1 (555) 000-0000" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Product Category *</label>
-          <select class="form-select" id="f-category">
-            <option value="">Select category...</option>
-            <option>Food &amp; Beverage</option>
-            <option>Health &amp; Wellness</option>
-            <option>Beauty &amp; Personal Care</option>
-            <option>Household Products</option>
-            <option>Electronics &amp; Gadgets</option>
-            <option>Outdoor &amp; Sports</option>
-            <option>Pet Products</option>
-            <option>Baby &amp; Kids</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Annual Revenue *</label>
-          <select class="form-select" id="f-revenue">
-            <option value="">Select range...</option>
-            <option>Under $500K</option>
-            <option>$500K &ndash; $1M</option>
-            <option>$1M &ndash; $5M</option>
-            <option>$5M &ndash; $20M</option>
-            <option>Over $20M</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Target Retailer *</label>
-          <select class="form-select" id="f-retailer">
-            <option value="">Select retailer...</option>
-            <option>Sam's Club</option>
-            <option>Costco</option>
-            <option>Both</option>
-            <option>Other Big Box</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Preferred Model</label>
-          <select class="form-select" id="f-model">
-            <option value="">Select model...</option>
-            <option>Roadshow</option>
-            <option>Inline / Permanent</option>
-            <option>Commission/Brokerage</option>
-            <option>Private Label</option>
-            <option>Not Sure</option>
-          </select>
-        </div>
-        <div class="form-group full">
-          <label class="form-label">Describe your product and why it's right for club retail *</label>
-          <textarea class="form-textarea" id="f-product" placeholder="Tell us about your product, its unique value proposition, price points, and why you believe it fits the Sam's Club / Costco member..."></textarea>
-        </div>
-        <div class="form-group full">
-          <label class="form-label">Current retail / DTC footprint</label>
-          <textarea class="form-textarea" id="f-footprint" placeholder="Where are you currently selling? What's your DTC revenue? Any existing retail relationships?..." style="min-height:80px;"></textarea>
-        </div>
-        <div class="form-group full">
-          <label class="form-label">Readiness &amp; timeline</label>
-          <textarea class="form-textarea" id="f-timeline" placeholder="Are you ready for roadshow now or planning? Any hard launch dates? Current inventory levels?..." style="min-height:80px;"></textarea>
-        </div>
-        <div class="form-group full" style="margin-top:0.5rem;">
-          <button class="btn btn-primary" onclick="submitIntake()" style="font-size:0.9rem;padding:1rem 2.5rem;">Submit Brand for Evaluation &rarr;</button>
-        </div>
-      </div>
-      <div id="scoreResult" style="display:none;margin-top:2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.5rem;">
-        <div style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:0.5rem;">PHASE 1 SCORING RESULT</div>
-        <div id="scoreDisplay"></div>
-      </div>
+    <div class="flow-container">
+      <svg id="flowDiagram" width="1100" height="520" viewBox="0 0 1100 520" style="max-width:100%;"></svg>
     </div>
   </div>
-
 </div>
+
+<!-- ============================================================ -->
+<!-- TAB: INTAKE -->
+<!-- ============================================================ -->
+<div id="tab-intake" class="tab-content">
+  <div style="padding-top:2rem;">
+    <div class="section-header">
+      <div class="section-title">BRAND INTAKE</div>
+      <div class="section-sub">PHASE 1 &middot; AUTO-SCORED &middot; DATA GOES TO GOOGLE SHEETS</div>
+    </div>
+  </div>
+  <div class="card" style="max-width:900px;">
+    <p style="color:var(--muted); font-size:0.85rem; margin-bottom:0.75rem; line-height:1.7;">Quick intake for Phase 1 auto-scoring. For the full multi-phase form with compliance, pricing, and food safety, use the <a href="ascenda-form.html" target="_blank" style="color:var(--accent);">complete intake form</a>.</p>
+    <p style="color:var(--muted); font-size:0.78rem; margin-bottom:2rem;">All submissions are logged to <span style="color:var(--accent);">Google Sheets (Phase1_Submissions)</span> and embedded in <span style="color:var(--accent);">Pinecone</span> via n8n workflow WF-01.</p>
+    <div class="form-grid" id="intakeForm">
+      <div class="form-group">
+        <label class="form-label">Brand Name *</label>
+        <input class="form-input" id="f-brand" placeholder="Your brand name" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contact Name *</label>
+        <input class="form-input" id="f-contact" placeholder="Full name" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email *</label>
+        <input class="form-input" id="f-email" type="email" placeholder="you@brand.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone</label>
+        <input class="form-input" id="f-phone" placeholder="+1 (555) 000-0000" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Product Category *</label>
+        <select class="form-select" id="f-category">
+          <option value="">Select category...</option>
+          <option>Food &amp; Beverage</option>
+          <option>Health &amp; Wellness</option>
+          <option>Beauty &amp; Personal Care</option>
+          <option>Household Products</option>
+          <option>Electronics &amp; Gadgets</option>
+          <option>Outdoor &amp; Sports</option>
+          <option>Pet Products</option>
+          <option>Baby &amp; Kids</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Annual Revenue *</label>
+        <select class="form-select" id="f-revenue">
+          <option value="">Select range...</option>
+          <option>Under $500K</option>
+          <option>$500K – $1M</option>
+          <option>$1M – $5M</option>
+          <option>$5M – $20M</option>
+          <option>Over $20M</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Target Retailer *</label>
+        <select class="form-select" id="f-retailer">
+          <option value="">Select retailer...</option>
+          <option>Sam's Club</option>
+          <option>Costco</option>
+          <option>Both</option>
+          <option>Other Big Box</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Preferred Model</label>
+        <select class="form-select" id="f-model">
+          <option value="">Select model...</option>
+          <option>Roadshow</option>
+          <option>Inline / Permanent</option>
+          <option>Commission/Brokerage</option>
+          <option>Private Label</option>
+          <option>Not Sure</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Describe your product and why it's right for club retail *</label>
+        <textarea class="form-textarea" id="f-product" placeholder="Tell us about your product, its unique value proposition, price points, and why you believe it fits the Sam's Club / Costco member..."></textarea>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Current retail / DTC footprint</label>
+        <textarea class="form-textarea" id="f-footprint" placeholder="Where are you currently selling? What's your DTC revenue? Any existing retail relationships?..." style="min-height:80px;"></textarea>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Readiness &amp; timeline</label>
+        <textarea class="form-textarea" id="f-timeline" placeholder="Are you ready for roadshow now or planning? Any hard launch dates? Current inventory levels?..." style="min-height:80px;"></textarea>
+      </div>
+      <div class="form-group full" style="margin-top:0.5rem;">
+        <button class="btn btn-primary" onclick="submitIntake()" style="font-size:0.85rem; padding:1rem 2.5rem;">Submit Brand for Evaluation &rarr;</button>
+      </div>
+    </div>
+    <div id="scoreResult" style="display:none; margin-top:2rem; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:1.5rem;">
+      <div style="font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--muted); letter-spacing:0.1em; margin-bottom:0.5rem;">PHASE 1 SCORING RESULT</div>
+      <div id="scoreDisplay"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end main-wrap -->
 
 <!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">&#10005;</button>
-    <div class="modal-title" id="modalTitle">Phase Detail</div>
-    <div id="modalSubtitle" style="color:var(--muted);font-size:0.8rem;margin-bottom:0.5rem;font-family:'DM Mono',monospace;"></div>
-    <div class="modal-body" id="modalBody"></div>
+    <div id="modalContent"></div>
   </div>
 </div>
 
@@ -1262,11 +512,11 @@
   <div id="notifBody"></div>
 </div>
 
-<footer>ASCENDA SALES &middot; DASHBOARD &middot; POWERED BY N8N + PINECONE + CLAUDE &middot; GITHUB PAGES</footer>
+<footer>ASCENDA SALES &middot; DASHBOARD &middot; N8N + GOOGLE SHEETS + PINECONE</footer>
 
 <script>
 // ============================================================
-// CONFIGURATION - REAL DATA SOURCES (ADDED - CRM Enhancement)
+// CONFIGURATION — REAL DATA SOURCES
 // ============================================================
 const CONFIG = {
   sheetsId: '1pioLz-mtObrcQq1126PmUAVg9QCs2plAyvp5oRXVK8w',
@@ -1277,22 +527,31 @@ const CONFIG = {
   storeCount: 600,
 };
 
-let BRANDS_DATA = [];
+// ============================================================
+// GOOGLE SHEETS INTEGRATION
+// Reads brand data from the real Google Sheets spreadsheet.
+// Requires the sheet to be published or API key set.
+// ============================================================
+let BRANDS = []; // populated from Sheets or empty
 let sheetsLoaded = false;
 
 async function loadBrandsFromSheets() {
   try {
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/' + CONFIG.sheetsId + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(CONFIG.sheetsTab);
+    // Try published CSV export first
+    const csvUrl = `https://docs.google.com/spreadsheets/d/${CONFIG.sheetsId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(CONFIG.sheetsTab)}`;
     const resp = await fetch(csvUrl);
     if (!resp.ok) throw new Error('Sheets not accessible');
     const text = await resp.text();
     const rows = parseCSV(text);
     if (rows.length > 1) {
       const headers = rows[0].map(h => h.trim().toLowerCase());
-      BRANDS_DATA = rows.slice(1).filter(r => r.length >= 4 && r[0]).map(function(row, idx) {
-        var get = function(key) { var i = headers.indexOf(key); return i >= 0 && row[i] ? row[i].trim() : ''; };
+      BRANDS = rows.slice(1).filter(r => r.length >= 4 && r[0]).map((row, idx) => {
+        const get = (key) => {
+          const i = headers.indexOf(key);
+          return i >= 0 && row[i] ? row[i].trim() : '';
+        };
         return {
-          id: get('id') || ('BRAND-' + idx),
+          id: get('id') || `BRAND-${idx}`,
           name: get('brandname') || get('brand') || row[1] || '',
           email: get('email') || '',
           category: get('category') || '',
@@ -1303,6 +562,8 @@ async function loadBrandsFromSheets() {
           submittedAt: get('submittedat') || '',
           contact: get('contactname') || '',
           phone: get('phone') || '',
+          phase: getPhaseFromRouting(get('routing'), parseInt(get('score')) || 0),
+          phaseName: getPhaseNameFromRouting(get('routing')),
         };
       });
       sheetsLoaded = true;
@@ -1311,13 +572,29 @@ async function loadBrandsFromSheets() {
     console.log('Sheets load info:', e.message);
     sheetsLoaded = false;
   }
-  renderCRM();
+  renderAll();
+}
+
+function getPhaseFromRouting(routing, score) {
+  if (routing === 'AUTO_APPROVE') return 2;
+  if (routing === 'MANUAL_REVIEW') return 1;
+  if (routing === 'AUTO_REJECT') return 0;
+  if (score >= 70) return 2;
+  if (score >= 60) return 1;
+  return 0;
+}
+
+function getPhaseNameFromRouting(routing) {
+  if (routing === 'AUTO_APPROVE') return 'Compliance & Due Diligence';
+  if (routing === 'MANUAL_REVIEW') return 'Committee Review';
+  if (routing === 'AUTO_REJECT') return 'Not Approved';
+  return 'Intake';
 }
 
 function parseCSV(text) {
-  var rows = []; var row = []; var cell = ''; var inQ = false;
-  for (var i = 0; i < text.length; i++) {
-    var c = text[i];
+  const rows = []; let row = []; let cell = ''; let inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
     if (inQ) {
       if (c === '"' && text[i+1] === '"') { cell += '"'; i++; }
       else if (c === '"') inQ = false;
@@ -1335,408 +612,590 @@ function parseCSV(text) {
   return rows;
 }
 
-const SERVICES = [
-  { icon: '\u2699\uFE0F', name: 'n8n Automation', desc: '10 workflows' },
-  { icon: '\uD83D\uDD37', name: 'Pinecone Vector DB', desc: 'Brand embeddings' },
-  { icon: '\uD83D\uDCCA', name: 'Google Sheets', desc: 'Phase1 Submissions' },
-  { icon: '\uD83D\uDCC1', name: 'Google Drive', desc: 'Documents' },
-  { icon: '\uD83D\uDCE7', name: 'Gmail / SMTP', desc: 'Auto-emails' },
-];
-
-
 // ============================================================
-// DATA
+// REAL WORKFLOW DATA — from actual JSON files in repo
 // ============================================================
-const PHASES = [
-  { num:'01', name:'Opportunity\nIdentification', status:'complete', count:47, label:'Evaluated', keyAction:'Portfolio intelligence & web form intake' },
-  { num:'02', name:'Compliance &\nDue Diligence', status:'complete', count:31, label:'Cleared', keyAction:'NDA, financials, retailer schema normalization' },
-  { num:'03', name:'Retail Readiness\nEvaluation', status:'active', count:14, label:'In Progress', keyAction:'Readiness Score + checklist automation' },
-  { num:'04', name:'Go / No-Go\nDecision', status:'review', count:5, label:'Awaiting Review', keyAction:'Committee scoring & economic model selection' },
-  { num:'05', name:'Business &\nInvestment Plan', status:'active', count:8, label:'In Planning', keyAction:'Financial model, SPV setup, LOI execution' },
-  { num:'06', name:'Retail & Roadshow\nReadiness', status:'active', count:6, label:'In Prep', keyAction:'Two-pager, submission automation' },
-  { num:'07', name:'Roadshow\nLogistics', status:'pending', count:4, label:'Scheduling', keyAction:'Staffing, samples, calendar setup' },
-  { num:'08', name:'Execute\nRoadshow', status:'active', count:3, label:'Live Events', keyAction:'In-club activation, field data capture' },
-  { num:'09', name:'Evaluate &\nIterate', status:'complete', count:18, label:'Completed', keyAction:'Post-show report, RAG feedback loop' },
-  { num:'10', name:'Growth &\nInvestment Scale', status:'pending', count:9, label:'Qualifying', keyAction:'SPV reinvestment, expansion path' },
-];
-
-const BRANDS = [
-  { name:'NutriPure Foods', cat:'Food & Beverage', score:88, phase:5, phaseName:'Investment Planning', color:'#3ddc97', bg:'rgba(61,220,151,0.15)', rev:'$3.2M', retailer:"Sam's Club", model:'Roadshow', contact:'Sarah Chen', email:'sarah@nutripure.com', events:12, unitsSold:4200, avgROI:'34%' },
-  { name:'VitaBlend Wellness', cat:'Health & Wellness', score:82, phase:3, phaseName:'Readiness Eval', color:'#4A9BE8', bg:'rgba(74,155,232,0.15)', rev:'$1.8M', retailer:"Sam's Club", model:'Inline', contact:'Jake Torres', email:'jake@vitablend.com', events:0, unitsSold:0, avgROI:'â' },
-  { name:'CleanHome Co.', cat:'Household Products', score:75, phase:6, phaseName:'Retail Readiness', color:'#6BB5FF', bg:'rgba(107,181,255,0.12)', rev:'$5.1M', retailer:'Costco', model:'Inline', contact:'Maria Lopez', email:'maria@cleanhome.co', events:3, unitsSold:1800, avgROI:'22%' },
-  { name:'PetPlex Brands', cat:'Pet Products', score:91, phase:8, phaseName:'Live Roadshow', color:'#3ddc97', bg:'rgba(61,220,151,0.12)', rev:'$7.4M', retailer:"Sam's Club", model:'Roadshow', contact:'Dave Wilson', email:'dave@petplex.com', events:24, unitsSold:9800, avgROI:'41%' },
-  { name:'GlowUp Beauty', cat:'Beauty & Personal Care', score:69, phase:4, phaseName:'Go/No-Go Review', color:'#ffbe3d', bg:'rgba(255,190,61,0.12)', rev:'$900K', retailer:"Sam's Club", model:'Roadshow', contact:'Amy Reed', email:'amy@glowup.co', events:0, unitsSold:0, avgROI:'â' },
-  { name:'TechEdge Gadgets', cat:'Electronics', score:77, phase:5, phaseName:'Investment Planning', color:'#4A9BE8', bg:'rgba(74,155,232,0.12)', rev:'$2.3M', retailer:'Costco', model:'Brokerage', contact:'Ryan Park', email:'ryan@techedge.io', events:5, unitsSold:1200, avgROI:'18%' },
-  { name:'FreshFarm Direct', cat:'Food & Beverage', score:84, phase:7, phaseName:'Logistics', color:'#3ddc97', bg:'rgba(61,220,151,0.12)', rev:'$4.7M', retailer:"Sam's Club", model:'Roadshow', contact:'Lisa Nguyen', email:'lisa@freshfarm.com', events:8, unitsSold:3400, avgROI:'29%' },
-  { name:'BabyFirst Products', cat:'Baby & Kids', score:80, phase:3, phaseName:'Readiness Eval', color:'#6BB5FF', bg:'rgba(107,181,255,0.12)', rev:'$2.1M', retailer:"Sam's Club", model:'Inline', contact:'Tom Hayes', email:'tom@babyfirst.co', events:0, unitsSold:0, avgROI:'â' },
-];
-
 const WORKFLOWS = [
-  { n:'01', name:'Brand Intake & Auto-Scoring', trigger:'Webhook: Form Submit', last:'2 min ago', runs:1247, active:true },
-  { n:'02', name:'Compliance Ingestion', trigger:'Phase 1 Approval', last:'1 hr ago', runs:312, active:true },
-  { n:'03', name:'Readiness Scoring Engine', trigger:'Compliance Cleared', last:'3 hr ago', runs:287, active:true },
-  { n:'04', name:'Committee Go/No-Go Router', trigger:'Score Computed', last:'Yesterday', runs:198, active:true },
-  { n:'05', name:'Financial Model & LOI Gen', trigger:'Go Decision', last:'2 days ago', runs:144, active:true },
-  { n:'06', name:'Retail Submission Automation', trigger:'LOI Signed', last:'3 days ago', runs:119, active:true },
-  { n:'07', name:'Logistics & Event Scheduling', trigger:'Retailer Approved', last:'1 wk ago', runs:87, active:true },
-  { n:'08', name:'Post-Show Report Generation', trigger:'Event Close Date', last:'2 wk ago', runs:74, active:true },
-  { n:'09', name:'Growth Trigger & SPV Flow', trigger:'KPI Threshold Met', last:'1 mo ago', runs:41, active:true },
-  { n:'10', name:'Pinecone RAG Sync', trigger:'Phase Gate Transition', last:'12 min ago', runs:3891, active:true },
-];
-
-
-const NAMESPACES = [
-  { name:'brands', vectors:312, color:'var(--accent)' },
-  { name:'portfolio-kpis', vectors:87, color:'var(--accent-light)' },
-  { name:'compliance-docs', vectors:201, color:'var(--success)' },
-  { name:'roadshow-results', vectors:143, color:'var(--warning)' },
-  { name:'market-intel', vectors:74, color:'var(--accent3)' },
-  { name:'templates', vectors:30, color:'var(--muted)' },
+  { n:'01', name:'Brand Intake & Auto-Scoring', trigger:'Webhook: POST /ascenda/intake', phase:'Phase 1', file:'workflow-01-intake-scoring.json' },
+  { n:'02', name:'Compliance Ingestion', trigger:'Phase 1 Approval Event', phase:'Phase 2', file:'workflow-02-compliance.json' },
+  { n:'03', name:'Readiness Scoring Engine', trigger:'Compliance Cleared', phase:'Phase 3', file:'workflow-03-readiness-scoring.json' },
+  { n:'04', name:'Committee Go/No-Go Router', trigger:'Readiness Score Computed', phase:'Phase 4', file:'workflow-04-gonogo.json' },
+  { n:'05', name:'Financial Model & LOI Gen', trigger:'Go Decision', phase:'Phase 5', file:'workflow-05-financial-loi.json' },
+  { n:'06', name:'Retail Submission Automation', trigger:'LOI Signed', phase:'Phase 6', file:'workflow-06-retail-submission.json' },
+  { n:'07', name:'Logistics & Event Scheduling', trigger:'Retailer Approved', phase:'Phase 7', file:'workflow-07-logistics.json' },
+  { n:'08', name:'Post-Show Report Generation', trigger:'Event Close Date', phase:'Phase 8', file:'workflow-08-postshow-report.json' },
+  { n:'09', name:'Growth Trigger & SPV Flow', trigger:'KPI Threshold Met', phase:'Phase 9', file:'workflow-09-growth-spv.json' },
+  { n:'10', name:'Pinecone RAG Sync', trigger:'Any Phase Gate Transition', phase:'All', file:'workflow-10-rag-sync.json' },
 ];
 
 // ============================================================
-// RENDER FUNCTIONS
+// REAL SERVICES — services the system actually uses
 // ============================================================
+const SERVICES = [
+  { icon:'⚙️', name:'n8n Automation Engine', url:'edenger.app.n8n.cloud', desc:'10 workflows powering the entire pipeline', realUrl:'https://edenger.app.n8n.cloud' },
+  { icon:'🔷', name:'Pinecone Vector DB', url:'ascenda-pipeline-*.pinecone.io', desc:'Brand embeddings and RAG intelligence', realUrl:null },
+  { icon:'📊', name:'Google Sheets', url:'sheets.googleapis.com', desc:'Phase1_Submissions — primary brand data store', realUrl:`https://docs.google.com/spreadsheets/d/${CONFIG.sheetsId}` },
+  { icon:'📁', name:'Google Drive', url:'drive.googleapis.com', desc:'Document storage for compliance files', realUrl:null },
+  { icon:'📧', name:'Gmail / SMTP', url:'smtp.gmail.com:587', desc:'Automated approval, review, and rejection emails', realUrl:null },
+  { icon:'💬', name:'Slack Webhooks', url:'hooks.slack.com', desc:'#brand-reviews alerts for manual review cases', realUrl:null },
+  { icon:'📄', name:'GitHub Pages', url:'verbose-fiesta-6ljjwv3.pages.github.io', desc:'Dashboard hosting and intake form', realUrl:'https://verbose-fiesta-6ljjwv3.pages.github.io/' },
+];
 
-function renderPipeline() {
-  const container = document.getElementById('pipelineTrack');
-  container.innerHTML = PHASES.map((p, i) => `
-    <div class="phase-node" onclick="showPhaseModal(${i})">
-      <div class="phase-card status-${p.status}">
-        <div class="phase-number">PHASE ${p.num}</div>
-        <div class="phase-name">${p.name}</div>
-        <div class="phase-count">${p.count}</div>
-        <div class="phase-count-label">${p.label}</div>
-        <div class="phase-badge badge-${p.status}">${p.status}</div>
-      </div>
-      ${i < PHASES.length - 1 ? '<div class="phase-connector">\u203A</div>' : ''}
+const PHASES_META = [
+  { num:'01', name:'Opportunity Identification', keyAction:'Web form intake + auto-scoring via WF-01' },
+  { num:'02', name:'Compliance & Due Diligence', keyAction:'NDA, financials, retailer schema normalization' },
+  { num:'03', name:'Retail Readiness Evaluation', keyAction:'Readiness score + checklist automation' },
+  { num:'04', name:'Go / No-Go Decision', keyAction:'Committee scoring & economic model selection' },
+  { num:'05', name:'Business & Investment Plan', keyAction:'Financial model, SPV setup, LOI execution' },
+  { num:'06', name:'Retail & Roadshow Readiness', keyAction:'Two-pager, submission automation' },
+  { num:'07', name:'Roadshow Logistics', keyAction:'Staffing, samples, calendar setup' },
+  { num:'08', name:'Execute Roadshow', keyAction:'In-club activation, field data capture' },
+  { num:'09', name:'Evaluate & Iterate', keyAction:'Post-show report, RAG feedback loop' },
+  { num:'10', name:'Growth & Investment Scale', keyAction:'SPV reinvestment, expansion path' },
+];
+
+// ============================================================
+// RENDER ALL
+// ============================================================
+function renderAll() {
+  renderDashboard();
+  renderBrands();
+  renderWorkflows();
+  renderHealth();
+}
+
+// ============================================================
+// DASHBOARD TAB
+// ============================================================
+function renderDashboard() {
+  // KPIs
+  const brandCount = BRANDS.length;
+  document.getElementById('kpi-brands').textContent = brandCount || (sheetsLoaded ? '0' : '—');
+  document.getElementById('kpi-score').textContent = brandCount > 0 ? Math.round(BRANDS.reduce((s,b)=>s+b.score,0)/brandCount) : (sheetsLoaded ? '0' : '—');
+  document.getElementById('kpi-value').textContent = sheetsLoaded ? (brandCount > 0 ? 'See Brands' : '$0') : '—';
+
+  // Tasks
+  renderTasks();
+
+  // Pipeline overview
+  renderPipelineOverview();
+
+  // Calendar
+  renderCalendar(new Date());
+
+  // Quick health
+  renderQuickHealth();
+}
+
+function renderTasks() {
+  const container = document.getElementById('taskList');
+  if (BRANDS.length === 0) {
+    container.innerHTML = `<div class="empty-state" style="padding:2rem;">
+      <div style="font-size:1.5rem; opacity:0.3; margin-bottom:0.5rem;">&#9744;</div>
+      <div style="font-size:0.82rem; color:var(--muted);">${sheetsLoaded ? 'No brands in pipeline yet. Submit a brand via the intake form to get started.' : 'Connect Google Sheets to load brand data and generate tasks.'}</div>
+    </div>`;
+    return;
+  }
+
+  // Generate real tasks based on actual brand data
+  const tasks = [];
+  BRANDS.forEach(b => {
+    if (b.routing === 'MANUAL_REVIEW') {
+      tasks.push({ priority:'high', text:`Review submission for ${b.name} (Score: ${b.score})`, due:'Committee review', brand:b.name });
+    }
+    if (b.routing === 'AUTO_APPROVE' && b.phase <= 2) {
+      tasks.push({ priority:'medium', text:`Send compliance checklist to ${b.name}`, due:'Within 24hrs of approval', brand:b.name });
+    }
+    if (b.score > 0 && b.score < 60) {
+      tasks.push({ priority:'low', text:`Follow up with ${b.name} on reapplication`, due:'6 month follow-up', brand:b.name });
+    }
+  });
+
+  if (tasks.length === 0) {
+    tasks.push({ priority:'medium', text:'All brands processed — review pipeline for next actions', due:'Ongoing', brand:'System' });
+  }
+
+  container.innerHTML = tasks.slice(0, 8).map(t => `
+    <div class="task-item">
+      <div class="task-priority ${t.priority}"></div>
+      <div class="task-text">${t.text}</div>
+      <div><div class="task-brand">${t.brand}</div><div class="task-due">${t.due}</div></div>
     </div>
   `).join('');
 }
 
+function renderPipelineOverview() {
+  const container = document.getElementById('pipelineOverview');
+  // Count brands in each routing bucket
+  const approved = BRANDS.filter(b => b.routing === 'AUTO_APPROVE').length;
+  const review = BRANDS.filter(b => b.routing === 'MANUAL_REVIEW').length;
+  const rejected = BRANDS.filter(b => b.routing === 'AUTO_REJECT').length;
+  const other = BRANDS.length - approved - review - rejected;
+  const total = BRANDS.length || 1;
+
+  const bars = [
+    { label:'Auto-Approved (≥70)', count:approved, color:'var(--success)', pct:(approved/total)*100 },
+    { label:'Manual Review (60-69)', count:review, color:'var(--warning)', pct:(review/total)*100 },
+    { label:'Not Approved (<60)', count:rejected, color:'var(--danger)', pct:(rejected/total)*100 },
+  ];
+  if (other > 0) bars.push({ label:'Other/Unscored', count:other, color:'var(--muted)', pct:(other/total)*100 });
+
+  if (BRANDS.length === 0) {
+    container.innerHTML = `<div style="padding:2rem; text-align:center;">
+      <div style="font-size:1.5rem; opacity:0.3; margin-bottom:0.5rem;">📊</div>
+      <div style="font-size:0.82rem; color:var(--muted);">${sheetsLoaded ? 'No brand data yet.' : 'Pipeline will populate when Google Sheets is connected.'}</div>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = bars.map(b => `
+    <div style="margin-bottom:0.75rem;">
+      <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:var(--muted); margin-bottom:0.3rem; font-family:'DM Mono',monospace;">
+        <span>${b.label}</span>
+        <span>${b.count} brand${b.count!==1?'s':''}</span>
+      </div>
+      <div style="height:20px; background:var(--surface); border-radius:4px; overflow:hidden;">
+        <div style="height:100%; width:${Math.max(b.pct,2)}%; background:${b.color}; border-radius:4px; display:flex; align-items:center; padding-left:0.5rem; font-size:0.6rem; font-weight:600; color:#fff; transition:width 1s;">${b.count > 0 ? b.count : ''}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// CALENDAR
+// ============================================================
+let calDate = new Date();
+
+function changeMonth(delta) {
+  if (delta === 0) { calDate = new Date(); }
+  else { calDate.setMonth(calDate.getMonth() + delta); }
+  renderCalendar(calDate);
+}
+
+function renderCalendar(date) {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const today = new Date();
+  document.getElementById('calMonthLabel').textContent = date.toLocaleDateString('en-US', { month:'long', year:'numeric' });
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevDays = new Date(year, month, 0).getDate();
+
+  // Generate calendar events from brand data
+  const events = generateCalendarEvents(year, month);
+
+  let html = '<div class="cal-grid">';
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
+    html += `<div class="cal-header">${d}</div>`;
+  });
+
+  // Previous month padding
+  for (let i = firstDay - 1; i >= 0; i--) {
+    html += `<div class="cal-cell other-month"><div class="cal-day">${prevDays - i}</div></div>`;
+  }
+
+  // Current month
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = (d === today.getDate() && month === today.getMonth() && year === today.getFullYear());
+    const dayEvents = events.filter(e => e.day === d);
+    html += `<div class="cal-cell${isToday ? ' today' : ''}">`;
+    html += `<div class="cal-day">${d}</div>`;
+    dayEvents.forEach(e => {
+      html += `<div class="cal-event ${e.type}" title="${e.title}">${e.title}</div>`;
+    });
+    html += '</div>';
+  }
+
+  // Next month padding
+  const totalCells = firstDay + daysInMonth;
+  const remaining = 7 - (totalCells % 7);
+  if (remaining < 7) {
+    for (let i = 1; i <= remaining; i++) {
+      html += `<div class="cal-cell other-month"><div class="cal-day">${i}</div></div>`;
+    }
+  }
+
+  html += '</div>';
+  document.getElementById('calendarGrid').innerHTML = html;
+}
+
+function generateCalendarEvents(year, month) {
+  const events = [];
+  // If we have brands, generate events based on their data
+  BRANDS.forEach((b, idx) => {
+    if (b.routing === 'AUTO_APPROVE') {
+      // Presentation event
+      const presDay = ((idx * 7 + 5) % 28) + 1;
+      events.push({ day: presDay, type:'presentation', title:`${b.name} - Presentation` });
+    }
+  });
+
+  // Calendar events from real brand data only — no hardcoded campaigns
+
+  return events;
+}
+
+// Quick health on dashboard
+function renderQuickHealth() {
+  const container = document.getElementById('quickHealth');
+  const quickServices = SERVICES.slice(0, 5);
+  container.innerHTML = quickServices.map(s => {
+    const status = (s.status || 'configured').toUpperCase();
+    const dotClass = s.realUrl ? 'dot-ok' : 'dot-pending';
+    const statusColor = s.realUrl ? 'var(--success)' : 'var(--muted)';
+    return `
+    <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.78rem;">
+      <span>${s.icon}</span>
+      <span>${s.name}</span>
+      <div class="indicator-dot ${dotClass}" style="width:6px;height:6px;border-radius:50%;background:${statusColor}"></div>
+      <span style="color:${statusColor}; font-size:0.68rem; font-family:'DM Mono',monospace;">${s.realUrl ? 'Connected' : 'Pending Setup'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// BRANDS TAB
+// ============================================================
 function renderBrands() {
   const container = document.getElementById('brandsGrid');
+  const subtitle = document.getElementById('brandsSubtitle');
+
+  if (BRANDS.length === 0) {
+    subtitle.textContent = sheetsLoaded ? 'NO BRANDS SUBMITTED YET' : 'PENDING GOOGLE SHEETS CONNECTION';
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">📦</div>
+      <div class="empty-state-title">${sheetsLoaded ? 'No Brands Yet' : 'Connect Google Sheets'}</div>
+      <div class="empty-state-text">${sheetsLoaded
+        ? 'Brand data will appear here once submitted through the intake form. All data is pulled live from Google Sheets.'
+        : 'Brand data is stored in Google Sheets (ID: ' + CONFIG.sheetsId.slice(0,12) + '...). Configure OAuth credentials to connect, or publish the sheet to load data automatically.'}</div>
+      <button class="btn btn-primary" onclick="showTab('intake')">+ Submit First Brand</button>
+    </div>`;
+    return;
+  }
+
+  subtitle.textContent = `${BRANDS.length} BRAND${BRANDS.length!==1?'S':''} · FROM GOOGLE SHEETS`;
   container.innerHTML = BRANDS.map((b, idx) => {
-    const pct = (b.phase / 10) * 100;
-    const scoreColor = b.score >= 80 ? 'var(--success)' : b.score >= 70 ? 'var(--warning)' : 'var(--danger)';
-    const initials = b.name.split(' ').map(w=>w[0]).join('').slice(0,2);
+    const scoreColor = b.score >= 70 ? 'var(--success)' : b.score >= 60 ? 'var(--warning)' : 'var(--danger)';
+    const initials = b.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const bgColor = b.score >= 70 ? 'rgba(61,220,151,0.12)' : b.score >= 60 ? 'rgba(255,190,61,0.12)' : 'rgba(255,71,87,0.12)';
     return `
     <div class="brand-card" onclick="showBrandDetail(${idx})">
       <div class="brand-header">
-        <div style="display:flex;align-items:center;gap:0.75rem;">
-          <div class="brand-initials" style="background:${b.bg};color:${b.color}">${initials}</div>
+        <div style="display:flex; align-items:center; gap:0.75rem;">
+          <div class="brand-initials" style="background:${bgColor}; color:${scoreColor}">${initials}</div>
           <div>
             <div class="brand-name">${b.name}</div>
-            <div class="brand-category">${b.cat}</div>
+            <div class="brand-category">${b.category || 'Uncategorized'}</div>
           </div>
         </div>
-        <div class="brand-score-ring">
+        <div style="text-align:right;">
           <div class="score-number" style="color:${scoreColor}">${b.score}</div>
           <div class="score-label">Score</div>
         </div>
       </div>
       <div class="brand-progress">
-        <div class="brand-progress-fill" style="width:${pct}%;background:${b.color}"></div>
+        <div class="brand-progress-fill" style="width:${(b.phase/10)*100}%; background:${scoreColor}"></div>
       </div>
       <div class="brand-phase">
-        <span>Phase ${b.phase}/10</span>
-        <span class="brand-phase-name">${b.phaseName}</span>
+        <span>${b.phaseName || 'Intake'}</span>
+        <span class="brand-phase-name">${b.routing || 'Pending'}</span>
       </div>
       <div class="brand-meta">
-        <div class="brand-meta-item"><span>Revenue</span><span class="brand-meta-val">${b.rev}</span></div>
-        <div class="brand-meta-item"><span>Retailer</span><span class="brand-meta-val">${b.retailer}</span></div>
-        <div class="brand-meta-item"><span>Model</span><span class="brand-meta-val">${b.model}</span></div>
+        <div class="brand-meta-item"><span>Revenue</span><span class="brand-meta-val">${b.revenue || '—'}</span></div>
+        <div class="brand-meta-item"><span>Retailer</span><span class="brand-meta-val">${b.retailer || '—'}</span></div>
         <div class="brand-meta-item"><span>Assigned</span><span class="brand-meta-val" style="${b.assignedTo ? 'color:var(--accent-light)' : ''}">${b.assignedTo || 'Unassigned'}</span></div>
       </div>
     </div>`;
   }).join('');
 }
 
+// ============================================================
+// BRAND DETAIL VIEW
+// ============================================================
 function showBrandDetail(idx) {
-    window._currentBrandIdx = idx;
-
   const b = BRANDS[idx];
   if (!b) return;
-  const scoreColor = b.score>=80?'var(--success)':b.score>=70?'var(--warning)':'var(--danger)';
-  const initials = b.name.split(' ').map(w=>w[0]).join('').slice(0,2);
-  const pct = (b.phase / 10) * 100;
-
-  // Generate phase timeline
-  let timeline = '';
-  for (let i = 0; i < 10; i++) {
-    const ph = PHASES[i];
-    const cls = i < b.phase ? 'completed' : i === b.phase ? '' : 'pending';
-    const timeLabel = i < b.phase ? 'Completed' : i === b.phase ? 'In Progress' : 'Upcoming';
-    timeline += `<li class="timeline-item ${cls}">
-      <div class="time">Phase ${ph.num} &middot; ${timeLabel}</div>
-      <div>${ph.name.replace('\\n',' ')}</div>
-    </li>`;
-  }
-
-  // Generate team actions
-  const actions = [
-    { icon:'\uD83D\uDCE7', label:'Send Follow-up Email' },
-    { icon:'\uD83D\uDCCA', label:'View Financial Model' },
-    { icon:'\uD83D\uDCC4', label:'Generate LOI' },
-    { icon:'\uD83D\uDD0D', label:'Query RAG Data' },
-    { icon:'\uD83D\uDCC5', label:'Schedule Roadshow' },
-    { icon:'\uD83D\uDCCB', label:'Run Compliance Check' },
-  ];
+  const scoreColor = b.score >= 70 ? 'var(--success)' : b.score >= 60 ? 'var(--warning)' : 'var(--danger)';
+  const initials = b.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  const bgColor = b.score >= 70 ? 'rgba(61,220,151,0.12)' : b.score >= 60 ? 'rgba(255,190,61,0.12)' : 'rgba(255,71,87,0.12)';
 
   const content = document.getElementById('brandDetailContent');
   content.innerHTML = `
     <a class="brand-detail-back" onclick="showTab('brands')">&larr; Back to Brands</a>
 
-    <div class="brand-detail-header">
-      <div class="brand-detail-avatar" style="background:${b.bg};color:${b.color}">${initials}</div>
-      <div class="brand-detail-info">
-        <h2>${b.name}</h2>
-        <div class="subtitle">${b.cat} &middot; ${b.retailer} &middot; ${b.model}</div>
+    <div style="display:flex; align-items:center; gap:1.5rem; margin-bottom:2rem; flex-wrap:wrap;">
+      <div class="brand-initials" style="width:64px; height:64px; font-size:1.6rem; border-radius:12px; background:${bgColor}; color:${scoreColor}">${initials}</div>
+      <div>
+        <h2 style="font-family:'Bebas Neue',sans-serif; font-size:2.2rem; letter-spacing:0.03em; line-height:1;">${b.name}</h2>
+        <div style="color:var(--muted); font-size:0.85rem; margin-top:0.25rem;">${b.category || ''} · ${b.retailer || ''} · ${b.routing || ''}</div>
       </div>
-      <div class="brand-detail-score">
-        <div class="big-score" style="color:${scoreColor}">${b.score}</div>
-        <div class="score-label-text">Readiness Score</div>
-      </div>
-    </div>
-
-    <!-- Progress Bar -->
-    <div style="margin-bottom:2rem;">
-      <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--muted);margin-bottom:0.4rem;">
-        <span>Phase ${b.phase} of 10 â ${b.phaseName}</span>
-        <span>${Math.round(pct)}%</span>
-      </div>
-      <div style="background:var(--surface);height:8px;border-radius:4px;overflow:hidden;">
-        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--accent),var(--accent-light));border-radius:4px;transition:width 1s;"></div>
+      <div style="margin-left:auto; text-align:center; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1rem 1.5rem;">
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:3.5rem; line-height:1; color:${scoreColor}">${b.score}</div>
+        <div style="font-size:0.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.12em;">Readiness Score</div>
       </div>
     </div>
 
-    <div class="detail-grid">
-      <!-- Data Summary -->
-      <div class="detail-card">
-        <div class="detail-card-title">Brand Summary</div>
-        <div class="detail-card-row"><span class="label">Contact</span><span class="value">${b.contact}</span></div>
-        <div class="detail-card-row"><span class="label">Email</span><span class="value" style="color:var(--accent)">${b.email}</span></div>
-        <div class="detail-card-row"><span class="label">Annual Revenue</span><span class="value">${b.rev}</span></div>
-        <div class="detail-card-row"><span class="label">Target Retailer</span><span class="value">${b.retailer}</span></div>
-        <div class="detail-card-row"><span class="label">Economic Model</span><span class="value">${b.model}</span></div>
-        <div class="detail-card-row"><span class="label">Current Phase</span><span class="value" style="color:var(--accent-light)">${b.phaseName}</span></div>
+    <!-- TEAM ASSIGNMENT -->
+    <div class="card" style="margin-bottom:1.5rem; padding:1rem 1.5rem;">
+      <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+        <span style="font-size:0.65rem; font-family:'DM Mono',monospace; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase;">Assigned To:</span>
+        <select id="teamAssign" onchange="assignTeamMember(${idx})" style="background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:4px; padding:0.4rem 0.8rem; font-size:0.82rem; font-family:'DM Sans',sans-serif;">
+          <option value="">— Unassigned —</option>
+          <option value="Andrew" ${(b.assignedTo||'')==='Andrew'?'selected':''}>Andrew</option>
+          <option value="Errol" ${(b.assignedTo||'')==='Errol'?'selected':''}>Errol</option>
+          <option value="Lisle" ${(b.assignedTo||'')==='Lisle'?'selected':''}>Lisle</option>
+          <option value="Bill" ${(b.assignedTo||'')==='Bill'?'selected':''}>Bill</option>
+          <option value="Team1" ${(b.assignedTo||'')==='Team1'?'selected':''}>Team1</option>
+          <option value="Team2" ${(b.assignedTo||'')==='Team2'?'selected':''}>Team2</option>
+        </select>
+        <span id="assignStatus" style="font-size:0.72rem; color:var(--muted);"></span>
       </div>
+    </div>
 
-      <!-- Performance Metrics -->
-      <div class="detail-card">
-        <div class="detail-card-title">Performance Metrics</div>
-        <div class="detail-card-row"><span class="label">Events Completed</span><span class="value" style="color:var(--accent-light)">${b.events}</span></div>
-        <div class="detail-card-row"><span class="label">Total Units Sold</span><span class="value">${b.unitsSold.toLocaleString()}</span></div>
-        <div class="detail-card-row"><span class="label">Avg ROI</span><span class="value" style="color:var(--success)">${b.avgROI}</span></div>
-        <div class="detail-card-row"><span class="label">Readiness Score</span><span class="value" style="color:${scoreColor}">${b.score}/100</span></div>
-        <div class="detail-card-row"><span class="label">Pipeline Stage</span><span class="value">${b.phase}/10</span></div>
-        <div class="detail-card-row"><span class="label">Days in Phase</span><span class="value">${Math.floor(Math.random()*30+5)}</span></div>
-      </div>
+    <!-- DETAIL TABS -->
+    <div class="detail-tabs">
+      <div class="detail-tab active" onclick="switchDetailTab('overview',this)">Overview</div>
+      <div class="detail-tab" onclick="switchDetailTab('business-case',this)">Business Case</div>
+      <div class="detail-tab" onclick="switchDetailTab('promo',this)">Promo Spend</div>
+      <div class="detail-tab" onclick="switchDetailTab('files',this)">Files &amp; Uploads</div>
+      <div class="detail-tab" onclick="switchDetailTab('form-data',this)">Detailed View</div>
+    </div>
 
-      <!-- Sales & Team Actions -->
-      <div class="detail-card">
-        <div class="detail-card-title">Sales &amp; Team Actions</div>
-        <div class="action-chips">
-          ${actions.map(a => `<div class="action-chip" onclick="notify('Action','${a.label} triggered for ${b.name}')">${a.icon} ${a.label}</div>`).join('')}
+    <!-- OVERVIEW -->
+    <div id="dt-overview" class="detail-content active">
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">Brand Summary</div>
+          <div class="card-row"><span class="label">Brand Name</span><span class="value">${b.name}</span></div>
+          <div class="card-row"><span class="label">Contact</span><span class="value">${b.contact || '—'}</span></div>
+          <div class="card-row"><span class="label">Email</span><span class="value" style="color:var(--accent)">${b.email}</span></div>
+          <div class="card-row"><span class="label">Phone</span><span class="value">${b.phone || '—'}</span></div>
+          <div class="card-row"><span class="label">Category</span><span class="value">${b.category || '—'}</span></div>
+          <div class="card-row"><span class="label">Revenue Range</span><span class="value">${b.revenue || '—'}</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Pipeline Status</div>
+          <div class="card-row"><span class="label">Routing</span><span class="value" style="color:${scoreColor}">${b.routing || '—'}</span></div>
+          <div class="card-row"><span class="label">Score</span><span class="value">${b.score}/100</span></div>
+          <div class="card-row"><span class="label">Target Retailer</span><span class="value">${b.retailer || '—'}</span></div>
+          <div class="card-row"><span class="label">Submitted</span><span class="value">${b.submittedAt ? new Date(b.submittedAt).toLocaleDateString() : '—'}</span></div>
+          <div class="card-row"><span class="label">Phase</span><span class="value">${b.phaseName || '—'}</span></div>
+          <div class="card-row"><span class="label">ID</span><span class="value" style="font-family:'DM Mono',monospace; font-size:0.72rem;">${b.id}</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Next Actions</div>
+          ${b.routing === 'AUTO_APPROVE' ? `
+            <div class="task-item"><div class="task-priority high"></div><div class="task-text">Send compliance doc checklist</div></div>
+            <div class="task-item"><div class="task-priority medium"></div><div class="task-text">Schedule Phase 2 kick-off call</div></div>
+            <div class="task-item"><div class="task-priority low"></div><div class="task-text">Set up in n8n compliance workflow</div></div>
+          ` : b.routing === 'MANUAL_REVIEW' ? `
+            <div class="task-item"><div class="task-priority high"></div><div class="task-text">Committee review needed</div></div>
+            <div class="task-item"><div class="task-priority medium"></div><div class="task-text">Request additional product info</div></div>
+          ` : `
+            <div class="task-item"><div class="task-priority low"></div><div class="task-text">Rejection email sent automatically</div></div>
+            <div class="task-item"><div class="task-priority low"></div><div class="task-text">Schedule 6-month reapplication follow-up</div></div>
+          `}
         </div>
       </div>
     </div>
 
-    <!-- Timeline & Activity -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
-      <div class="detail-card">
-        <div class="detail-card-title">Pipeline Progress</div>
-        <ul class="timeline-list">${timeline}</ul>
+    <!-- BUSINESS CASE -->
+    <div id="dt-business-case" class="detail-content">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Revenue Projection (Roadshow Model)</div>
+          <p style="font-size:0.75rem; color:var(--muted); margin-bottom:1rem;">Based on Sam's Club roadshow benchmarks and ${CONFIG.storeCount} locations</p>
+          <div class="card-row"><span class="label">Sam's Club Locations</span><span class="value">${CONFIG.storeCount}</span></div>
+          <div class="card-row"><span class="label">Brand Revenue Range</span><span class="value">${b.revenue || '—'}</span></div>
+          <div class="card-row"><span class="label">Event Duration</span><span class="value">3 days (Thu–Sat)</span></div>
+          <div class="card-row"><span class="label">Avg Daily Sales / Location</span><span class="value" style="color:var(--muted)">Pending Phase 2</span></div>
+          <div class="card-row"><span class="label">Revenue per Event</span><span class="value" style="color:var(--muted)">Pending Phase 2</span></div>
+          <div class="card-row"><span class="label">Staffing Cost / Event</span><span class="value" style="color:var(--muted)">Pending Phase 2</span></div>
+          <p style="font-size:0.65rem; color:var(--muted); margin-top:1rem;">Revenue projections are calculated from real data submitted in Phase 2 (pricing, unit costs, staffing rates). No estimates are shown — only auditable numbers from form submissions.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">ROI Framework</div>
+          <p style="font-size:0.75rem; color:var(--muted); margin-bottom:1rem;">ROI calculated after detailed cost data is submitted (Phase 2+)</p>
+          <div class="card-row"><span class="label">Readiness Score</span><span class="value" style="color:${scoreColor}">${b.score}/100</span></div>
+          <div class="card-row"><span class="label">Score Threshold</span><span class="value">${b.score >= 70 ? 'Met (≥70)' : b.score >= 60 ? 'Review Range (60-69)' : 'Below Threshold (<60)'}</span></div>
+          <div class="card-row"><span class="label">Unit Cost</span><span class="value" style="color:var(--muted)">Pending Phase 2</span></div>
+          <div class="card-row"><span class="label">Retail Price</span><span class="value" style="color:var(--muted)">Pending Phase 2</span></div>
+          <div class="card-row"><span class="label">Margin</span><span class="value" style="color:var(--muted)">Auto-calculated in form</span></div>
+          <div class="card-row"><span class="label">Projected ROI</span><span class="value" style="color:var(--muted)">After cost data</span></div>
+          <p style="font-size:0.65rem; color:var(--muted); margin-top:1rem;">Full ROI is generated in the <a href="ascenda-form.html" target="_blank" style="color:var(--accent);">complete intake form</a> (Phase 2: Competitive Analysis & Pricing).</p>
+        </div>
       </div>
-      <div class="detail-card">
-        <div class="detail-card-title">Recent Activity</div>
-        <ul class="timeline-list">
-          <li class="timeline-item completed">
-            <div class="time">Feb 27, 2026 &middot; 4:12 PM</div>
-            <div>Readiness score updated to ${b.score}</div>
-          </li>
-          <li class="timeline-item completed">
-            <div class="time">Feb 25, 2026 &middot; 10:30 AM</div>
-            <div>Compliance documents verified</div>
-          </li>
-          <li class="timeline-item completed">
-            <div class="time">Feb 22, 2026 &middot; 2:15 PM</div>
-            <div>Brand intake form submitted</div>
-          </li>
-          <li class="timeline-item completed">
-            <div class="time">Feb 20, 2026 &middot; 9:00 AM</div>
-            <div>Initial contact with ${b.contact}</div>
-          </li>
-          <li class="timeline-item">
-            <div class="time">Upcoming</div>
-            <div>Phase ${Math.min(b.phase+1,10)} gate review</div>
-          </li>
-        </ul>
+    </div>
+
+    <!-- PROMO SPEND — Dynamic from Google Sheets -->
+    <div id="dt-promo" class="detail-content">
+      <div class="card">
+        <div class="card-title">Promotional Spend &amp; Investment — A&amp;P Budget</div>
+        <p style="font-size:0.78rem; color:var(--muted); margin-bottom:1rem;">Source: <a href="https://docs.google.com/spreadsheets/d/1VZzSugENfTMvA8D2ZSQuSGlDa_NsHq4o5Zz3Qazut6w/edit" target="_blank" style="color:var(--accent)">A&amp;P Marketing Budget Tracker</a> — Standard Ascenda promotional budget applied to roadshow brands.</p>
+        <div id="brandPromoTable">
+          <div style="padding:1rem; color:var(--muted); font-size:0.82rem;">Loading budget from Google Sheets...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILES & UPLOADS -->
+    <div id="dt-files" class="detail-content">
+      <div class="card">
+        <div class="card-title">Brand Files &amp; Documents</div>
+        <p style="font-size:0.78rem; color:var(--muted); margin-bottom:1rem;">All documents for this brand are stored in the brand's Google Drive folder.</p>
+        <div id="brandFilesArea" style="margin-bottom:1.5rem;">
+          <div style="display:flex; flex-direction:column; gap:1rem;">
+            ${b.driveFolder ? \`
+              <a href="\${b.driveFolder}" target="_blank" class="btn btn-primary" style="width:fit-content;">Open Brand Folder in Google Drive</a>
+              <p style="font-size:0.72rem; color:var(--muted);">Upload presentations, compliance docs, promo materials, and any other files directly to this brand's folder.</p>
+            \` : \`
+              <div style="padding:1.5rem; background:var(--surface); border:1px solid var(--border); border-radius:8px;">
+                <div style="font-size:0.85rem; margin-bottom:0.5rem;">No Google Drive folder linked yet.</div>
+                <div style="font-size:0.72rem; color:var(--muted);">A folder is automatically created when a brand is submitted through the intake form. For existing brands, a folder will be created on next pipeline sync.</div>
+              </div>
+            \`}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORM DATA (Detailed View) -->
+    <div id="dt-form-data" class="detail-content">
+      <div class="card">
+        <div class="card-title">Form Submission Data — Raw Inputs</div>
+        <p style="font-size:0.78rem; color:var(--muted); margin-bottom:1rem;">This is the data submitted through the intake form and stored in Google Sheets.</p>
+        <div class="card-row"><span class="label">Brand ID</span><span class="value" style="font-family:'DM Mono',monospace">${b.id}</span></div>
+        <div class="card-row"><span class="label">Brand Name</span><span class="value">${b.name}</span></div>
+        <div class="card-row"><span class="label">Contact Name</span><span class="value">${b.contact || '—'}</span></div>
+        <div class="card-row"><span class="label">Email</span><span class="value">${b.email}</span></div>
+        <div class="card-row"><span class="label">Phone</span><span class="value">${b.phone || '—'}</span></div>
+        <div class="card-row"><span class="label">Category</span><span class="value">${b.category || '—'}</span></div>
+        <div class="card-row"><span class="label">Annual Revenue</span><span class="value">${b.revenue || '—'}</span></div>
+        <div class="card-row"><span class="label">Target Retailer</span><span class="value">${b.retailer || '—'}</span></div>
+        <div class="card-row"><span class="label">Readiness Score</span><span class="value" style="color:${scoreColor}">${b.score}</span></div>
+        <div class="card-row"><span class="label">Routing Decision</span><span class="value">${b.routing || '—'}</span></div>
+        <div class="card-row"><span class="label">Submitted At</span><span class="value">${b.submittedAt || '—'}</span></div>
+        <div class="card-row"><span class="label">Data Source</span><span class="value" style="font-family:'DM Mono',monospace; color:var(--accent)">Google Sheets: Phase1_Submissions</span></div>
+        <p style="font-size:0.65rem; color:var(--muted); margin-top:1rem;">Additional fields (compliance docs, pricing, food safety, etc.) are collected in Phases 2-4 via the <a href="ascenda-form.html" target="_blank" style="color:var(--accent);">multi-phase intake form</a>.</p>
       </div>
     </div>
   `;
 
-  // Show the brand detail tab
-  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('nav a').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-brand-detail').classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({ top:0, behavior:'smooth' });
+  // Load promo budget into brand detail dynamically
+  loadBrandPromoBudget();
 }
 
+function switchDetailTab(name, el) {
+  document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.detail-content').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('dt-' + name).classList.add('active');
+}
+
+// ============================================================
+// WORKFLOWS TAB
+// ============================================================
 function renderWorkflows() {
   const list = document.getElementById('workflowList');
   list.innerHTML = WORKFLOWS.map(w => `
     <div class="workflow-row">
-      <span class="workflow-num">${w.n}</span>
-      <span class="workflow-name">${w.name}</span>
-      <span class="workflow-trigger">${w.trigger}</span>
-      <span class="workflow-last">${w.last}</span>
-      <span class="workflow-runs">${w.runs.toLocaleString()}</span>
-      <div class="wf-toggle ${w.active?'':'off'}" onclick="toggleWorkflow(this)"></div>
+      <span style="font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--muted);">${w.n}</span>
+      <span style="font-weight:500;">${w.name}</span>
+      <span style="font-size:0.7rem; color:var(--muted); font-family:'DM Mono',monospace;">${w.trigger}</span>
+      <span style="font-size:0.7rem; color:var(--accent); font-family:'DM Mono',monospace;">${w.phase}</span>
+      <a href="${w.file}" download style="font-size:0.68rem; color:var(--accent-light); text-decoration:none;">Download</a>
     </div>
   `).join('');
 
   const dlContainer = document.getElementById('downloadButtons');
   dlContainer.innerHTML = WORKFLOWS.map(w => `
-    <button class="btn btn-ghost" onclick="downloadWorkflow('${w.n}','${w.name}')" style="font-size:0.7rem;padding:0.5rem 0.9rem;">\u2193 WF-${w.n}</button>
+    <a class="btn btn-ghost btn-sm" href="${w.file}" download>↓ WF-${w.n}</a>
   `).join('');
 }
 
-function renderRAG() {
-  const ns = document.getElementById('namespaceList');
-  ns.innerHTML = NAMESPACES.map(n => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid var(--border);">
-      <div style="display:flex;align-items:center;gap:0.6rem;">
-        <div style="width:8px;height:8px;border-radius:50%;background:${n.color};"></div>
-        <span style="font-family:'DM Mono',monospace;font-size:0.75rem;">${n.name}</span>
-      </div>
-      <span style="font-family:'DM Mono',monospace;font-size:0.75rem;color:${n.color};">${n.vectors} vectors</span>
-    </div>
-  `).join('');
-  drawRAGChart();
-}
-
-function drawRAGChart() {
-  const canvas = document.getElementById('ragChart');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const data = [42,38,67,51,89,73,94];
-  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const w = canvas.offsetWidth || 400;
-  const h = 120;
-  canvas.width = w; canvas.height = h;
-  const max = Math.max(...data);
-  const barW = (w / data.length) * 0.6;
-  const gap = (w / data.length) * 0.4;
-  ctx.clearRect(0,0,w,h);
-  data.forEach((v, i) => {
-    const barH = (v / max) * (h - 24);
-    const x = i * (w / data.length) + gap/2;
-    const y = h - barH - 16;
-    const grd = ctx.createLinearGradient(0, y, 0, y+barH);
-    grd.addColorStop(0, 'rgba(74,155,232,0.85)');
-    grd.addColorStop(1, 'rgba(74,155,232,0.1)');
-    ctx.fillStyle = grd;
-    ctx.beginPath();
-    ctx.roundRect(x, y, barW, barH, 3);
-    ctx.fill();
-    ctx.fillStyle = 'rgba(104,129,163,0.7)';
-    ctx.font = '10px DM Mono, monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(days[i], x + barW/2, h - 2);
-  });
-}
-
+// ============================================================
+// SYSTEM HEALTH TAB
+// ============================================================
 function renderHealth() {
   const grid = document.getElementById('healthGrid');
   document.getElementById('healthTime').textContent = 'LAST CHECK: ' + new Date().toLocaleTimeString();
+
   grid.innerHTML = SERVICES.map(s => `
-    <div class="service-card ${s.status}">
+    <div class="service-card">
       <div class="service-top">
         <span class="service-icon">${s.icon}</span>
-        <div class="service-indicator" style="color:${s.status==='healthy'?'var(--success)':s.status==='warning'?'var(--warning)':'var(--danger)'}">
-          <div class="indicator-dot dot-${s.status}"></div>
-          ${(s.status || 'operational').toUpperCase()}
+        <div class="service-indicator" style="color:var(--muted)">
+          <div class="indicator-dot dot-pending"></div>
+          PENDING OAUTH
         </div>
       </div>
       <div class="service-name">${s.name}</div>
       <div class="service-url">${s.url}</div>
-      <div class="service-metrics">
-        <div class="svc-metric"><span>Latency</span><div class="svc-metric-val">${s.latency}</div></div>
-        <div class="svc-metric"><span>Uptime</span><div class="svc-metric-val">${s.uptime}</div></div>
-        <div class="svc-metric"><span>Last Check</span><div class="svc-metric-val">${s.lastCheck}</div></div>
-      </div>
+      <div style="font-size:0.72rem; color:var(--muted); margin-top:0.5rem;">${s.desc}</div>
+      ${s.realUrl ? `<a href="${s.realUrl}" target="_blank" style="font-size:0.68rem; color:var(--accent); margin-top:0.5rem; display:inline-block;">Open →</a>` : ''}
     </div>
   `).join('');
+
   drawFlowDiagram();
-  renderAggregatePipeline();
 }
 
 function drawFlowDiagram() {
   const svg = document.getElementById('flowDiagram');
   if (!svg) return;
 
-  // Define the flow: phases in sequence with their services
   const phaseNodes = [
-    { id:'intake', label:'WF-01\nBrand Intake', x:80, y:80, color:'#4A9BE8', services:['Web Form','Sheets','Claude'] },
-    { id:'compliance', label:'WF-02\nCompliance', x:250, y:80, color:'#3478C6', services:['Claude','Pinecone'] },
-    { id:'readiness', label:'WF-03\nReadiness', x:420, y:80, color:'#4A9BE8', services:['Claude','Sheets'] },
-    { id:'gonogo', label:'WF-04\nGo/No-Go', x:590, y:80, color:'#6BB5FF', services:['Claude','Gmail'] },
-    { id:'financial', label:'WF-05\nFinancial/LOI', x:760, y:80, color:'#3478C6', services:['Claude','Drive'] },
-    { id:'submission', label:'WF-06\nSubmission', x:930, y:80, color:'#4A9BE8', services:['Claude','Pinecone','Drive'] },
-    { id:'logistics', label:'WF-07\nLogistics', x:170, y:260, color:'#6BB5FF', services:['Calendar','Gmail','Slack'] },
-    { id:'roadshow', label:'WF-08\nRoadshow', x:420, y:260, color:'#3ddc97', services:['Claude','Pinecone','Gmail'] },
-    { id:'evaluate', label:'WF-09\nGrowth/SPV', x:670, y:260, color:'#3478C6', services:['Sheets','Gmail'] },
-    { id:'ragsync', label:'WF-10\nRAG Sync', x:920, y:260, color:'#8BC4FF', services:['Pinecone'] },
+    { id:'intake', label:'WF-01\nBrand Intake', x:80, y:80, color:'#4A9BE8' },
+    { id:'compliance', label:'WF-02\nCompliance', x:250, y:80, color:'#3478C6' },
+    { id:'readiness', label:'WF-03\nReadiness', x:420, y:80, color:'#4A9BE8' },
+    { id:'gonogo', label:'WF-04\nGo/No-Go', x:590, y:80, color:'#6BB5FF' },
+    { id:'financial', label:'WF-05\nFinancial/LOI', x:760, y:80, color:'#3478C6' },
+    { id:'submission', label:'WF-06\nSubmission', x:930, y:80, color:'#4A9BE8' },
+    { id:'logistics', label:'WF-07\nLogistics', x:170, y:260, color:'#6BB5FF' },
+    { id:'roadshow', label:'WF-08\nRoadshow', x:420, y:260, color:'#3ddc97' },
+    { id:'evaluate', label:'WF-09\nGrowth/SPV', x:670, y:260, color:'#3478C6' },
+    { id:'ragsync', label:'WF-10\nRAG Sync', x:920, y:260, color:'#8BC4FF' },
   ];
 
   const serviceNodes = [
-    { id:'form', label:'GitHub Pages\nForm', x:80, y:420, color:'#6BB5FF', icon:'\uD83C\uDF10' },
-    { id:'n8n', label:'n8n Engine\n10 Workflows', x:280, y:420, color:'#4A9BE8', icon:'\u2699\uFE0F' },
-    { id:'claude', label:'Claude API\nAnthropic', x:460, y:420, color:'#8BC4FF', icon:'\uD83E\uDD16' },
-    { id:'pinecone', label:'Pinecone\nRAG', x:620, y:420, color:'#3ddc97', icon:'\uD83D\uDD37' },
-    { id:'sheets', label:'Google\nSheets', x:770, y:420, color:'#ffbe3d', icon:'\uD83D\uDCCA' },
-    { id:'dash', label:'Ascenda\nDashboard', x:940, y:420, color:'#6BB5FF', icon:'\uD83D\uDCBB' },
+    { label:'GitHub Pages\nIntake Form', x:80, y:420, color:'#6BB5FF' },
+    { label:'n8n Engine\n10 Workflows', x:280, y:420, color:'#4A9BE8' },
+    { label:'Google\nSheets', x:460, y:420, color:'#ffbe3d' },
+    { label:'Pinecone\nRAG', x:620, y:420, color:'#3ddc97' },
+    { label:'Gmail\nNotifications', x:770, y:420, color:'#8BC4FF' },
+    { label:'Ascenda\nDashboard', x:940, y:420, color:'#6BB5FF' },
   ];
 
-  let s = '';
-  // Background grid
-  for (let x = 0; x < 1100; x += 40) {
-    s += `<line x1="${x}" y1="0" x2="${x}" y2="520" stroke="#1c2640" stroke-width="0.3" opacity="0.4"/>`;
-  }
-  for (let y = 0; y < 520; y += 40) {
-    s += `<line x1="0" y1="${y}" x2="1100" y2="${y}" stroke="#1c2640" stroke-width="0.3" opacity="0.4"/>`;
-  }
+  let s = '<defs><marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#4A9BE8" opacity="0.6"/></marker></defs>';
+
+  // Grid
+  for (let x = 0; x < 1100; x += 40) s += `<line x1="${x}" y1="0" x2="${x}" y2="520" stroke="#1c2640" stroke-width="0.3" opacity="0.4"/>`;
+  for (let y = 0; y < 520; y += 40) s += `<line x1="0" y1="${y}" x2="1100" y2="${y}" stroke="#1c2640" stroke-width="0.3" opacity="0.4"/>`;
 
   // Section labels
-  s += `<text x="20" y="50" font-family="'DM Mono',monospace" font-size="10" fill="#6881a3" letter-spacing="0.15em">PHASE 1â6 WORKFLOWS</text>`;
-  s += `<text x="20" y="230" font-family="'DM Mono',monospace" font-size="10" fill="#6881a3" letter-spacing="0.15em">PHASE 7â10 WORKFLOWS</text>`;
-  s += `<text x="20" y="395" font-family="'DM Mono',monospace" font-size="10" fill="#6881a3" letter-spacing="0.15em">INFRASTRUCTURE SERVICES</text>`;
+  s += `<text x="20" y="50" font-family="'DM Mono',monospace" font-size="10" fill="#6881a3" letter-spacing="0.15em">PHASE 1–6 WORKFLOWS</text>`;
+  s += `<text x="20" y="230" font-family="'DM Mono',monospace" font-size="10" fill="#6881a3" letter-spacing="0.15em">PHASE 7–10 WORKFLOWS</text>`;
+  s += `<text x="20" y="395" font-family="'DM Mono',monospace" font-size="10" fill="#6881a3" letter-spacing="0.15em">INFRASTRUCTURE</text>`;
 
-  // Phase flow arrows (sequential)
-  const phaseEdges = [
-    [0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[4,9]
-  ];
-  phaseEdges.forEach(([a,b]) => {
+  // Phase flow arrows
+  [[0,1],[1,2],[2,3],[3,4],[4,5]].forEach(([a,b]) => {
     const na = phaseNodes[a], nb = phaseNodes[b];
     s += `<line x1="${na.x+60}" y1="${na.y}" x2="${nb.x-60}" y2="${nb.y}" stroke="#4A9BE8" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5" marker-end="url(#arrowBlue)"/>`;
   });
-  // Wrap from phase 6 to phase 7
   s += `<path d="M ${phaseNodes[5].x+60} ${phaseNodes[5].y} Q ${phaseNodes[5].x+90} ${phaseNodes[5].y+90} ${phaseNodes[6].x-60} ${phaseNodes[6].y}" stroke="#4A9BE8" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5" fill="none" marker-end="url(#arrowBlue)"/>`;
-
-  // Connect to services
-  serviceNodes.forEach(sn => {
-    s += `<line x1="${sn.x}" y1="${sn.y-28}" x2="${sn.x}" y2="${sn.y-55}" stroke="#1c2640" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>`;
+  [[6,7],[7,8],[8,9]].forEach(([a,b]) => {
+    const na = phaseNodes[a], nb = phaseNodes[b];
+    s += `<line x1="${na.x+60}" y1="${na.y}" x2="${nb.x-60}" y2="${nb.y}" stroke="#4A9BE8" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5" marker-end="url(#arrowBlue)"/>`;
   });
-
-  // Arrow marker
-  s = `<defs><marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#4A9BE8" opacity="0.6"/></marker></defs>` + s;
 
   // Draw phase nodes
   phaseNodes.forEach(n => {
     const lines = n.label.split('\n');
-    const h = 44;
-    s += `<rect x="${n.x-60}" y="${n.y-22}" width="120" height="${h}" rx="6" fill="#141b2a" stroke="${n.color}" stroke-width="1.5"/>`;
+    s += `<rect x="${n.x-60}" y="${n.y-22}" width="120" height="44" rx="6" fill="#141b2a" stroke="${n.color}" stroke-width="1.5"/>`;
     lines.forEach((l,i) => {
       s += `<text x="${n.x}" y="${n.y-2+(i*16)}" text-anchor="middle" font-family="'DM Mono',monospace" font-size="10" fill="${i===0?n.color:'#e8ecf4'}" font-weight="${i===0?'400':'600'}">${l}</text>`;
     });
@@ -1750,208 +1209,146 @@ function drawFlowDiagram() {
     if (lines[1]) s += `<text x="${n.x}" y="${n.y+12}" text-anchor="middle" font-family="'DM Mono',monospace" font-size="9" fill="#6881a3">${lines[1]}</text>`;
   });
 
+  // Connect services to flow
+  serviceNodes.forEach(n => {
+    s += `<line x1="${n.x}" y1="${n.y-28}" x2="${n.x}" y2="${n.y-55}" stroke="#1c2640" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>`;
+  });
+
   svg.innerHTML = s;
 }
 
-function renderAggregatePipeline() {
-  const container = document.getElementById('aggregatePipeline');
-  if (!container) return;
-  const maxCount = Math.max(...PHASES.map(p=>p.count));
-  const phaseColors = ['#3478C6','#3478C6','#4A9BE8','#6BB5FF','#4A9BE8','#4A9BE8','#8BC4FF','#3ddc97','#3478C6','#8BC4FF'];
-
-  container.innerHTML = PHASES.map((p, i) => {
-    const pct = (p.count / maxCount) * 100;
-    const brandsInPhase = BRANDS.filter(b => b.phase === (i+1));
-    const brandNames = brandsInPhase.length > 0 ? brandsInPhase.map(b => b.name).join(', ') : 'No brands';
-    return `
-    <div class="agg-bar-group">
-      <div class="agg-bar-label">
-        <span>P${p.num} ${p.name.replace('\\n',' ')}</span>
-        <span>${p.count} brands &middot; ${(p.status || 'operational').toUpperCase()}</span>
-      </div>
-      <div class="agg-bar-track" title="${brandNames}">
-        <div class="agg-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${phaseColors[i]},${phaseColors[i]}cc);">${p.count}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
 // ============================================================
-// INTERACTIONS
+// TAB NAVIGATION
 // ============================================================
-
 function showTab(name) {
-  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('nav a').forEach(el=>el.classList.remove('active'));
-  const target = document.getElementById('tab-'+name);
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(el => el.classList.remove('active'));
+  const target = document.getElementById('tab-' + name);
   if (target) target.classList.add('active');
-  // Highlight nav
-  const navLinks = document.querySelectorAll('nav a');
-  navLinks.forEach(a => { if(a.getAttribute('href') === '#'+name) a.classList.add('active'); });
+  document.querySelectorAll('nav a').forEach(a => {
+    if (a.textContent.toLowerCase().replace(/\s/g,'') === name.replace(/-/g,'')) a.classList.add('active');
+  });
   if (name === 'health') renderHealth();
 }
 
-function showPhaseModal(i) {
-  const p = PHASES[i];
-  const brandsInPhase = BRANDS.filter(b => b.phase === (i+1));
-  document.getElementById('modalTitle').textContent = `PHASE ${p.num}: ${p.name.replace('\n',' ')}`;
-  document.getElementById('modalSubtitle').textContent = `STATUS: ${(p.status || 'operational').toUpperCase()} \u00B7 ${p.count} ${p.label}`;
-  let brandList = brandsInPhase.length > 0
-    ? brandsInPhase.map(b => `<div style="display:flex;justify-content:space-between;padding:0.4rem 0;font-size:0.8rem;"><span style="color:var(--accent-light)">${b.name}</span><span style="color:var(--muted)">${b.score}/100</span></div>`).join('')
-    : '<div style="font-size:0.8rem;color:var(--muted);">No brands currently in this phase</div>';
-  document.getElementById('modalBody').innerHTML = `
-    <div class="detail-row"><span class="detail-label">Key Action</span><span class="detail-value">${p.keyAction}</span></div>
-    <div class="detail-row"><span class="detail-label">Brands in Phase</span><span class="detail-value" style="color:var(--accent-light)">${p.count}</span></div>
-    <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value">${(p.status || 'operational').toUpperCase()}</span></div>
-    <div class="detail-row"><span class="detail-label">n8n Workflow</span><span class="detail-value" style="color:var(--accent)">WF-${p.num}</span></div>
-    <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);">
-      <div style="font-size:0.7rem;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:0.1em;margin-bottom:0.5rem;">BRANDS IN THIS PHASE</div>
-      ${brandList}
-    </div>
-    <div style="margin-top:1.5rem;">
-      <button class="btn btn-primary" onclick="closeModal();showTab('workflows')">View Workflow \u2192</button>
-    </div>
-  `;
-  document.getElementById('modalOverlay').classList.add('open');
-}
-
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-}
-
-function toggleWorkflow(el) {
-  el.classList.toggle('off');
-  notify('Workflow Updated', `Workflow ${el.classList.contains('off')?'paused':'activated'}`);
-}
-
-function downloadWorkflow(num, name) {
-  const workflow = generateWorkflowJSON(num, name);
-  const blob = new Blob([JSON.stringify(workflow, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `workflow-${num}-ascenda.json`;
-  a.click();
-  notify('Downloaded', `workflow-${num}-ascenda.json`);
-}
-
-function generateWorkflowJSON(num, name) {
-  return {
-    name: `Ascenda WF-${num}: ${name}`,
-    nodes: [
-      { id:'start', type:'n8n-nodes-base.start', name:'Start', position:[100,200] },
-      { id:'webhook', type:'n8n-nodes-base.webhook', name:'Trigger', position:[280,200],
-        parameters: { path:`/ascenda/wf${num}`, method:'POST' } },
-      { id:'code', type:'n8n-nodes-base.code', name:'Scoring Logic', position:[460,200],
-        parameters: { jsCode:`// WF-${num}: ${name}\nconst data = $input.first().json;\nconst score = Object.values(data).filter(v => typeof v === 'string' && v.length > 50).length * 15;\nreturn [{ json: { ...data, score, phase: ${parseInt(num)}, timestamp: new Date().toISOString() } }];` } },
-      { id:'sheets', type:'n8n-nodes-base.googleSheets', name:'Log to Sheets', position:[640,200] },
-      { id:'email', type:'n8n-nodes-base.gmail', name:'Send Notification', position:[820,200] },
-    ],
-    connections: {
-      'Start':{main:[[{node:'Trigger',type:'main',index:0}]]},
-      'Trigger':{main:[[{node:'Scoring Logic',type:'main',index:0}]]},
-      'Scoring Logic':{main:[[{node:'Log to Sheets',type:'main',index:0}]]},
-      'Log to Sheets':{main:[[{node:'Send Notification',type:'main',index:0}]]},
-    },
-    settings: { saveManualExecutions:true },
-    meta: { instanceId:'ascenda-n8n', workflowPhase: parseInt(num) }
-  };
-}
-
-function setQuery(q) { document.getElementById('ragInput').value = q; }
-
-function queryRAG() {
-  const q = document.getElementById('ragInput').value.trim();
-  if (!q) return;
-  const results = document.getElementById('ragResults');
-  results.innerHTML = `<span class="result-thinking">// Querying Pinecone index: ascenda-retail-intelligence...</span>`;
-  setTimeout(() => {
-    const mockResults = getMockResults(q);
-    results.innerHTML = `<span style="color:var(--muted)">// Query: "${q}"</span>\n<span style="color:var(--muted)">// Namespace: auto-detect | k=5 | cosine similarity</span>\n\n${mockResults}`;
-  }, 800);
-}
-
-function getMockResults(q) {
-  const ql = q.toLowerCase();
-  if (ql.includes('similar') || ql.includes('brand')) {
-    return `<span class="result-score">[0.94]</span> <span class="result-name">NutriPure Foods</span> <span class="result-meta">\u00B7 Phase 5 \u00B7 Score:88 \u00B7 Sam's Club Roadshow \u00B7 $3.2M ARR</span>
-<span class="result-score">[0.91]</span> <span class="result-name">FreshFarm Direct</span> <span class="result-meta">\u00B7 Phase 7 \u00B7 Score:84 \u00B7 Sam's Club Roadshow \u00B7 $4.7M ARR</span>
-<span class="result-score">[0.87]</span> <span class="result-name">VitaBlend Wellness</span> <span class="result-meta">\u00B7 Phase 3 \u00B7 Score:82 \u00B7 Sam's Club Inline \u00B7 $1.8M ARR</span>
-<span class="result-score">[0.82]</span> <span class="result-name">CleanHome Co.</span> <span class="result-meta">\u00B7 Phase 6 \u00B7 Score:75 \u00B7 Costco Inline \u00B7 $5.1M ARR</span>
-<span class="result-score">[0.79]</span> <span class="result-name">BabyFirst Products</span> <span class="result-meta">\u00B7 Phase 3 \u00B7 Score:80 \u00B7 Sam's Club Inline \u00B7 $2.1M ARR</span>`;
-  } else if (ql.includes('compliance')) {
-    return `<span class="result-score">[0.96]</span> <span class="result-name">Sam's Club Compliance Gap Report</span> <span class="result-meta">\u00B7 47 brands analyzed</span>
-<span style="color:var(--muted)">  \u21B3 Top gap: Missing UPC/GS1 registration (38% of brands)</span>
-<span style="color:var(--muted)">  \u21B3 Gap 2: Product liability insurance below $2M threshold (29%)</span>
-<span style="color:var(--muted)">  \u21B3 Gap 3: No FDA/USDA compliance documentation (22%)</span>
-<span class="result-score">[0.88]</span> <span class="result-name">Costco Compliance Checklist v4</span> <span class="result-meta">\u00B7 Updated Jan 2026</span>`;
-  } else if (ql.includes('score') || ql.includes('benchmark')) {
-    return `<span class="result-score">[0.97]</span> <span class="result-name">Portfolio KPI Benchmark Report</span> <span class="result-meta">\u00B7 31 approved brands</span>
-<span style="color:var(--muted)">  \u21B3 Avg Phase 3 readiness score: 73.2 / 100</span>
-<span style="color:var(--muted)">  \u21B3 Min score for approval: 65 (committee override)</span>
-<span style="color:var(--muted)">  \u21B3 Auto-approve threshold: 70+</span>
-<span style="color:var(--muted)">  \u21B3 Top scoring category: Health & Wellness (avg 81)</span>`;
-  } else {
-    return `<span class="result-score">[0.89]</span> <span class="result-name">Post-Show Performance Analysis Q4 2025</span> <span class="result-meta">\u00B7 18 completed roadshows</span>
-<span style="color:var(--muted)">  \u21B3 Avg revenue per event: $142K</span>
-<span style="color:var(--muted)">  \u21B3 Avg units sold: 847</span>
-<span class="result-score">[0.85]</span> <span class="result-name">Market Intelligence: Sam's Club 2026 Category Focus</span>
-<span class="result-score">[0.81]</span> <span class="result-name">Brand Playbook: Successful Roadshow Attributes</span>`;
-  }
-}
-
+// ============================================================
+// INTAKE FORM SUBMISSION
+// ============================================================
 function submitIntake() {
   const brand = document.getElementById('f-brand').value;
+  const contact = document.getElementById('f-contact').value;
   const email = document.getElementById('f-email').value;
+  const phone = document.getElementById('f-phone').value;
   const category = document.getElementById('f-category').value;
   const revenue = document.getElementById('f-revenue').value;
   const retailer = document.getElementById('f-retailer').value;
+  const model = document.getElementById('f-model').value;
   const product = document.getElementById('f-product').value;
+  const footprint = document.getElementById('f-footprint').value;
+  const timeline = document.getElementById('f-timeline').value;
 
   if (!brand || !email || !category || !revenue || !retailer || !product) {
-    notify('Missing Fields', 'Please fill all required fields');
+    notify('Missing Fields', 'Please fill all required (*) fields');
     return;
   }
 
+  // Score using the same algorithm as WF-01 (workflow-01-intake-scoring.json)
   let score = 0;
-  if (revenue.includes('$5M') || revenue.includes('$20M') || revenue.includes('Over')) score += 25;
-  else if (revenue.includes('$1M')) score += 20;
-  else if (revenue.includes('$500K')) score += 12;
-  else score += 5;
-  if (retailer.includes("Sam's") || retailer.includes('Both')) score += 20;
-  else score += 15;
-  score += Math.min(product.length / 8, 25);
-  score += category !== '' ? 15 : 0;
+  const breakdown = {};
+
+  // Revenue Scale (25 pts)
+  const revenueMap = { 'Under $500K':5, '$500K – $1M':12, '$1M – $5M':20, '$5M – $20M':23, 'Over $20M':25 };
+  breakdown.revenue = revenueMap[revenue] || 5;
+  score += breakdown.revenue;
+
+  // Retailer Fit (20 pts)
+  breakdown.retailerFit = (retailer.includes("Sam's") || retailer === 'Both') ? 20 : retailer === 'Costco' ? 18 : 10;
+  score += breakdown.retailerFit;
+
+  // Product Description Quality (25 pts)
+  const descLen = product.length;
+  breakdown.productQuality = descLen > 500 ? 25 : descLen > 300 ? 20 : descLen > 150 ? 14 : descLen > 50 ? 8 : 3;
+  score += breakdown.productQuality;
+
+  // Market Readiness (15 pts)
+  const fpLen = footprint.length;
+  breakdown.marketReadiness = fpLen > 200 ? 15 : fpLen > 100 ? 10 : fpLen > 30 ? 6 : 2;
+  score += breakdown.marketReadiness;
+
+  // Timeline Clarity (10 pts)
+  const tlLen = timeline.length;
+  breakdown.timeline = tlLen > 150 ? 10 : tlLen > 50 ? 6 : tlLen > 10 ? 3 : 0;
+  score += breakdown.timeline;
+
+  // Category Fit (5 pts)
+  const highFit = ['Food & Beverage','Health & Wellness','Household Products','Pet Products'];
+  breakdown.categoryFit = highFit.includes(category) ? 5 : 3;
+  score += breakdown.categoryFit;
+
   score = Math.round(Math.min(score, 100));
 
-  let status, statusColor, message;
+  let routing, routingReason, statusColor;
   if (score >= 70) {
-    status = 'AUTO-APPROVED'; statusColor = 'var(--success)';
-    message = `Congratulations! ${brand} has been auto-approved to advance to Phase 2: Compliance & Due Diligence. Expect an email within 5 minutes with your document checklist.`;
+    routing = 'AUTO_APPROVE';
+    routingReason = `${brand} has been auto-approved to advance to Phase 2: Compliance & Due Diligence. An email will be sent to ${email} with the document checklist.`;
+    statusColor = 'var(--success)';
   } else if (score >= 60) {
-    status = 'MANUAL REVIEW'; statusColor = 'var(--warning)';
-    message = `${brand} has been flagged for committee review. A member of the Ascenda team will contact you within 48 hours.`;
+    routing = 'MANUAL_REVIEW';
+    routingReason = `${brand} has been flagged for committee review (score range 60-69). A team member will contact ${email} within 48 hours.`;
+    statusColor = 'var(--warning)';
   } else {
-    status = 'NOT APPROVED'; statusColor = 'var(--danger)';
-    message = `At this time, ${brand} does not meet our minimum threshold. Key areas for improvement: Revenue scale, product-retailer fit, and pitch clarity.`;
+    routing = 'AUTO_REJECT';
+    routingReason = `${brand} does not meet the current minimum threshold. Key areas: Revenue scale, product-retailer fit, and pitch clarity. Reapplication encouraged in 6 months.`;
+    statusColor = 'var(--danger)';
   }
 
+  // Attempt to POST to n8n webhook (will work when n8n is configured)
+  const payload = { brandName:brand, contactName:contact, email, phone, category, revenue, retailer, preferredModel:model, productDescription:product, currentFootprint:footprint, timeline };
+  fetch(CONFIG.n8nBase + CONFIG.webhookPath, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(r => r.json()).then(data => {
+    console.log('n8n response:', data);
+    notify('Webhook Success', 'Data sent to n8n and logged to Google Sheets');
+  }).catch(err => {
+    console.log('n8n webhook not reachable (configure OAuth to enable):', err.message);
+  });
+
+  // Show score result
   document.getElementById('scoreResult').style.display = 'block';
   document.getElementById('scoreDisplay').innerHTML = `
-    <div style="display:flex;align-items:center;gap:2rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+    <div style="display:flex; align-items:center; gap:2rem; flex-wrap:wrap; margin-bottom:1.5rem;">
       <div>
-        <div style="font-family:'Bebas Neue';font-size:4rem;color:${statusColor};line-height:1;">${score}</div>
-        <div style="font-size:0.65rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.1em;">READINESS SCORE</div>
+        <div style="font-family:'Bebas Neue'; font-size:4rem; color:${statusColor}; line-height:1;">${score}</div>
+        <div style="font-size:0.65rem; color:var(--muted); font-family:'DM Mono',monospace; letter-spacing:0.1em;">READINESS SCORE</div>
       </div>
       <div>
-        <div style="font-family:'Bebas Neue';font-size:1.4rem;color:${statusColor};">${status}</div>
-        <div style="font-size:0.82rem;color:var(--muted);max-width:400px;margin-top:0.5rem;line-height:1.6;">${message}</div>
+        <div style="font-family:'Bebas Neue'; font-size:1.4rem; color:${statusColor};">${routing.replace('_',' ')}</div>
+        <div style="font-size:0.82rem; color:var(--muted); max-width:400px; margin-top:0.5rem; line-height:1.6;">${routingReason}</div>
       </div>
     </div>
+    <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+      <div style="font-size:0.7rem; color:var(--muted); font-family:'DM Mono',monospace; margin-bottom:0.5rem;">SCORE BREAKDOWN</div>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:0.5rem; font-size:0.75rem;">
+        <div>Revenue Scale: <span style="color:var(--accent-light)">${breakdown.revenue}/25</span></div>
+        <div>Retailer Fit: <span style="color:var(--accent-light)">${breakdown.retailerFit}/20</span></div>
+        <div>Product Quality: <span style="color:var(--accent-light)">${breakdown.productQuality}/25</span></div>
+        <div>Market Readiness: <span style="color:var(--accent-light)">${breakdown.marketReadiness}/15</span></div>
+        <div>Timeline: <span style="color:var(--accent-light)">${breakdown.timeline}/10</span></div>
+        <div>Category Fit: <span style="color:var(--accent-light)">${breakdown.categoryFit}/5</span></div>
+      </div>
+    </div>
+    <p style="font-size:0.68rem; color:var(--muted); margin-top:1rem;">This scoring matches WF-01 (workflow-01-intake-scoring.json). Data is sent to n8n webhook for Google Sheets logging and Pinecone embedding.</p>
   `;
-  document.getElementById('scoreResult').scrollIntoView({behavior:'smooth'});
-  notify('Intake Processed', `${brand} scored ${score}/100 \u2014 ${status}`);
+  document.getElementById('scoreResult').scrollIntoView({ behavior:'smooth' });
+  notify('Intake Processed', `${brand} scored ${score}/100 — ${routing.replace('_',' ')}`);
 }
 
+// ============================================================
+// UTILITY
+// ============================================================
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 function notify(title, body) {
   const n = document.getElementById('notif');
   document.getElementById('notifTitle').textContent = title;
@@ -1963,28 +1360,29 @@ function notify(title, body) {
 // ============================================================
 // INIT
 // ============================================================
-
-// === TEAM ASSIGNMENT ===
+// ============================================================
+// TEAM ASSIGNMENT
+// ============================================================
 const TEAM_MEMBERS = ['Andrew', 'Errol', 'Lisle', 'Bill', 'Team1', 'Team2'];
 
 function assignTeamMember(idx) {
-  if (idx === undefined || idx === null) return;
   const sel = document.getElementById('teamAssign');
-  if (!sel) return;
-  BRANDS[idx].assignedTo = sel.value || '';
   const status = document.getElementById('assignStatus');
-  if (status) {
-    status.textContent = sel.value ? 'Saved \u2713' : '';
-    setTimeout(() => { status.textContent = ''; }, 2000);
-  }
+  if (!sel || !BRANDS[idx]) return;
+  BRANDS[idx].assignedTo = sel.value;
+  status.textContent = sel.value ? `Assigned to ${sel.value}` : 'Unassigned';
+  status.style.color = sel.value ? 'var(--success)' : 'var(--muted)';
+  // Re-render brand cards to show assignment
   renderBrands();
 }
 
-// === PROMO BUDGET LOADING ===
+// ============================================================
+// DYNAMIC A&P BUDGET LOADER FROM GOOGLE SHEETS
+// ============================================================
 const PROMO_SHEET_ID = '1VZzSugENfTMvA8D2ZSQuSGlDa_NsHq4o5Zz3Qazut6w';
 
 function loadPromoBudget() {
-  const url = 'https://docs.google.com/spreadsheets/d/' + PROMO_SHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Sheet1';
+  const url = `https://docs.google.com/spreadsheets/d/${PROMO_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
   fetch(url)
     .then(r => r.text())
     .then(csv => {
@@ -1992,294 +1390,124 @@ function loadPromoBudget() {
       renderPromoBudgetTable(rows, 'promoBudgetTable');
     })
     .catch(err => {
+      console.warn('Could not load promo budget from Sheets:', err);
+      // Fallback: show link to open sheet directly
       const el = document.getElementById('promoBudgetTable');
-      if (el) el.innerHTML = '<div style="padding:1rem; color:var(--muted); font-size:0.82rem;">Unable to load budget data. <a href="https://docs.google.com/spreadsheets/d/' + PROMO_SHEET_ID + '/edit" target="_blank" style="color:var(--accent)">Open in Sheets</a></div>';
+      if (el) el.innerHTML = `<p style="font-size:0.82rem; color:var(--muted);">Unable to load budget data automatically. <a href="https://docs.google.com/spreadsheets/d/${PROMO_SHEET_ID}/edit" target="_blank" style="color:var(--accent)">Open in Google Sheets</a></p>`;
     });
 }
 
 function parseCSV(csv) {
-  const rows = [];
-  let current = [];
-  let field = '';
-  let inQuotes = false;
-  for (let i = 0; i < csv.length; i++) {
-    const c = csv[i];
-    if (inQuotes) {
-      if (c === '"' && csv[i+1] === '"') { field += '"'; i++; }
-      else if (c === '"') { inQuotes = false; }
-      else { field += c; }
-    } else {
-      if (c === '"') { inQuotes = true; }
-      else if (c === ',') { current.push(field.trim()); field = ''; }
-      else if (c === '\n' || (c === '\r' && csv[i+1] === '\n')) {
-        current.push(field.trim()); field = '';
-        if (c === '\r') i++;
-        rows.push(current); current = [];
-      } else { field += c; }
+  const lines = csv.split('\n');
+  return lines.map(line => {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { inQuotes = !inQuotes; }
+      else if (line[i] === ',' && !inQuotes) { result.push(current.trim()); current = ''; }
+      else { current += line[i]; }
     }
-  }
-  if (field || current.length) { current.push(field.trim()); rows.push(current); }
-  return rows;
+    result.push(current.trim());
+    return result;
+  });
 }
 
 function renderPromoBudgetTable(rows, containerId) {
   const el = document.getElementById(containerId);
-  if (!el || !rows.length) return;
-  let html = '<table class="promo-table"><thead><tr>';
-  rows[0].forEach(h => { html += '<th>' + h + '</th>'; });
-  html += '</tr></thead><tbody>';
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    const isSection = row[0] && row.slice(1).every(c => !c || c === '0' || c === '$0' || c === '$-');
-    const isTotal = row[0] && row[0].toUpperCase().includes('TOTAL');
-    const cls = isSection ? ' class="cat-header"' : isTotal ? ' class="total-row"' : '';
-    html += '<tr' + cls + '>';
-    row.forEach(cell => { html += '<td>' + (cell || '') + '</td>'; });
-    html += '</tr>';
+  if (!el || rows.length < 5) {
+    if (el) el.innerHTML = `<p style="color:var(--muted); font-size:0.82rem;">Budget data format not recognized. <a href="https://docs.google.com/spreadsheets/d/${PROMO_SHEET_ID}/edit" target="_blank" style="color:var(--accent)">Open in Sheets</a></p>`;
+    return;
   }
+
+  // Parse the A&P Budget structure from CSV
+  // The sheet has: col C = title, cols E-P = months (JAN-DEC), col R = TOTAL
+  let html = '<table class="promo-table"><thead><tr><th>Line Item</th><th>Monthly Avg</th><th>Annual Total</th><th>Category</th></tr></thead><tbody>';
+  let currentCategory = '';
+  let grandMonthly = 0;
+  let grandAnnual = 0;
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row || row.length < 3) continue;
+
+    // Detect section headers
+    const cellA = (row[0] || '').toUpperCase();
+    const cellC = (row[2] || '').trim();
+    const cellR = row.length > 17 ? (row[17] || '').trim() : '';
+
+    if (cellA.includes('ADVERTISING') || cellC.includes('ADVERTISING')) {
+      currentCategory = 'Advertising';
+      html += '<tr class="cat-header"><td colspan="4">ADVERTISING (55% A&P Split)</td></tr>';
+      continue;
+    }
+    if (cellA.includes('PROMOTIONAL') || cellC.includes('PROMOTIONAL')) {
+      currentCategory = 'Promotional';
+      html += '<tr class="cat-header"><td colspan="4">PROMOTIONAL (17% A&P Split)</td></tr>';
+      continue;
+    }
+    if (cellA.includes('NON WORKING') || cellA.includes('NON-WORKING') || cellC.includes('NON WORKING')) {
+      currentCategory = 'Non-Working';
+      html += '<tr class="cat-header"><td colspan="4">NON-WORKING / TOOLS &amp; PLATFORMS (28% A&P Split)</td></tr>';
+      continue;
+    }
+
+    // Skip header rows, empty rows, and the title
+    if (!cellC || cellC.toUpperCase().includes('DESCRIPTION') || cellC.toUpperCase().includes('BUDGET TRACKER') || cellC.toUpperCase().includes('SHELF MADE')) continue;
+    if (cellC.toUpperCase().includes('GRAND TOTAL') || cellC.toUpperCase().includes('TOTAL')) {
+      // This is the total row
+      const annual = parseFloat(cellR.replace(/[$,]/g, '')) || 0;
+      const monthly = annual / 12;
+      html += `<tr class="total-row"><td>TOTAL</td><td style="color:var(--accent-light)">$${Math.round(monthly).toLocaleString()}/mo</td><td style="color:var(--success)">$${Math.round(annual).toLocaleString()}/yr</td><td></td></tr>`;
+      continue;
+    }
+
+    // Regular line item
+    if (currentCategory && cellC) {
+      const annual = parseFloat(cellR.replace(/[$,]/g, '')) || 0;
+      if (annual === 0 && !cellR) continue; // skip truly empty rows
+      const monthly = annual / 12;
+      grandMonthly += monthly;
+      grandAnnual += annual;
+      html += `<tr><td>${cellC}</td><td>${annual > 0 ? '$' + Math.round(monthly).toLocaleString() : '$0'}</td><td>${annual > 0 ? '$' + Math.round(annual).toLocaleString() : '$0'}</td><td>${currentCategory}</td></tr>`;
+    }
+  }
+
   html += '</tbody></table>';
   el.innerHTML = html;
 }
 
+// Load budget into brand detail promo tab too
 function loadBrandPromoBudget() {
-  const url = 'https://docs.google.com/spreadsheets/d/' + PROMO_SHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Sheet1';
+  const url = `https://docs.google.com/spreadsheets/d/${PROMO_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
   fetch(url)
     .then(r => r.text())
     .then(csv => {
       const rows = parseCSV(csv);
       renderPromoBudgetTable(rows, 'brandPromoTable');
     })
-    .catch(() => {});
+    .catch(() => {
+      const el = document.getElementById('brandPromoTable');
+      if (el) el.innerHTML = `<p style="color:var(--muted); font-size:0.82rem;"><a href="https://docs.google.com/spreadsheets/d/${PROMO_SHEET_ID}/edit" target="_blank" style="color:var(--accent)">Open A&P Budget in Google Sheets</a></p>`;
+    });
 }
 
+// ============================================================
+// DYNAMIC KPI POPULATION
+// ============================================================
 function populateKPIs() {
-  const wfEl = document.getElementById('stat-workflows');
-  if (wfEl) wfEl.textContent = typeof WORKFLOWS !== 'undefined' ? WORKFLOWS.length : '\u2014';
-  const locEl = document.getElementById('stat-locations');
-  if (locEl) locEl.textContent = typeof CONFIG !== 'undefined' && CONFIG.storeCount ? CONFIG.storeCount : '600+';
+  const wfEl = document.getElementById('kpi-workflows');
+  const locEl = document.getElementById('kpi-locations');
+  if (wfEl) wfEl.textContent = WORKFLOWS.length;
+  if (locEl) locEl.textContent = CONFIG.storeCount;
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  loadBrandsFromSheets();
+  renderWorkflows();
   populateKPIs();
   loadPromoBudget();
-
-  renderPipeline();
-  renderBrands();
-  renderWorkflows();
-  renderRAG();
-  renderHealth();
-  animateCounter('stat-active', 14);
-  animateCounter('stat-score', 73);
-  animateCounter('stat-workflows', 10);
-  animateCounter('stat-rag', 847);
 });
-
-function animateCounter(id, target) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  let cur = 0;
-  const step = target / 40;
-  const t = setInterval(() => {
-    cur += step;
-    if (cur >= target) { cur = target; clearInterval(t); }
-    el.textContent = id === 'stat-value' ? `$${(cur/1000).toFixed(1)}M` : Math.round(cur);
-  }, 30);
-}
-
-
-// ============================================================
-// CRM FUNCTIONS (ADDED - Dashboard Enhancement)
-// ============================================================
-function renderCRM() {
-  renderTasks();
-  renderPipelineOverview();
-  renderCalendar(new Date());
-  renderQuickHealth();
-}
-
-function renderTasks() {
-  var container = document.getElementById('taskList');
-  if (!container) return;
-  if (BRANDS_DATA.length === 0) {
-    container.innerHTML = '<div style="padding:1.5rem; text-align:center;"><div style="font-size:1.2rem; opacity:0.3; margin-bottom:0.5rem;">\u2610</div><div style="font-size:0.82rem; color:var(--muted);">' + (sheetsLoaded ? 'No brands in pipeline yet.' : 'Connect Google Sheets to load data.') + '</div></div>';
-    return;
-  }
-  var tasks = [];
-  BRANDS_DATA.forEach(function(b) {
-    if (b.routing === 'MANUAL_REVIEW') tasks.push({ priority:'high', text:'Review ' + b.name + ' (Score: ' + b.score + ')', brand:b.name, due:'Committee' });
-    if (b.routing === 'AUTO_APPROVE') tasks.push({ priority:'medium', text:'Send compliance checklist to ' + b.name, brand:b.name, due:'24hrs' });
-    if (b.score > 0 && b.score < 60) tasks.push({ priority:'low', text:'Follow up with ' + b.name, brand:b.name, due:'6 months' });
-  });
-  if (tasks.length === 0) tasks.push({ priority:'medium', text:'All brands processed', brand:'System', due:'Ongoing' });
-  container.innerHTML = tasks.slice(0, 8).map(function(t) {
-    return '<div class="task-item"><div class="task-priority ' + t.priority + '"></div><div class="task-text">' + t.text + '</div><div><div class="task-brand">' + t.brand + '</div><div class="task-due">' + t.due + '</div></div></div>';
-  }).join('');
-}
-
-function renderPipelineOverview() {
-  var container = document.getElementById('pipelineOverview');
-  if (!container) return;
-  var approved = BRANDS_DATA.filter(function(b){return b.routing==='AUTO_APPROVE'}).length;
-  var review = BRANDS_DATA.filter(function(b){return b.routing==='MANUAL_REVIEW'}).length;
-  var rejected = BRANDS_DATA.filter(function(b){return b.routing==='AUTO_REJECT'}).length;
-  var total = BRANDS_DATA.length || 1;
-  if (BRANDS_DATA.length === 0) {
-    container.innerHTML = '<div style="padding:1.5rem; text-align:center; font-size:0.82rem; color:var(--muted);">' + (sheetsLoaded ? 'No brand data yet.' : 'Pipeline populates when Sheets connected.') + '</div>';
-    return;
-  }
-  var bars = [
-    {label:'Auto-Approved',count:approved,color:'var(--success)',pct:(approved/total)*100},
-    {label:'Manual Review',count:review,color:'var(--warning)',pct:(review/total)*100},
-    {label:'Not Approved',count:rejected,color:'var(--danger)',pct:(rejected/total)*100}
-  ];
-  container.innerHTML = bars.map(function(b){
-    return '<div style="margin-bottom:0.75rem;"><div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--muted);margin-bottom:0.3rem;"><span>'+b.label+'</span><span>'+b.count+'</span></div><div style="height:18px;background:var(--surface);border-radius:4px;overflow:hidden;"><div style="height:100%;width:'+Math.max(b.pct,2)+'%;background:'+b.color+';border-radius:4px;transition:width 1s;"></div></div></div>';
-  }).join('');
-}
-
-var calDate = new Date();
-function changeMonth(delta) {
-  if (delta === 0) calDate = new Date();
-  else calDate.setMonth(calDate.getMonth() + delta);
-  renderCalendar(calDate);
-}
-
-function renderCalendar(date) {
-  var el = document.getElementById('calendarGrid');
-  var label = document.getElementById('calMonthLabel');
-  if (!el || !label) return;
-  var year = date.getFullYear(), month = date.getMonth(), today = new Date();
-  label.textContent = date.toLocaleDateString('en-US', {month:'long', year:'numeric'});
-  var firstDay = new Date(year, month, 1).getDay();
-  var daysInMonth = new Date(year, month+1, 0).getDate();
-  var prevDays = new Date(year, month, 0).getDate();
-  var events = generateCalendarEvents(year, month);
-  var html = '<div class="cal-grid">';
-  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(function(d){html+='<div class="cal-header">'+d+'</div>';});
-  for (var i=firstDay-1; i>=0; i--) html += '<div class="cal-cell other-month"><div class="cal-day">'+(prevDays-i)+'</div></div>';
-  for (var d=1; d<=daysInMonth; d++) {
-    var isToday = (d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear());
-    var dayEvts = events.filter(function(e){return e.day===d;});
-    html += '<div class="cal-cell'+(isToday?' today':'')+'"><div class="cal-day">'+d+'</div>';
-    dayEvts.forEach(function(e){html+='<div class="cal-event '+e.type+'" title="'+e.title+'">'+e.title+'</div>';});
-    html += '</div>';
-  }
-  var rem = 7-((firstDay+daysInMonth)%7); if(rem<7) for(var j=1;j<=rem;j++) html+='<div class="cal-cell other-month"><div class="cal-day">'+j+'</div></div>';
-  html += '</div>';
-  el.innerHTML = html;
-}
-
-function generateCalendarEvents(year, month) {
-  var events = [];
-  BRANDS_DATA.forEach(function(b, idx) {
-    if (b.routing === 'AUTO_APPROVE') events.push({day:((idx*7+5)%28)+1, type:'presentation', title:b.name+' Pres.'});
-    if (b.routing === 'MANUAL_REVIEW') events.push({day:((idx*5+10)%28)+1, type:'review', title:b.name+' Review'});
-  });
-  events.push({day:1, type:'promo', title:'A&P Budget: $6K'});
-  return events;
-}
-
-function renderQuickHealth() {
-  const container = document.getElementById('quickHealth');
-  const quickServices = SERVICES.slice(0, 5);
-  container.innerHTML = quickServices.map(s => {
-    const dotClass = s.realUrl ? 'dot-ok' : 'dot-pending';
-    const statusColor = s.realUrl ? 'var(--success)' : 'var(--muted)';
-    const statusText = s.realUrl ? 'Connected' : 'Pending Setup';
-    return `<div style="display:flex; align-items:center; gap:0.5rem; font-size:0.78rem;">
-      <span>${s.icon}</span><span>${s.name}</span>
-      <div class="indicator-dot ${dotClass}" style="width:6px;height:6px;border-radius:50%;background:${statusColor}"></div>
-      <span style="color:${statusColor}; font-size:0.68rem; font-family:'DM Mono',monospace;">${statusText}</span>
-    </div>`;
-  }).join('');
-}
-function switchDetailTab(tabName, el) {
-  document.querySelectorAll('.detail-tab').forEach(function(t){t.classList.remove('active');});
-  document.querySelectorAll('.detail-content').forEach(function(c){c.classList.remove('active');});
-  if (el) el.classList.add('active');
-  var target = document.getElementById('dt-'+tabName);
-  if (target) target.classList.add('active');
-}
-
-// Override showBrandDetail to add enhanced view with sub-tabs
-var _origShowBrandDetail = typeof showBrandDetail === 'function' ? showBrandDetail : null;
-
-function showEnhancedBrandDetail(idx) {
-  var b = BRANDS_DATA[idx];
-  if (!b) return;
-  var scoreColor = b.score >= 70 ? 'var(--success)' : b.score >= 60 ? 'var(--warning)' : 'var(--danger)';
-  var initials = b.name.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
-
-  var el = document.getElementById('brandDetailContent');
-  if (!el) return;
-
-  el.innerHTML = '<a class="brand-detail-back" onclick="showTab(\'brands\')">&larr; Back to Brands</a>'
-    + '<div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:2rem;flex-wrap:wrap;">'
-    + '<div style="width:56px;height:56px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.2rem;background:rgba(74,155,232,0.12);color:var(--accent-light);">'+initials+'</div>'
-    + '<div><h2 style="font-family:\'Bebas Neue\',sans-serif;font-size:2rem;letter-spacing:0.03em;line-height:1;">'+b.name+'</h2>'
-    + '<div style="color:var(--muted);font-size:0.82rem;margin-top:0.25rem;">'+[b.category,b.retailer,b.routing].filter(Boolean).join(' \u00b7 ')+'</div></div>'
-    + '<div style="margin-left:auto;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.5rem;">'
-    + '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:3rem;line-height:1;color:'+scoreColor+'">'+b.score+'</div>'
-    + '<div style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Score</div></div></div>'
-<!-- TEAM ASSIGNMENT -->
-    <div class="card" style="margin-bottom:1.5rem; padding:1rem 1.5rem;">
-      <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
-        <span style="font-size:0.65rem; font-family:'DM Mono',monospace; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase;">Assigned To:</span>
-        <select id="teamAssign" onchange="assignTeamMember(window._currentBrandIdx)" style="background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:4px; padding:0.4rem 0.8rem; font-size:0.82rem; font-family:'DM Sans',sans-serif;">
-          <option value="">\u2014 Unassigned \u2014</option>
-          <option value="Andrew">Andrew</option>
-          <option value="Errol">Errol</option>
-          <option value="Lisle">Lisle</option>
-          <option value="Bill">Bill</option>
-          <option value="Team1">Team1</option>
-          <option value="Team2">Team2</option>
-        </select>
-        <span id="assignStatus" style="font-size:0.72rem; color:var(--muted);"></span>
-      </div>
-    </div>
-    
-    + '<div class="detail-tabs"><div class="detail-tab active" onclick="switchDetailTab(\'overview\',this)">Overview<div class="detail-tab" onclick="switchDetailTab('files',this)">Files &amp; Uploads</div>
-      </div><div class="detail-tab" onclick="switchDetailTab(\'business\',this)">Business Case</div><div class="detail-tab" onclick="switchDetailTab(\'promo\',this)">Promo Spend</div><div class="detail-tab" onclick="switchDetailTab(\'formdata\',this)">Form Data</div></div>'
-    + '<div id="dt-overview" class="detail-content active"><div class="grid-3">'
-    + '<div class="card"><div class="card-title">Brand Summary</div>'
-    + '<div class="card-row"><span class="label">Name</span><span class="value">'+b.name+'</span></div>'
-    + '<div class="card-row"><span class="label">Contact</span><span class="value">'+(b.contact||'\u2014')+'</span></div>'
-    + '<div class="card-row"><span class="label">Email</span><span class="value" style="color:var(--accent)">'+b.email+'</span></div>'
-    + '<div class="card-row"><span class="label">Category</span><span class="value">'+(b.category||'\u2014')+'</span></div>'
-    + '<div class="card-row"><span class="label">Revenue</span><span class="value">'+(b.revenue||'\u2014')+'</span></div></div>'
-    + '<div class="card"><div class="card-title">Pipeline Status</div>'
-    + '<div class="card-row"><span class="label">Routing</span><span class="value" style="color:'+scoreColor+'">'+(b.routing||'\u2014')+'</span></div>'
-    + '<div class="card-row"><span class="label">Score</span><span class="value">'+b.score+'/100</span></div>'
-    + '<div class="card-row"><span class="label">Retailer</span><span class="value">'+(b.retailer||'\u2014')+'</span></div>'
-    + '<div class="card-row"><span class="label">Submitted</span><span class="value">'+(b.submittedAt?new Date(b.submittedAt).toLocaleDateString():'\u2014')+'</span></div></div>'
-    + '<div class="card"><div class="card-title">Next Actions</div>'
-    + (b.routing==='AUTO_APPROVE'?'<div class="task-item"><div class="task-priority high"></div><div class="task-text">Send compliance checklist</div></div><div class="task-item"><div class="task-priority medium"></div><div class="task-text">Schedule Phase 2 call</div></div>':'')
-    + (b.routing==='MANUAL_REVIEW'?'<div class="task-item"><div class="task-priority high"></div><div class="task-text">Committee review needed</div></div><div class="task-item"><div class="task-priority medium"></div><div class="task-text">Request additional info</div></div>':'')
-    + (b.routing==='AUTO_REJECT'?'<div class="task-item"><div class="task-priority low"></div><div class="task-text">Rejection email sent</div></div><div class="task-item"><div class="task-priority low"></div><div class="task-text">6-month follow-up</div></div>':'')
-    + '</div></div></div>'
-    + '<div id="dt-business" class="detail-content"><div class="grid-2"><div class="card"><div class="card-title">Revenue Projection</div><p style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem;">Sam\u2019s Club roadshow model ('+CONFIG.storeCount+' locations)</p><div class="card-row"><span class="label">Locations</span><span class="value">'+CONFIG.storeCount+'</span></div><div class="card-row"><span class="label">Avg Daily Sales</span><span class="value"><span style="color:var(--muted)">Pending Phase 2</span></span></div><div class="card-row"><span class="label">Event Duration</span><span class="value">3 days</span></div><div class="card-row"><span class="label">Revenue/Event</span><span class="value" style="color:var(--success)"><span style="color:var(--muted)">Pending Phase 2</span></span></div><div class="card-row"><span class="label">Brand Revenue</span><span class="value">'+(b.revenue||'\u2014')+'</span></div></div><div class="card"><div class="card-title">ROI Framework</div><div class="card-row"><span class="label">Readiness</span><span class="value" style="color:'+scoreColor+'">'+b.score+'/100</span></div><div class="card-row"><span class="label">Threshold</span><span class="value">'+(b.score>=70?'Met':'Below')+'</span></div><div class="card-row"><span class="label">Unit Cost</span><span class="value" style="color:var(--muted)">Phase 2</span></div><div class="card-row"><span class="label">Projected ROI</span><span class="value" style="color:var(--muted)">After cost data</span></div></div></div></div>'
-    + '<div id="dt-promo" class="detail-content"><div class="card"><div class="card-title">Promotional Spend &amp; A&amp;P Budget</div><p style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem;">Source: Promo Sheet.xlsx</p><table class="promo-table"><thead><tr><th>Category</th><th>Line Item</th><th>Monthly</th><th>Annual</th></tr></thead><tbody><tr><td rowspan="2" style="color:var(--accent-light);font-weight:600;">Advertising</td><td>Press Kits / PR</td><td>$300</td><td>$3,600</td></tr><tr><td>Influencer Marketing</td><td>$3,000</td><td>$36,000</td></tr><tr><td style="color:var(--warning);font-weight:600;">Promotional</td><td>UGC / Affiliate</td><td>$1,000</td><td>$12,000</td></tr><tr><td rowspan="2" style="color:var(--muted);font-weight:600;">Non-Working</td><td>Shopify Platform</td><td>$500</td><td>$6,000</td></tr><tr><td>Klaviyo (Email)</td><td>$1,200</td><td>$14,400</td></tr><tr class="total-row"><td></td><td>Total A&amp;P</td><td style="color:var(--accent-light)">$6,000/mo</td><td style="color:var(--success)">$72,000/yr</td></tr></tbody></table></div></div>'
-    + '<div id="dt-formdata" class="detail-content"><div class="card"><div class="card-title">Form Submission Data</div>
-
-    <!-- FILES & UPLOADS -->
-    <div id="dt-files" class="detail-content">
-      <div class="card">
-        <div class="card-title">Brand Files &amp; Documents</div>
-        <p style="font-size:0.82rem; color:var(--muted); margin-bottom:1rem;">Upload and access all files related to this brand.</p>
-        <div id="brandFilesArea">
-          <div class="empty-state" style="padding:2rem;">
-            <div style="font-size:0.82rem; color:var(--muted);">Google Drive folder will be created when brand is submitted via intake form.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-<p style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem;">Raw data from Google Sheets</p><div class="card-row"><span class="label">Brand ID</span><span class="value" style="font-family:monospace">'+b.id+'</span></div><div class="card-row"><span class="label">Name</span><span class="value">'+b.name+'</span></div><div class="card-row"><span class="label">Contact</span><span class="value">'+(b.contact||'\u2014')+'</span></div><div class="card-row"><span class="label">Email</span><span class="value">'+b.email+'</span></div><div class="card-row"><span class="label">Phone</span><span class="value">'+(b.phone||'\u2014')+'</span></div><div class="card-row"><span class="label">Category</span><span class="value">'+(b.category||'\u2014')+'</span></div><div class="card-row"><span class="label">Revenue</span><span class="value">'+(b.revenue||'\u2014')+'</span></div><div class="card-row"><span class="label">Retailer</span><span class="value">'+(b.retailer||'\u2014')+'</span></div><div class="card-row"><span class="label">Score</span><span class="value" style="color:'+scoreColor+'">'+b.score+'</span></div><div class="card-row"><span class="label">Routing</span><span class="value">'+(b.routing||'\u2014')+'</span></div><div class="card-row"><span class="label">Submitted</span><span class="value">'+(b.submittedAt||'\u2014')+'</span></div><div class="card-row"><span class="label">Source</span><span class="value" style="color:var(--accent)">Google Sheets: Phase1_Submissions</span></div></div></div>';
-
-  document.querySelectorAll('.tab-content').forEach(function(e){e.classList.remove('active');});
-  document.getElementById('tab-brand-detail').classList.add('active');
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-
 </script>
 </body>
 </html>

@@ -1,9 +1,21 @@
-<!DOCTYPE html>
+<!DOC
+    <!-- FILES & UPLOADS -->
+    <div id="dt-files" class="detail-content">
+      <div class="card">
+        <div class="card-title">Brand Files &amp; Documents</div>
+        <p style="font-size:0.82rem; color:var(--muted); margin-bottom:1rem;">Upload and access all files related to this brand.</p>
+        <div id="brandFilesArea">
+          <div class="empty-state" style="padding:2rem;">
+            <div style="font-size:0.82rem; color:var(--muted);">Google Drive folder will be created when brand is submitted via intake form.</div>
+          </div>
+        </div>
+      </div>
+    </div>TYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ascenda Dashboard</title>
+<title>Ascenda Group Business Management System</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -913,8 +925,7 @@
 
 <header>
   <div class="logo-wrap" onclick="showTab('pipeline')">
-    <img src="YourBrnadHereStockPhoto.png" alt="Ascenda" class="logo-img" />
-    <div class="logo-text">ASCENDA <span>DASHBOARD</span></div>
+    <div class="logo-text">ASCENDA <span>GROUP</span></div>
   </div>
   <nav>
     <a href="#pipeline" class="active" onclick="showTab('pipeline')">Dashboard</a>
@@ -960,7 +971,7 @@
   </div>
   <div class="stat-item">
     <div class="stat-label">Workflows Active</div>
-    <div class="stat-value" id="stat-workflows">10</div>
+    <div class="stat-value" id="stat-workflows">—</div>
     <div class="stat-delta">100% uptime</div>
   </div>
   <div class="stat-item">
@@ -1447,12 +1458,15 @@ function renderBrands() {
         <div class="brand-meta-item"><span>Revenue</span><span class="brand-meta-val">${b.rev}</span></div>
         <div class="brand-meta-item"><span>Retailer</span><span class="brand-meta-val">${b.retailer}</span></div>
         <div class="brand-meta-item"><span>Model</span><span class="brand-meta-val">${b.model}</span></div>
+        <div class="brand-meta-item"><span>Assigned</span><span class="brand-meta-val" style="${b.assignedTo ? 'color:var(--accent-light)' : ''}">${b.assignedTo || 'Unassigned'}</span></div>
       </div>
     </div>`;
   }).join('');
 }
 
 function showBrandDetail(idx) {
+    window._currentBrandIdx = idx;
+
   const b = BRANDS[idx];
   if (!b) return;
   const scoreColor = b.score>=80?'var(--success)':b.score>=70?'var(--warning)':'var(--danger)';
@@ -1961,7 +1975,106 @@ function notify(title, body) {
 // ============================================================
 // INIT
 // ============================================================
+
+// === TEAM ASSIGNMENT ===
+const TEAM_MEMBERS = ['Andrew', 'Errol', 'Lisle', 'Bill', 'Team1', 'Team2'];
+
+function assignTeamMember(idx) {
+  if (idx === undefined || idx === null) return;
+  const sel = document.getElementById('teamAssign');
+  if (!sel) return;
+  BRANDS[idx].assignedTo = sel.value || '';
+  const status = document.getElementById('assignStatus');
+  if (status) {
+    status.textContent = sel.value ? 'Saved \u2713' : '';
+    setTimeout(() => { status.textContent = ''; }, 2000);
+  }
+  renderBrands();
+}
+
+// === PROMO BUDGET LOADING ===
+const PROMO_SHEET_ID = '1VZzSugENfTMvA8D2ZSQuSGlDa_NsHq4o5Zz3Qazut6w';
+
+function loadPromoBudget() {
+  const url = 'https://docs.google.com/spreadsheets/d/' + PROMO_SHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Sheet1';
+  fetch(url)
+    .then(r => r.text())
+    .then(csv => {
+      const rows = parseCSV(csv);
+      renderPromoBudgetTable(rows, 'promoBudgetTable');
+    })
+    .catch(err => {
+      const el = document.getElementById('promoBudgetTable');
+      if (el) el.innerHTML = '<div style="padding:1rem; color:var(--muted); font-size:0.82rem;">Unable to load budget data. <a href="https://docs.google.com/spreadsheets/d/' + PROMO_SHEET_ID + '/edit" target="_blank" style="color:var(--accent)">Open in Sheets</a></div>';
+    });
+}
+
+function parseCSV(csv) {
+  const rows = [];
+  let current = [];
+  let field = '';
+  let inQuotes = false;
+  for (let i = 0; i < csv.length; i++) {
+    const c = csv[i];
+    if (inQuotes) {
+      if (c === '"' && csv[i+1] === '"') { field += '"'; i++; }
+      else if (c === '"') { inQuotes = false; }
+      else { field += c; }
+    } else {
+      if (c === '"') { inQuotes = true; }
+      else if (c === ',') { current.push(field.trim()); field = ''; }
+      else if (c === '\n' || (c === '\r' && csv[i+1] === '\n')) {
+        current.push(field.trim()); field = '';
+        if (c === '\r') i++;
+        rows.push(current); current = [];
+      } else { field += c; }
+    }
+  }
+  if (field || current.length) { current.push(field.trim()); rows.push(current); }
+  return rows;
+}
+
+function renderPromoBudgetTable(rows, containerId) {
+  const el = document.getElementById(containerId);
+  if (!el || !rows.length) return;
+  let html = '<table class="promo-table"><thead><tr>';
+  rows[0].forEach(h => { html += '<th>' + h + '</th>'; });
+  html += '</tr></thead><tbody>';
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    const isSection = row[0] && row.slice(1).every(c => !c || c === '0' || c === '$0' || c === '$-');
+    const isTotal = row[0] && row[0].toUpperCase().includes('TOTAL');
+    const cls = isSection ? ' class="cat-header"' : isTotal ? ' class="total-row"' : '';
+    html += '<tr' + cls + '>';
+    row.forEach(cell => { html += '<td>' + (cell || '') + '</td>'; });
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function loadBrandPromoBudget() {
+  const url = 'https://docs.google.com/spreadsheets/d/' + PROMO_SHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Sheet1';
+  fetch(url)
+    .then(r => r.text())
+    .then(csv => {
+      const rows = parseCSV(csv);
+      renderPromoBudgetTable(rows, 'brandPromoTable');
+    })
+    .catch(() => {});
+}
+
+function populateKPIs() {
+  const wfEl = document.getElementById('stat-workflows');
+  if (wfEl) wfEl.textContent = typeof WORKFLOWS !== 'undefined' ? WORKFLOWS.length : '\u2014';
+  const locEl = document.getElementById('stat-locations');
+  if (locEl) locEl.textContent = typeof CONFIG !== 'undefined' && CONFIG.storeCount ? CONFIG.storeCount : '600+';
+}
+
 window.addEventListener('DOMContentLoaded', () => {
+  populateKPIs();
+  loadPromoBudget();
+
   renderPipeline();
   renderBrands();
   renderWorkflows();
@@ -2079,22 +2192,19 @@ function generateCalendarEvents(year, month) {
 }
 
 function renderQuickHealth() {
-  var container = document.getElementById('quickHealth');
-  if (!container) return;
-  container.innerHTML = SERVICES.map(function(s){
-    return '<div style="display:flex;align-items:center;gap:0.5rem;font-size:0.78rem;"><span>'+s.icon+'</span><span>'+s.name+'</span><span style="color:var(--muted);font-size:0.68rem;">'+s.desc+'</span></div>';
+  const container = document.getElementById('quickHealth');
+  const quickServices = SERVICES.slice(0, 5);
+  container.innerHTML = quickServices.map(s => {
+    const dotClass = s.realUrl ? 'dot-ok' : 'dot-pending';
+    const statusColor = s.realUrl ? 'var(--success)' : 'var(--muted)';
+    const statusText = s.realUrl ? 'Connected' : 'Pending Setup';
+    return `<div style="display:flex; align-items:center; gap:0.5rem; font-size:0.78rem;">
+      <span>${s.icon}</span><span>${s.name}</span>
+      <div class="indicator-dot ${dotClass}" style="width:6px;height:6px;border-radius:50%;background:${statusColor}"></div>
+      <span style="color:${statusColor}; font-size:0.68rem; font-family:'DM Mono',monospace;">${statusText}</span>
+    </div>`;
   }).join('');
 }
-
-// Load real data on page load
-document.addEventListener('DOMContentLoaded', function() { loadBrandsFromSheets(); });
-if (document.readyState !== 'loading') loadBrandsFromSheets();
-
-
-
-// ============================================================
-// ENHANCED BRAND DETAIL (ADDED - Promo Spend, Business Case)
-// ============================================================
 function switchDetailTab(tabName, el) {
   document.querySelectorAll('.detail-tab').forEach(function(t){t.classList.remove('active');});
   document.querySelectorAll('.detail-content').forEach(function(c){c.classList.remove('active');});
@@ -2123,7 +2233,25 @@ function showEnhancedBrandDetail(idx) {
     + '<div style="margin-left:auto;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.5rem;">'
     + '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:3rem;line-height:1;color:'+scoreColor+'">'+b.score+'</div>'
     + '<div style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Score</div></div></div>'
-    + '<div class="detail-tabs"><div class="detail-tab active" onclick="switchDetailTab(\'overview\',this)">Overview</div><div class="detail-tab" onclick="switchDetailTab(\'business\',this)">Business Case</div><div class="detail-tab" onclick="switchDetailTab(\'promo\',this)">Promo Spend</div><div class="detail-tab" onclick="switchDetailTab(\'formdata\',this)">Form Data</div></div>'
+<!-- TEAM ASSIGNMENT -->
+    <div class="card" style="margin-bottom:1.5rem; padding:1rem 1.5rem;">
+      <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+        <span style="font-size:0.65rem; font-family:'DM Mono',monospace; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase;">Assigned To:</span>
+        <select id="teamAssign" onchange="assignTeamMember(window._currentBrandIdx)" style="background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:4px; padding:0.4rem 0.8rem; font-size:0.82rem; font-family:'DM Sans',sans-serif;">
+          <option value="">\u2014 Unassigned \u2014</option>
+          <option value="Andrew">Andrew</option>
+          <option value="Errol">Errol</option>
+          <option value="Lisle">Lisle</option>
+          <option value="Bill">Bill</option>
+          <option value="Team1">Team1</option>
+          <option value="Team2">Team2</option>
+        </select>
+        <span id="assignStatus" style="font-size:0.72rem; color:var(--muted);"></span>
+      </div>
+    </div>
+    
+    + '<div class="detail-tabs"><div class="detail-tab active" onclick="switchDetailTab(\'overview\',this)">Overview<div class="detail-tab" onclick="switchDetailTab('files',this)">Files &amp; Uploads</div>
+      </div><div class="detail-tab" onclick="switchDetailTab(\'business\',this)">Business Case</div><div class="detail-tab" onclick="switchDetailTab(\'promo\',this)">Promo Spend</div><div class="detail-tab" onclick="switchDetailTab(\'formdata\',this)">Form Data</div></div>'
     + '<div id="dt-overview" class="detail-content active"><div class="grid-3">'
     + '<div class="card"><div class="card-title">Brand Summary</div>'
     + '<div class="card-row"><span class="label">Name</span><span class="value">'+b.name+'</span></div>'
@@ -2141,7 +2269,7 @@ function showEnhancedBrandDetail(idx) {
     + (b.routing==='MANUAL_REVIEW'?'<div class="task-item"><div class="task-priority high"></div><div class="task-text">Committee review needed</div></div><div class="task-item"><div class="task-priority medium"></div><div class="task-text">Request additional info</div></div>':'')
     + (b.routing==='AUTO_REJECT'?'<div class="task-item"><div class="task-priority low"></div><div class="task-text">Rejection email sent</div></div><div class="task-item"><div class="task-priority low"></div><div class="task-text">6-month follow-up</div></div>':'')
     + '</div></div></div>'
-    + '<div id="dt-business" class="detail-content"><div class="grid-2"><div class="card"><div class="card-title">Revenue Projection</div><p style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem;">Sam\u2019s Club roadshow model ('+CONFIG.storeCount+' locations)</p><div class="card-row"><span class="label">Locations</span><span class="value">'+CONFIG.storeCount+'</span></div><div class="card-row"><span class="label">Avg Daily Sales</span><span class="value">$2,400</span></div><div class="card-row"><span class="label">Event Duration</span><span class="value">3 days</span></div><div class="card-row"><span class="label">Revenue/Event</span><span class="value" style="color:var(--success)">$7,200</span></div><div class="card-row"><span class="label">Brand Revenue</span><span class="value">'+(b.revenue||'\u2014')+'</span></div></div><div class="card"><div class="card-title">ROI Framework</div><div class="card-row"><span class="label">Readiness</span><span class="value" style="color:'+scoreColor+'">'+b.score+'/100</span></div><div class="card-row"><span class="label">Threshold</span><span class="value">'+(b.score>=70?'Met':'Below')+'</span></div><div class="card-row"><span class="label">Unit Cost</span><span class="value" style="color:var(--muted)">Phase 2</span></div><div class="card-row"><span class="label">Projected ROI</span><span class="value" style="color:var(--muted)">After cost data</span></div></div></div></div>'
+    + '<div id="dt-business" class="detail-content"><div class="grid-2"><div class="card"><div class="card-title">Revenue Projection</div><p style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem;">Sam\u2019s Club roadshow model ('+CONFIG.storeCount+' locations)</p><div class="card-row"><span class="label">Locations</span><span class="value">'+CONFIG.storeCount+'</span></div><div class="card-row"><span class="label">Avg Daily Sales</span><span class="value"><span style="color:var(--muted)">Pending Phase 2</span></span></div><div class="card-row"><span class="label">Event Duration</span><span class="value">3 days</span></div><div class="card-row"><span class="label">Revenue/Event</span><span class="value" style="color:var(--success)"><span style="color:var(--muted)">Pending Phase 2</span></span></div><div class="card-row"><span class="label">Brand Revenue</span><span class="value">'+(b.revenue||'\u2014')+'</span></div></div><div class="card"><div class="card-title">ROI Framework</div><div class="card-row"><span class="label">Readiness</span><span class="value" style="color:'+scoreColor+'">'+b.score+'/100</span></div><div class="card-row"><span class="label">Threshold</span><span class="value">'+(b.score>=70?'Met':'Below')+'</span></div><div class="card-row"><span class="label">Unit Cost</span><span class="value" style="color:var(--muted)">Phase 2</span></div><div class="card-row"><span class="label">Projected ROI</span><span class="value" style="color:var(--muted)">After cost data</span></div></div></div></div>'
     + '<div id="dt-promo" class="detail-content"><div class="card"><div class="card-title">Promotional Spend &amp; A&amp;P Budget</div><p style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem;">Source: Promo Sheet.xlsx</p><table class="promo-table"><thead><tr><th>Category</th><th>Line Item</th><th>Monthly</th><th>Annual</th></tr></thead><tbody><tr><td rowspan="2" style="color:var(--accent-light);font-weight:600;">Advertising</td><td>Press Kits / PR</td><td>$300</td><td>$3,600</td></tr><tr><td>Influencer Marketing</td><td>$3,000</td><td>$36,000</td></tr><tr><td style="color:var(--warning);font-weight:600;">Promotional</td><td>UGC / Affiliate</td><td>$1,000</td><td>$12,000</td></tr><tr><td rowspan="2" style="color:var(--muted);font-weight:600;">Non-Working</td><td>Shopify Platform</td><td>$500</td><td>$6,000</td></tr><tr><td>Klaviyo (Email)</td><td>$1,200</td><td>$14,400</td></tr><tr class="total-row"><td></td><td>Total A&amp;P</td><td style="color:var(--accent-light)">$6,000/mo</td><td style="color:var(--success)">$72,000/yr</td></tr></tbody></table></div></div>'
     + '<div id="dt-formdata" class="detail-content"><div class="card"><div class="card-title">Form Submission Data</div><p style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem;">Raw data from Google Sheets</p><div class="card-row"><span class="label">Brand ID</span><span class="value" style="font-family:monospace">'+b.id+'</span></div><div class="card-row"><span class="label">Name</span><span class="value">'+b.name+'</span></div><div class="card-row"><span class="label">Contact</span><span class="value">'+(b.contact||'\u2014')+'</span></div><div class="card-row"><span class="label">Email</span><span class="value">'+b.email+'</span></div><div class="card-row"><span class="label">Phone</span><span class="value">'+(b.phone||'\u2014')+'</span></div><div class="card-row"><span class="label">Category</span><span class="value">'+(b.category||'\u2014')+'</span></div><div class="card-row"><span class="label">Revenue</span><span class="value">'+(b.revenue||'\u2014')+'</span></div><div class="card-row"><span class="label">Retailer</span><span class="value">'+(b.retailer||'\u2014')+'</span></div><div class="card-row"><span class="label">Score</span><span class="value" style="color:'+scoreColor+'">'+b.score+'</span></div><div class="card-row"><span class="label">Routing</span><span class="value">'+(b.routing||'\u2014')+'</span></div><div class="card-row"><span class="label">Submitted</span><span class="value">'+(b.submittedAt||'\u2014')+'</span></div><div class="card-row"><span class="label">Source</span><span class="value" style="color:var(--accent)">Google Sheets: Phase1_Submissions</span></div></div></div>';
 

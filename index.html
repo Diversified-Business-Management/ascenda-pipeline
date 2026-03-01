@@ -1,16 +1,4 @@
-<!DOC
-    <!-- FILES & UPLOADS -->
-    <div id="dt-files" class="detail-content">
-      <div class="card">
-        <div class="card-title">Brand Files &amp; Documents</div>
-        <p style="font-size:0.82rem; color:var(--muted); margin-bottom:1rem;">Upload and access all files related to this brand.</p>
-        <div id="brandFilesArea">
-          <div class="empty-state" style="padding:2rem;">
-            <div style="font-size:0.82rem; color:var(--muted);">Google Drive folder will be created when brand is submitted via intake form.</div>
-          </div>
-        </div>
-      </div>
-    </div>TYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -2271,7 +2259,21 @@ function showEnhancedBrandDetail(idx) {
     + '</div></div></div>'
     + '<div id="dt-business" class="detail-content"><div class="grid-2"><div class="card"><div class="card-title">Revenue Projection</div><p style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem;">Sam\u2019s Club roadshow model ('+CONFIG.storeCount+' locations)</p><div class="card-row"><span class="label">Locations</span><span class="value">'+CONFIG.storeCount+'</span></div><div class="card-row"><span class="label">Avg Daily Sales</span><span class="value"><span style="color:var(--muted)">Pending Phase 2</span></span></div><div class="card-row"><span class="label">Event Duration</span><span class="value">3 days</span></div><div class="card-row"><span class="label">Revenue/Event</span><span class="value" style="color:var(--success)"><span style="color:var(--muted)">Pending Phase 2</span></span></div><div class="card-row"><span class="label">Brand Revenue</span><span class="value">'+(b.revenue||'\u2014')+'</span></div></div><div class="card"><div class="card-title">ROI Framework</div><div class="card-row"><span class="label">Readiness</span><span class="value" style="color:'+scoreColor+'">'+b.score+'/100</span></div><div class="card-row"><span class="label">Threshold</span><span class="value">'+(b.score>=70?'Met':'Below')+'</span></div><div class="card-row"><span class="label">Unit Cost</span><span class="value" style="color:var(--muted)">Phase 2</span></div><div class="card-row"><span class="label">Projected ROI</span><span class="value" style="color:var(--muted)">After cost data</span></div></div></div></div>'
     + '<div id="dt-promo" class="detail-content"><div class="card"><div class="card-title">Promotional Spend &amp; A&amp;P Budget</div><p style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem;">Source: Promo Sheet.xlsx</p><table class="promo-table"><thead><tr><th>Category</th><th>Line Item</th><th>Monthly</th><th>Annual</th></tr></thead><tbody><tr><td rowspan="2" style="color:var(--accent-light);font-weight:600;">Advertising</td><td>Press Kits / PR</td><td>$300</td><td>$3,600</td></tr><tr><td>Influencer Marketing</td><td>$3,000</td><td>$36,000</td></tr><tr><td style="color:var(--warning);font-weight:600;">Promotional</td><td>UGC / Affiliate</td><td>$1,000</td><td>$12,000</td></tr><tr><td rowspan="2" style="color:var(--muted);font-weight:600;">Non-Working</td><td>Shopify Platform</td><td>$500</td><td>$6,000</td></tr><tr><td>Klaviyo (Email)</td><td>$1,200</td><td>$14,400</td></tr><tr class="total-row"><td></td><td>Total A&amp;P</td><td style="color:var(--accent-light)">$6,000/mo</td><td style="color:var(--success)">$72,000/yr</td></tr></tbody></table></div></div>'
-    + '<div id="dt-formdata" class="detail-content"><div class="card"><div class="card-title">Form Submission Data</div><p style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem;">Raw data from Google Sheets</p><div class="card-row"><span class="label">Brand ID</span><span class="value" style="font-family:monospace">'+b.id+'</span></div><div class="card-row"><span class="label">Name</span><span class="value">'+b.name+'</span></div><div class="card-row"><span class="label">Contact</span><span class="value">'+(b.contact||'\u2014')+'</span></div><div class="card-row"><span class="label">Email</span><span class="value">'+b.email+'</span></div><div class="card-row"><span class="label">Phone</span><span class="value">'+(b.phone||'\u2014')+'</span></div><div class="card-row"><span class="label">Category</span><span class="value">'+(b.category||'\u2014')+'</span></div><div class="card-row"><span class="label">Revenue</span><span class="value">'+(b.revenue||'\u2014')+'</span></div><div class="card-row"><span class="label">Retailer</span><span class="value">'+(b.retailer||'\u2014')+'</span></div><div class="card-row"><span class="label">Score</span><span class="value" style="color:'+scoreColor+'">'+b.score+'</span></div><div class="card-row"><span class="label">Routing</span><span class="value">'+(b.routing||'\u2014')+'</span></div><div class="card-row"><span class="label">Submitted</span><span class="value">'+(b.submittedAt||'\u2014')+'</span></div><div class="card-row"><span class="label">Source</span><span class="value" style="color:var(--accent)">Google Sheets: Phase1_Submissions</span></div></div></div>';
+    + '<div id="dt-formdata" class="detail-content"><div class="card"><div class="card-title">Form Submission Data</div>
+
+    <!-- FILES & UPLOADS -->
+    <div id="dt-files" class="detail-content">
+      <div class="card">
+        <div class="card-title">Brand Files &amp; Documents</div>
+        <p style="font-size:0.82rem; color:var(--muted); margin-bottom:1rem;">Upload and access all files related to this brand.</p>
+        <div id="brandFilesArea">
+          <div class="empty-state" style="padding:2rem;">
+            <div style="font-size:0.82rem; color:var(--muted);">Google Drive folder will be created when brand is submitted via intake form.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+<p style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem;">Raw data from Google Sheets</p><div class="card-row"><span class="label">Brand ID</span><span class="value" style="font-family:monospace">'+b.id+'</span></div><div class="card-row"><span class="label">Name</span><span class="value">'+b.name+'</span></div><div class="card-row"><span class="label">Contact</span><span class="value">'+(b.contact||'\u2014')+'</span></div><div class="card-row"><span class="label">Email</span><span class="value">'+b.email+'</span></div><div class="card-row"><span class="label">Phone</span><span class="value">'+(b.phone||'\u2014')+'</span></div><div class="card-row"><span class="label">Category</span><span class="value">'+(b.category||'\u2014')+'</span></div><div class="card-row"><span class="label">Revenue</span><span class="value">'+(b.revenue||'\u2014')+'</span></div><div class="card-row"><span class="label">Retailer</span><span class="value">'+(b.retailer||'\u2014')+'</span></div><div class="card-row"><span class="label">Score</span><span class="value" style="color:'+scoreColor+'">'+b.score+'</span></div><div class="card-row"><span class="label">Routing</span><span class="value">'+(b.routing||'\u2014')+'</span></div><div class="card-row"><span class="label">Submitted</span><span class="value">'+(b.submittedAt||'\u2014')+'</span></div><div class="card-row"><span class="label">Source</span><span class="value" style="color:var(--accent)">Google Sheets: Phase1_Submissions</span></div></div></div>';
 
   document.querySelectorAll('.tab-content').forEach(function(e){e.classList.remove('active');});
   document.getElementById('tab-brand-detail').classList.add('active');

@@ -994,7 +994,7 @@
       <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:12px;height:3px;background:var(--danger);display:inline-block;border-radius:2px;"></span> BLOCKED</span>
       <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:12px;height:3px;background:var(--border);display:inline-block;border-radius:2px;"></span> PENDING</span>
     </div>
-  </div>
+  
 
   <!-- TAB: BRANDS -->
   
@@ -1033,6 +1033,8 @@
 
 </div>
 <!-- End of Dashboard tab additions -->
+</div>
+
 
 <div id="tab-brands" class="tab-content">
     <div class="section-header">
@@ -1652,7 +1654,7 @@ function renderHealth() {
         <span class="service-icon">${s.icon}</span>
         <div class="service-indicator" style="color:${s.status==='healthy'?'var(--success)':s.status==='warning'?'var(--warning)':'var(--danger)'}">
           <div class="indicator-dot dot-${s.status}"></div>
-          ${s.status.toUpperCase()}
+          ${(s.status || 'operational').toUpperCase()}
         </div>
       </div>
       <div class="service-name">${s.name}</div>
@@ -1763,7 +1765,7 @@ function renderAggregatePipeline() {
     <div class="agg-bar-group">
       <div class="agg-bar-label">
         <span>P${p.num} ${p.name.replace('\\n',' ')}</span>
-        <span>${p.count} brands &middot; ${p.status.toUpperCase()}</span>
+        <span>${p.count} brands &middot; ${(p.status || 'operational').toUpperCase()}</span>
       </div>
       <div class="agg-bar-track" title="${brandNames}">
         <div class="agg-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${phaseColors[i]},${phaseColors[i]}cc);">${p.count}</div>
@@ -1791,14 +1793,14 @@ function showPhaseModal(i) {
   const p = PHASES[i];
   const brandsInPhase = BRANDS.filter(b => b.phase === (i+1));
   document.getElementById('modalTitle').textContent = `PHASE ${p.num}: ${p.name.replace('\n',' ')}`;
-  document.getElementById('modalSubtitle').textContent = `STATUS: ${p.status.toUpperCase()} \u00B7 ${p.count} ${p.label}`;
+  document.getElementById('modalSubtitle').textContent = `STATUS: ${(p.status || 'operational').toUpperCase()} \u00B7 ${p.count} ${p.label}`;
   let brandList = brandsInPhase.length > 0
     ? brandsInPhase.map(b => `<div style="display:flex;justify-content:space-between;padding:0.4rem 0;font-size:0.8rem;"><span style="color:var(--accent-light)">${b.name}</span><span style="color:var(--muted)">${b.score}/100</span></div>`).join('')
     : '<div style="font-size:0.8rem;color:var(--muted);">No brands currently in this phase</div>';
   document.getElementById('modalBody').innerHTML = `
     <div class="detail-row"><span class="detail-label">Key Action</span><span class="detail-value">${p.keyAction}</span></div>
     <div class="detail-row"><span class="detail-label">Brands in Phase</span><span class="detail-value" style="color:var(--accent-light)">${p.count}</span></div>
-    <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value">${p.status.toUpperCase()}</span></div>
+    <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value">${(p.status || 'operational').toUpperCase()}</span></div>
     <div class="detail-row"><span class="detail-label">n8n Workflow</span><span class="detail-value" style="color:var(--accent)">WF-${p.num}</span></div>
     <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);">
       <div style="font-size:0.7rem;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:0.1em;margin-bottom:0.5rem;">BRANDS IN THIS PHASE</div>

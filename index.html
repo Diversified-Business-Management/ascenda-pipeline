@@ -1046,15 +1046,15 @@ function showBrandDetail(idx) {
         <p style="font-size:0.78rem; color:var(--muted); margin-bottom:1rem;">All documents for this brand are stored in the brand's Google Drive folder.</p>
         <div id="brandFilesArea" style="margin-bottom:1.5rem;">
           <div style="display:flex; flex-direction:column; gap:1rem;">
-            ${b.driveFolder ? \`
-              <a href="\${b.driveFolder}" target="_blank" class="btn btn-primary" style="width:fit-content;">Open Brand Folder in Google Drive</a>
+            ${b.driveFolder ? `
+              <a href="${b.driveFolder}" target="_blank" class="btn btn-primary" style="width:fit-content;">Open Brand Folder in Google Drive</a>
               <p style="font-size:0.72rem; color:var(--muted);">Upload presentations, compliance docs, promo materials, and any other files directly to this brand's folder.</p>
-            \` : \`
+            ` : `
               <div style="padding:1.5rem; background:var(--surface); border:1px solid var(--border); border-radius:8px;">
                 <div style="font-size:0.85rem; margin-bottom:0.5rem;">No Google Drive folder linked yet.</div>
                 <div style="font-size:0.72rem; color:var(--muted);">A folder is automatically created when a brand is submitted through the intake form. For existing brands, a folder will be created on next pipeline sync.</div>
               </div>
-            \`}
+            `}
           </div>
         </div>
       </div>

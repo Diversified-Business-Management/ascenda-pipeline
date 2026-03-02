@@ -519,8 +519,9 @@ footer { border-top:1px solid var(--border); padding:2rem; text-align:center; co
 // CONFIGURATION — REAL DATA SOURCES
 // ============================================================
 const CONFIG = {
-  sheetsId: '1pioLz-mtObrcQq1126PmUAVg9QCs2plAyvp5oRXVK8w',
-  sheetsTab: 'Phase1_Submissions',
+  sheetsId: '1zVPaQo5eSxj9rTFVXa4FPf-S7MFi-pEn-QT1D6s6mRc',
+  sheetsTab: 'Sheet1',
+  masterSheetsId: '1zVPaQo5eSxj9rTFVXa4FPf-S7MFi-pEn-QT1D6s6mRc',
   n8nBase: 'https://edenger.app.n8n.cloud',
   webhookPath: '/webhook/ascenda/intake',
   pineconeHost: 'ascenda-pipeline-8t9sj7i.svc.aped-4627-b74a.pinecone.io',
@@ -550,20 +551,33 @@ async function loadBrandsFromSheets() {
           const i = headers.indexOf(key);
           return i >= 0 && row[i] ? row[i].trim() : '';
         };
+        const tier = get('tier') || '';
+        const score = parseInt(get('score')) || 0;
+        const routing = tier === 'Fast-Track' ? 'AUTO_APPROVE' : tier === 'Standard Review' ? 'MANUAL_REVIEW' : tier === 'Rejected' ? 'AUTO_REJECT' : '';
         return {
-          id: get('id') || `BRAND-${idx}`,
-          name: get('brandname') || get('brand') || row[1] || '',
-          email: get('email') || '',
-          category: get('category') || '',
+          id: get('prospectid') || `BRAND-${idx}`,
+          name: get('p1company') || row[5] || '',
+          email: get('p1email') || '',
+          category: get('p1category') || '',
           revenue: get('revenue') || '',
-          retailer: get('retailer') || '',
-          score: parseInt(get('score')) || 0,
-          routing: get('routing') || '',
+          retailer: 'Sam\'s Club',
+          score: score,
+          routing: routing,
+          tier: tier,
           submittedAt: get('submittedat') || '',
-          contact: get('contactname') || '',
-          phone: get('phone') || '',
-          phase: getPhaseFromRouting(get('routing'), parseInt(get('score')) || 0),
-          phaseName: getPhaseNameFromRouting(get('routing')),
+          contact: (get('p1firstname') + ' ' + get('p1lastname')).trim(),
+          phone: get('p1phone') || '',
+          website: get('p1website') || '',
+          productName: get('p1productname') || '',
+          description: get('p1description') || '',
+          differentiation: get('p1differentiation') || '',
+          memberValue: get('p1membervalue') || '',
+          competitors: get('p1competitors') || '',
+          brandFolderId: get('brandfolderid') || '',
+          brandFolderUrl: get('brandfolderurl') || '',
+          brandSheetId: get('brandsheetid') || '',
+          phase: getPhaseFromRouting(routing, score),
+          phaseName: getPhaseNameFromRouting(routing),
         };
       });
       sheetsLoaded = true;
@@ -967,12 +981,13 @@ function showBrandDetail(idx) {
       <div class="grid-3">
         <div class="card">
           <div class="card-title">Brand Summary</div>
-          <div class="card-row"><span class="label">Brand Name</span><span class="value">${b.name}</span></div>
+          <div class="card-row"><span class="label">Company</span><span class="value">${b.name}</span></div>
+          <div class="card-row"><span class="label">Product</span><span class="value">${b.productName || '—'}</span></div>
           <div class="card-row"><span class="label">Contact</span><span class="value">${b.contact || '—'}</span></div>
           <div class="card-row"><span class="label">Email</span><span class="value" style="color:var(--accent)">${b.email}</span></div>
           <div class="card-row"><span class="label">Phone</span><span class="value">${b.phone || '—'}</span></div>
           <div class="card-row"><span class="label">Category</span><span class="value">${b.category || '—'}</span></div>
-          <div class="card-row"><span class="label">Revenue Range</span><span class="value">${b.revenue || '—'}</span></div>
+          <div class="card-row"><span class="label">Website</span><span class="value">${b.website ? '<a href="'+b.website+'" target="_blank" style="color:var(--accent)">'+b.website+'</a>' : '—'}</span></div>
         </div>
         <div class="card">
           <div class="card-title">Pipeline Status</div>
@@ -1032,7 +1047,9 @@ function showBrandDetail(idx) {
     <div id="dt-promo" class="detail-content">
       <div class="card">
         <div class="card-title">Promotional Spend &amp; Investment — A&amp;P Budget</div>
-        <p style="font-size:0.78rem; color:var(--muted); margin-bottom:1rem;">Source: <a href="https://docs.google.com/spreadsheets/d/1VZzSugENfTMvA8D2ZSQuSGlDa_NsHq4o5Zz3Qazut6w/edit" target="_blank" style="color:var(--accent)">A&amp;P Marketing Budget Tracker</a> — Standard Ascenda promotional budget applied to roadshow brands.</p>
+        <p style="font-size:0.78rem; color:var(--muted); margin-bottom:1rem;">
+          ${b.brandSheetId ? `Source: <a href="https://docs.google.com/spreadsheets/d/${b.brandSheetId}/edit" target="_blank" style="color:var(--accent)">Ascenda - ${b.name} - A&amp;P Promo Plan</a> — Brand-specific promotional budget.` : `Source: <a href="https://docs.google.com/spreadsheets/d/1VZzSugENfTMvA8D2ZSQuSGlDa_NsHq4o5Zz3Qazut6w/edit" target="_blank" style="color:var(--accent)">A&amp;P Marketing Budget Tracker</a> — Standard Ascenda promotional budget applied to roadshow brands.`}
+        </p>
         <div id="brandPromoTable">
           <div style="padding:1rem; color:var(--muted); font-size:0.82rem;">Loading budget from Google Sheets...</div>
         </div>
@@ -1046,8 +1063,8 @@ function showBrandDetail(idx) {
         <p style="font-size:0.78rem; color:var(--muted); margin-bottom:1rem;">All documents for this brand are stored in the brand's Google Drive folder.</p>
         <div id="brandFilesArea" style="margin-bottom:1.5rem;">
           <div style="display:flex; flex-direction:column; gap:1rem;">
-            ${b.driveFolder ? `
-              <a href="${b.driveFolder}" target="_blank" class="btn btn-primary" style="width:fit-content;">Open Brand Folder in Google Drive</a>
+            ${b.brandFolderUrl ? `
+              <a href="${b.brandFolderUrl}" target="_blank" class="btn btn-primary" style="width:fit-content;">Open Brand Folder in Google Drive</a>
               <p style="font-size:0.72rem; color:var(--muted);">Upload presentations, compliance docs, promo materials, and any other files directly to this brand's folder.</p>
             ` : `
               <div style="padding:1.5rem; background:var(--surface); border:1px solid var(--border); border-radius:8px;">
@@ -1055,6 +1072,10 @@ function showBrandDetail(idx) {
                 <div style="font-size:0.72rem; color:var(--muted);">A folder is automatically created when a brand is submitted through the intake form. For existing brands, a folder will be created on next pipeline sync.</div>
               </div>
             `}
+            ${b.brandSheetId ? `
+              <a href="https://docs.google.com/spreadsheets/d/${b.brandSheetId}/edit" target="_blank" class="btn btn-primary" style="width:fit-content; background:var(--accent-dark);">Open Brand A&amp;P Promo Plan</a>
+              <p style="font-size:0.72rem; color:var(--muted);">This brand's individual A&amp;P Marketing Budget Tracker spreadsheet.</p>
+            ` : ''}
           </div>
         </div>
       </div>
@@ -1066,17 +1087,25 @@ function showBrandDetail(idx) {
         <div class="card-title">Form Submission Data — Raw Inputs</div>
         <p style="font-size:0.78rem; color:var(--muted); margin-bottom:1rem;">This is the data submitted through the intake form and stored in Google Sheets.</p>
         <div class="card-row"><span class="label">Brand ID</span><span class="value" style="font-family:'DM Mono',monospace">${b.id}</span></div>
-        <div class="card-row"><span class="label">Brand Name</span><span class="value">${b.name}</span></div>
+        <div class="card-row"><span class="label">Company Name</span><span class="value">${b.name}</span></div>
+        <div class="card-row"><span class="label">Product Name</span><span class="value">${b.productName || '—'}</span></div>
+        <div class="card-row"><span class="label">Website</span><span class="value">${b.website ? '<a href="'+b.website+'" target="_blank" style="color:var(--accent)">'+b.website+'</a>' : '—'}</span></div>
         <div class="card-row"><span class="label">Contact Name</span><span class="value">${b.contact || '—'}</span></div>
         <div class="card-row"><span class="label">Email</span><span class="value">${b.email}</span></div>
         <div class="card-row"><span class="label">Phone</span><span class="value">${b.phone || '—'}</span></div>
         <div class="card-row"><span class="label">Category</span><span class="value">${b.category || '—'}</span></div>
-        <div class="card-row"><span class="label">Annual Revenue</span><span class="value">${b.revenue || '—'}</span></div>
+        <div class="card-row"><span class="label">Description</span><span class="value">${b.description || '—'}</span></div>
+        <div class="card-row"><span class="label">Differentiation</span><span class="value">${b.differentiation || '—'}</span></div>
+        <div class="card-row"><span class="label">Member Value</span><span class="value">${b.memberValue || '—'}</span></div>
+        <div class="card-row"><span class="label">Competitors</span><span class="value">${b.competitors || '—'}</span></div>
         <div class="card-row"><span class="label">Target Retailer</span><span class="value">${b.retailer || '—'}</span></div>
         <div class="card-row"><span class="label">Readiness Score</span><span class="value" style="color:${scoreColor}">${b.score}</span></div>
+        <div class="card-row"><span class="label">Tier</span><span class="value">${b.tier || '—'}</span></div>
         <div class="card-row"><span class="label">Routing Decision</span><span class="value">${b.routing || '—'}</span></div>
         <div class="card-row"><span class="label">Submitted At</span><span class="value">${b.submittedAt || '—'}</span></div>
-        <div class="card-row"><span class="label">Data Source</span><span class="value" style="font-family:'DM Mono',monospace; color:var(--accent)">Google Sheets: Phase1_Submissions</span></div>
+        ${b.brandFolderUrl ? `<div class="card-row"><span class="label">Brand Folder</span><span class="value"><a href="${b.brandFolderUrl}" target="_blank" style="color:var(--accent)">Open in Google Drive</a></span></div>` : ''}
+        ${b.brandSheetId ? `<div class="card-row"><span class="label">Brand Sheet</span><span class="value"><a href="https://docs.google.com/spreadsheets/d/${b.brandSheetId}/edit" target="_blank" style="color:var(--accent)">Open A&amp;P Promo Plan</a></span></div>` : ''}
+        <div class="card-row"><span class="label">Data Source</span><span class="value" style="font-family:'DM Mono',monospace; color:var(--accent)">Ascenda Intake Master: Sheet1</span></div>
         <p style="font-size:0.65rem; color:var(--muted); margin-top:1rem;">Additional fields (compliance docs, pricing, food safety, etc.) are collected in Phases 2-4 via the <a href="ascenda-form.html" target="_blank" style="color:var(--accent);">multi-phase intake form</a>.</p>
       </div>
     </div>

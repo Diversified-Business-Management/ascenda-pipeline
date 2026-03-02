@@ -528,6 +528,62 @@
 </head>
 <body>
 
+<!-- PASSWORD GATE -->
+<div id="authGate" style="
+  position:fixed; inset:0; z-index:9999;
+  background:linear-gradient(135deg, #0a0e17 0%, #111827 50%, #0a0e17 100%);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'DM Sans',sans-serif;
+">
+  <div style="
+    background:#141b2a; border:1px solid #1c2640; border-radius:12px;
+    padding:3rem; width:100%; max-width:400px; text-align:center;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+  ">
+    <div style="font-family:'Bebas Neue',sans-serif; font-size:2.2rem; letter-spacing:0.04em; color:#e8ecf4; margin-bottom:0.25rem;">ASCENDA <span style="color:#6BB5FF">GROUP</span></div>
+    <div style="font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:0.25em; color:#4A9BE8; text-transform:uppercase; margin-bottom:2rem;">Feasibility Snapshot</div>
+    <div style="margin-bottom:1.5rem;">
+      <input id="authInput" type="password" placeholder="Enter access code" autocomplete="off" style="
+        width:100%; padding:0.75rem 1rem; background:#0f1420; border:1px solid #1c2640;
+        border-radius:8px; color:#e8ecf4; font-family:'DM Sans',sans-serif; font-size:0.95rem;
+        outline:none; transition: border-color 0.2s;
+      " onfocus="this.style.borderColor='#4A9BE8'" onblur="this.style.borderColor='#1c2640'">
+    </div>
+    <button id="authBtn" onclick="checkAuth()" style="
+      width:100%; padding:0.75rem; background:linear-gradient(135deg,#4A9BE8,#3478C6);
+      border:none; border-radius:8px; color:#fff; font-family:'DM Sans',sans-serif;
+      font-weight:600; font-size:0.9rem; cursor:pointer; letter-spacing:0.03em;
+      transition: opacity 0.2s;
+    " onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Sign In</button>
+    <div id="authError" style="color:#ff4757; font-size:0.8rem; margin-top:1rem; display:none;">Incorrect access code. Please try again.</div>
+  </div>
+</div>
+<script>
+(function(){
+  const k = [65,115,99,101,110,100,97];
+  function checkAuth(){
+    const v = document.getElementById('authInput').value;
+    if(v === String.fromCharCode(...k)){
+      sessionStorage.setItem('ascenda_auth','1');
+      document.getElementById('authGate').style.display='none';
+    } else {
+      document.getElementById('authError').style.display='block';
+      document.getElementById('authInput').value='';
+      document.getElementById('authInput').focus();
+    }
+  }
+  window.checkAuth = checkAuth;
+  document.addEventListener('DOMContentLoaded', function(){
+    if(sessionStorage.getItem('ascenda_auth')==='1'){
+      document.getElementById('authGate').style.display='none';
+    }
+    document.getElementById('authInput').addEventListener('keydown', function(e){
+      if(e.key==='Enter') checkAuth();
+    });
+  });
+})();
+</script>
+
 <!-- SITE HEADER -->
 <header class="site-header">
   <img src="https://ascendagrp.com/wp-content/uploads/2025/12/Group-2.png" alt="Ascenda Group" onerror="this.style.display='none';this.nextSibling.style.display='block'">

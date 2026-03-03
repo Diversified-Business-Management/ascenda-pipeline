@@ -684,15 +684,15 @@
           <select class="form-select" id="p1-category">
             <option value="">Select a category...</option>
             <option>Food & Beverage</option>
-            <option>Health & Beauty</option>
+            <option>Health & Wellness</option>
+            <option>Household Products</option>
+            <option>Pet Products</option>
             <option>Home & Kitchen</option>
             <option>Electronics</option>
             <option>Apparel</option>
             <option>Toys & Games</option>
-            <option>Pet Supplies</option>
             <option>Automotive</option>
             <option>Office Supplies</option>
-            <option>Wellness / Supplements</option>
             <option>Other</option>
           </select>
         </div>
@@ -700,6 +700,26 @@
           <label class="form-label">Brief Product Description <span class="req">*</span></label>
           <textarea class="form-textarea" id="p1-desc" maxlength="500" placeholder="Describe your product..." oninput="updateCount('p1-desc','p1-desc-count',500)"></textarea>
           <div class="char-count" id="p1-desc-count">0 / 500</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Annual Revenue <span class="req">*</span></label>
+          <select class="form-select" id="p1-revenue">
+            <option value="">Select revenue range...</option>
+            <option>Under $500K</option>
+            <option>$500K – $1M</option>
+            <option>$1M – $5M</option>
+            <option>$5M – $20M</option>
+            <option>Over $20M</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Target Retailer <span class="req">*</span></label>
+          <select class="form-select" id="p1-retailer">
+            <option value="">Select retailer...</option>
+            <option>Sam's Club</option>
+            <option>Costco</option>
+            <option>Both</option>
+          </select>
         </div>
       </div>
     </div>
@@ -1234,7 +1254,7 @@ function updateProgress(n) {
 
 // ── PHASE SUBMISSIONS ────────────────────────────────────────────────────────
 function submitPhase1() {
-  const required = ['p1-company','p1-first','p1-last','p1-email','p1-product-name','p1-category','p1-desc','p1-diff','p1-value'];
+  const required = ['p1-company','p1-first','p1-last','p1-email','p1-product-name','p1-category','p1-desc','p1-diff','p1-value','p1-revenue','p1-retailer'];
   let valid = true;
   required.forEach(id => {
     const el = document.getElementById(id);
@@ -1247,41 +1267,78 @@ function submitPhase1() {
   if (!valid) { alert('Please fill in all required fields marked with *.'); return; }
 
   prospectId = generateId();
+
+  // Collect all Phase 1 fields
+  const company = document.getElementById('p1-company').value;
+  const firstName = document.getElementById('p1-first').value;
+  const lastName = document.getElementById('p1-last').value;
+  const email = document.getElementById('p1-email').value;
+  const phone = document.getElementById('p1-phone').value;
+  const website = document.getElementById('p1-website').value;
+  const productName = document.getElementById('p1-product-name').value;
+  const category = document.getElementById('p1-category').value;
+  const description = document.getElementById('p1-desc').value;
+  const differentiation = document.getElementById('p1-diff').value;
+  const memberValue = document.getElementById('p1-value').value;
+  const competitors = document.getElementById('p1-competitors').value;
+  const revenue = document.getElementById('p1-revenue').value;
+  const retailer = document.getElementById('p1-retailer').value;
+  const econNotes = document.getElementById('p1-econ-notes').value;
+  const constraints = document.getElementById('p1-constraints').value;
+
   formData.phase1 = {
     id: prospectId,
-    company: document.getElementById('p1-company').value,
-    website: document.getElementById('p1-website').value,
-    firstName: document.getElementById('p1-first').value,
-    lastName: document.getElementById('p1-last').value,
-    email: document.getElementById('p1-email').value,
-    phone: document.getElementById('p1-phone').value,
-    productName: document.getElementById('p1-product-name').value,
-    category: document.getElementById('p1-category').value,
-    description: document.getElementById('p1-desc').value,
-    differentiation: document.getElementById('p1-diff').value,
-    memberValue: document.getElementById('p1-value').value,
-    competitors: document.getElementById('p1-competitors').value,
+    company, website, firstName, lastName, email, phone,
+    productName, category, description, differentiation,
+    memberValue, competitors, revenue, retailer,
     has20PctValue: document.querySelector('input[name="p1-value20"]:checked')?.value,
     consignmentReady: document.querySelector('input[name="p1-consignment"]:checked')?.value,
     multiClub: document.querySelector('input[name="p1-multi"]:checked')?.value,
     pricingWorks: document.querySelector('input[name="p1-pricing"]:checked')?.value,
     canProvideCOGS: document.querySelector('input[name="p1-cogs"]:checked')?.value,
     canBreakEven: document.querySelector('input[name="p1-breakeven"]:checked')?.value,
-    econNotes: document.getElementById('p1-econ-notes').value,
+    econNotes, constraints,
     hasInsurance: document.querySelector('input[name="p1-insurance"]:checked')?.value,
     coverage: document.getElementById('p1-coverage').value,
-    constraints: document.getElementById('p1-constraints').value,
     nutritionalLabel: document.querySelector('input[name="p1-label"]:checked')?.value,
     testing: document.getElementById('p1-testing').value,
     certifications: document.getElementById('p1-certs').value,
     submittedAt: new Date().toISOString()
   };
 
-  // POST to n8n
+  // Build n8n-compatible payload (maps to WF-01 field names)
+  const n8nPayload = {
+    brandName: company,
+    contactName: `${firstName} ${lastName}`.trim(),
+    email, phone, category, revenue, retailer,
+    preferredModel: 'Roadshow',
+    productDescription: description,
+    currentFootprint: differentiation + (competitors ? '\n\nCompetitors: ' + competitors : ''),
+    timeline: memberValue + (econNotes ? '\n\nEconomics: ' + econNotes : '') + (constraints ? '\n\nConstraints: ' + constraints : ''),
+    // Include all extended fields for richer data
+    p1Website: website,
+    p1ProductName: productName,
+    p1Differentiation: differentiation,
+    p1MemberValue: memberValue,
+    p1Competitors: competitors,
+    p1Has20PctValue: formData.phase1.has20PctValue,
+    p1ConsignmentReady: formData.phase1.consignmentReady,
+    p1MultiClub: formData.phase1.multiClub,
+    p1PricingWorks: formData.phase1.pricingWorks,
+    p1CanProvideCOGS: formData.phase1.canProvideCOGS,
+    p1CanBreakEven: formData.phase1.canBreakEven,
+    p1HasInsurance: formData.phase1.hasInsurance,
+    p1Coverage: formData.phase1.coverage,
+    p1NutritionalLabel: formData.phase1.nutritionalLabel,
+    p1Testing: formData.phase1.testing,
+    p1Certifications: formData.phase1.certifications
+  };
+
+  // POST to n8n with compatible field names
   fetch(N8N_WEBHOOK, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ phase: 1, ...formData.phase1 })
+    body: JSON.stringify(n8nPayload)
   }).catch(() => {}); // Non-blocking
 
   // Update prospect ID displays

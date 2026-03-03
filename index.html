@@ -117,8 +117,9 @@ nav a:hover, nav a.active { color:var(--accent-light); }
 .cal-day { font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted); margin-bottom:0.3rem; }
 .cal-event { font-size:0.6rem; padding:0.15rem 0.3rem; border-radius:2px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
 .cal-event.presentation { background:rgba(74,155,232,0.2); color:var(--accent-light); }
-.cal-event.instore { background:rgba(61,220,151,0.2); color:var(--success); }
+.cal-event.in-store { background:rgba(61,220,151,0.2); color:var(--success); }
 .cal-event.promo { background:rgba(255,190,61,0.2); color:var(--warning); }
+.cal-event.submission { background:rgba(139,196,255,0.15); color:var(--accent3); }
 
 /* TASK LIST */
 .task-item { display:flex; align-items:center; gap:0.75rem; padding:0.75rem 0; border-bottom:1px solid var(--border); font-size:0.82rem; }
@@ -609,7 +610,8 @@ async function loadBrandsFromSheets() {
         };
         const tier = get('tier') || '';
         const score = parseInt(get('score')) || 0;
-        const routing = tier === 'Fast-Track' ? 'AUTO_APPROVE' : tier === 'Standard Review' ? 'MANUAL_REVIEW' : tier === 'Rejected' ? 'AUTO_REJECT' : '';
+        // Re-compute routing from score using current thresholds (25/15)
+        const routing = score >= 25 ? 'AUTO_APPROVE' : score >= 15 ? 'MANUAL_REVIEW' : 'AUTO_REJECT';
         return {
           id: get('prospectid') || `BRAND-${idx}`,
           name: get('p1company') || row[5] || '',
@@ -649,8 +651,8 @@ function getPhaseFromRouting(routing, score) {
   if (routing === 'AUTO_APPROVE') return 2;
   if (routing === 'MANUAL_REVIEW') return 1;
   if (routing === 'AUTO_REJECT') return 0;
-  if (score >= 70) return 2;
-  if (score >= 60) return 1;
+  if (score >= 25) return 2;
+  if (score >= 15) return 1;
   return 0;
 }
 
@@ -892,16 +894,42 @@ function renderCalendar(date) {
 
 function generateCalendarEvents(year, month) {
   const events = [];
-  // If we have brands, generate events based on their data
+  const now = new Date();
+
   BRANDS.forEach((b, idx) => {
+    // Parse submission date
+    const subDate = b.submittedAt ? new Date(b.submittedAt) : null;
+
+    // Show submission date event
+    if (subDate && subDate.getFullYear() === year && subDate.getMonth() === month) {
+      events.push({ day: subDate.getDate(), type:'submission', title:`${b.name} — Submitted` });
+    }
+
     if (b.routing === 'AUTO_APPROVE') {
-      // Presentation event
-      const presDay = ((idx * 7 + 5) % 28) + 1;
-      events.push({ day: presDay, type:'presentation', title:`${b.name} - Presentation` });
+      // Presentation event (2 weeks after submission)
+      const presDate = subDate ? new Date(subDate.getTime() + 14*86400000) : null;
+      if (presDate && presDate.getFullYear() === year && presDate.getMonth() === month) {
+        events.push({ day: presDate.getDate(), type:'presentation', title:`${b.name} — Presentation` });
+      }
+      // Compliance deadline (30 days after submission)
+      const compDate = subDate ? new Date(subDate.getTime() + 30*86400000) : null;
+      if (compDate && compDate.getFullYear() === year && compDate.getMonth() === month) {
+        events.push({ day: compDate.getDate(), type:'in-store', title:`${b.name} — Compliance Due` });
+      }
+    } else if (b.routing === 'MANUAL_REVIEW') {
+      // Committee review (5 business days after submission)
+      const revDate = subDate ? new Date(subDate.getTime() + 7*86400000) : null;
+      if (revDate && revDate.getFullYear() === year && revDate.getMonth() === month) {
+        events.push({ day: revDate.getDate(), type:'promo', title:`${b.name} — Committee Review` });
+      }
+    } else if (b.routing === 'AUTO_REJECT') {
+      // 6-month follow-up reapplication window
+      const followUp = subDate ? new Date(subDate.getTime() + 180*86400000) : null;
+      if (followUp && followUp.getFullYear() === year && followUp.getMonth() === month) {
+        events.push({ day: followUp.getDate(), type:'promo', title:`${b.name} — Reapply Window` });
+      }
     }
   });
-
-  // Calendar events from real brand data only — no hardcoded campaigns
 
   return events;
 }
@@ -1373,13 +1401,13 @@ function submitIntake() {
   score = Math.round(Math.min(score, 100));
 
   let routing, routingReason, statusColor;
-  if (score >= 70) {
+  if (score >= 25) {
     routing = 'AUTO_APPROVE';
     routingReason = `${brand} has been auto-approved to advance to Phase 2: Compliance & Due Diligence. An email will be sent to ${email} with the document checklist.`;
     statusColor = 'var(--success)';
-  } else if (score >= 60) {
+  } else if (score >= 15) {
     routing = 'MANUAL_REVIEW';
-    routingReason = `${brand} has been flagged for committee review (score range 60-69). A team member will contact ${email} within 48 hours.`;
+    routingReason = `${brand} has been flagged for committee review (score range 15-24). A team member will contact ${email} within 48 hours.`;
     statusColor = 'var(--warning)';
   } else {
     routing = 'AUTO_REJECT';

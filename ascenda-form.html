@@ -1306,32 +1306,37 @@ function submitPhase1() {
     submittedAt: new Date().toISOString()
   };
 
-  // Build n8n-compatible payload (maps to WF-01 field names)
+  // Build n8n-compatible payload (uses field names WF-01 validates: company, firstName, productName, differentiation)
   const n8nPayload = {
-    brandName: company,
+    company: company,
+    firstName: firstName,
+    lastName: lastName,
     contactName: `${firstName} ${lastName}`.trim(),
+    brandName: company,
     email, phone, category, revenue, retailer,
+    website: website,
+    productName: productName,
     preferredModel: 'Roadshow',
     productDescription: description,
+    differentiation: differentiation,
     currentFootprint: differentiation + (competitors ? '\n\nCompetitors: ' + competitors : ''),
     timeline: memberValue + (econNotes ? '\n\nEconomics: ' + econNotes : '') + (constraints ? '\n\nConstraints: ' + constraints : ''),
-    // Include all extended fields for richer data
-    p1Website: website,
-    p1ProductName: productName,
-    p1Differentiation: differentiation,
-    p1MemberValue: memberValue,
-    p1Competitors: competitors,
-    p1Has20PctValue: formData.phase1.has20PctValue,
-    p1ConsignmentReady: formData.phase1.consignmentReady,
-    p1MultiClub: formData.phase1.multiClub,
-    p1PricingWorks: formData.phase1.pricingWorks,
-    p1CanProvideCOGS: formData.phase1.canProvideCOGS,
-    p1CanBreakEven: formData.phase1.canBreakEven,
-    p1HasInsurance: formData.phase1.hasInsurance,
-    p1Coverage: formData.phase1.coverage,
-    p1NutritionalLabel: formData.phase1.nutritionalLabel,
-    p1Testing: formData.phase1.testing,
-    p1Certifications: formData.phase1.certifications
+    memberValue: memberValue,
+    competitors: competitors,
+    econNotes: econNotes,
+    constraints: constraints,
+    // Extended compliance fields
+    has20PctValue: formData.phase1.has20PctValue,
+    consignmentReady: formData.phase1.consignmentReady,
+    multiClub: formData.phase1.multiClub,
+    pricingWorks: formData.phase1.pricingWorks,
+    canProvideCOGS: formData.phase1.canProvideCOGS,
+    canBreakEven: formData.phase1.canBreakEven,
+    hasInsurance: formData.phase1.hasInsurance,
+    coverage: formData.phase1.coverage,
+    nutritionalLabel: formData.phase1.nutritionalLabel,
+    testing: formData.phase1.testing,
+    certifications: formData.phase1.certifications
   };
 
   // POST to n8n with compatible field names

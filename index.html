@@ -1416,7 +1416,7 @@ function submitIntake() {
   }
 
   // Attempt to POST to n8n webhook (will work when n8n is configured)
-  const payload = { brandName:brand, contactName:contact, email, phone, category, revenue, retailer, preferredModel:model, productDescription:product, currentFootprint:footprint, timeline };
+  const payload = { company:brand, brandName:brand, firstName:contact.split(' ')[0], lastName:contact.split(' ').slice(1).join(' '), contactName:contact, email, phone, category, revenue, retailer, preferredModel:model, productName:brand+' Product', productDescription:product, differentiation:footprint, currentFootprint:footprint, timeline };
   fetch(CONFIG.n8nBase + CONFIG.webhookPath, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

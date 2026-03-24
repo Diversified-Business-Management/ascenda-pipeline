@@ -1,0 +1,139 @@
+{
+  "name": "Ascenda WF-08: Post-Show Reporting & Buyer Follow-Up",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Event Close Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [120, 240],
+      "parameters": { "path": "ascenda/event-close", "method": "POST", "responseMode": "lastNode" }
+    },
+    {
+      "id": "aggregate-data",
+      "name": "Aggregate Event Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [320, 240],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst totalRevenue = parseFloat(d.totalRevenue) || 0;\nconst totalCost = parseFloat(d.totalCost) || 0;\nconst unitsSold = parseInt(d.unitsSold) || 0;\nconst consumerCaptures = parseInt(d.consumerCaptures) || 0;\n\nconst roi = totalCost > 0 ? ((totalRevenue - totalCost) / totalCost * 100).toFixed(1) : '0';\nconst revenuePerUnit = unitsSold > 0 ? (totalRevenue / unitsSold).toFixed(2) : '0';\nconst daysActive = parseInt(d.daysActive) || 4;\nconst dailyRevenue = daysActive > 0 ? (totalRevenue / daysActive).toFixed(2) : '0';\n\nreturn [{ json: {\n  ...d,\n  totalRevenue, totalCost, unitsSold, consumerCaptures,\n  roi: parseFloat(roi),\n  revenuePerUnit: parseFloat(revenuePerUnit),\n  dailyRevenue: parseFloat(dailyRevenue),\n  eventComplete: true,\n  phase: 8,\n  closedAt: new Date().toISOString()\n} }];"
+      }
+    },
+    {
+      "id": "gen-report",
+      "name": "Claude: Generate Executive Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [520, 240],
+      "parameters": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_ANTHROPIC_API_KEY" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, messages: [{ role: 'user', content: 'Write an executive post-show report for a Sam\\'s Club Category 63 Roadshow event. Brand: ' + $json.brandName + '. Retailer: ' + $json.retailer + '. Total Revenue: $' + $json.totalRevenue + '. Units Sold: ' + $json.unitsSold + '. ROI: ' + $json.roi + '%. Daily Revenue: $' + $json.dailyRevenue + '. Consumer Captures: ' + $json.consumerCaptures + '. Include: Performance Summary, Key Wins (3 bullets), Areas for Improvement (2 bullets), Consumer Insights, Buyer Follow-Up Recommendations, Expansion Recommendations (repeat shows, additional clubs, Costco crossover), 2026 Roadmap Alignment. Professional executive style.' }] }) }}"
+      }
+    },
+    {
+      "id": "parse-report",
+      "name": "Parse Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 240],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nlet report = '';\ntry { report = d.content[0].text; } catch(e) { report = 'Report generation failed.'; }\nconst brandData = $('Aggregate Event Data').first().json;\nreturn [{ json: { ...brandData, executiveReport: report } }];"
+      }
+    },
+    {
+      "id": "update-master-phase8",
+      "name": "Update Master: Phase 8 Results",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [920, 160],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "iAf8iDwbKFomAdUD", "name": "Google Sheets" }
+      },
+      "parameters": {
+        "operation": "update",
+        "documentId": { "value": "1zVPaQo5eSxj9rTFVXa4FPf-S7MFi-pEn-QT1D6s6mRc" },
+        "sheetName": "Phase1_Submissions",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "values": [
+            { "column": "Phase", "value": "8" },
+            { "column": "TotalRevenue", "value": "={{ $json.totalRevenue }}" },
+            { "column": "UnitsSold", "value": "={{ $json.unitsSold }}" },
+            { "column": "ROI", "value": "={{ $json.roi }}" },
+            { "column": "ConsumerCaptures", "value": "={{ $json.consumerCaptures }}" },
+            { "column": "EventClosedAt", "value": "={{ $json.closedAt }}" },
+            { "column": "Status", "value": "EVENT_COMPLETE" }
+          ]
+        },
+        "options": { "lookupColumn": "ID", "lookupValue": "={{ $json.id }}" }
+      }
+    },
+    {
+      "id": "email-report",
+      "name": "Email: Post-Show Report",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [920, 320],
+      "credentials": {
+        "gmailOAuth2": { "id": "eukzBWMaeb8VtN1s", "name": "Gmail" }
+      },
+      "parameters": {
+        "sendTo": "={{ $json.email }}, errol.denger@ascendagrp.com, andrew.therrien@ascendagrp.com",
+        "subject": "=Post-Show Report: {{ $json.brandName }} Roadshow Results (ROI: {{ $json.roi }}%)",
+        "emailType": "html",
+        "message": "=<div style='font-family:Arial,sans-serif;max-width:600px'><h2>Roadshow Complete - Performance Report</h2><table style='width:100%;border-collapse:collapse;margin:16px 0'><tr style='background:#f5f5f5'><td style='padding:10px;border:1px solid #ddd;font-weight:bold'>Total Revenue</td><td style='padding:10px;border:1px solid #ddd'>${{ $json.totalRevenue }}</td></tr><tr><td style='padding:10px;border:1px solid #ddd;font-weight:bold'>Units Sold</td><td style='padding:10px;border:1px solid #ddd'>{{ $json.unitsSold }}</td></tr><tr style='background:#f5f5f5'><td style='padding:10px;border:1px solid #ddd;font-weight:bold'>ROI</td><td style='padding:10px;border:1px solid #ddd'>{{ $json.roi }}%</td></tr><tr><td style='padding:10px;border:1px solid #ddd;font-weight:bold'>Daily Revenue</td><td style='padding:10px;border:1px solid #ddd'>${{ $json.dailyRevenue }}</td></tr><tr style='background:#f5f5f5'><td style='padding:10px;border:1px solid #ddd;font-weight:bold'>Consumer Captures</td><td style='padding:10px;border:1px solid #ddd'>{{ $json.consumerCaptures }}</td></tr></table><hr><div style='white-space:pre-wrap'>{{ $json.executiveReport }}</div><hr><p>Our team will follow up with expansion recommendations and buyer recap.</p></div>"
+      }
+    },
+    {
+      "id": "check-kpi",
+      "name": "ROI Threshold for Growth?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1120, 240],
+      "parameters": {
+        "conditions": { "number": [{ "value1": "={{ $json.roi }}", "value2": 20, "operation": "largerEqual" }] }
+      }
+    },
+    {
+      "id": "trigger-growth",
+      "name": "Trigger WF-09: Growth Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1320, 180],
+      "parameters": {
+        "url": "https://edenger.app.n8n.cloud/webhook/ascenda/growth-analysis",
+        "method": "POST",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}"
+      }
+    }
+  ],
+  "connections": {
+    "Event Close Trigger": { "main": [[{ "node": "Aggregate Event Data", "type": "main", "index": 0 }]] },
+    "Aggregate Event Data": { "main": [[{ "node": "Claude: Generate Executive Report", "type": "main", "index": 0 }]] },
+    "Claude: Generate Executive Report": { "main": [[{ "node": "Parse Report", "type": "main", "index": 0 }]] },
+    "Parse Report": { "main": [[{ "node": "Update Master: Phase 8 Results", "type": "main", "index": 0 }, { "node": "Email: Post-Show Report", "type": "main", "index": 0 }]] },
+    "Email: Post-Show Report": { "main": [[{ "node": "ROI Threshold for Growth?", "type": "main", "index": 0 }]] },
+    "ROI Threshold for Growth?": {
+      "main": [
+        [{ "node": "Trigger WF-09: Growth Analysis", "type": "main", "index": 0 }],
+        []
+      ]
+    }
+  },
+  "settings": { "saveManualExecutions": true, "executionTimeout": 600, "timezone": "America/Los_Angeles" },
+  "meta": { "phase": 8, "ascendaVersion": "3.0", "description": "Stage 8 - Post-Show Reporting & Buyer Follow-Up. Aggregates event data, generates executive report, updates master, emails results. If ROI >= 20%, triggers growth analysis." }
+}

@@ -1,0 +1,120 @@
+{
+  "name": "Ascenda WF-06b: Roadshow 2026 Presentation Generator",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Presentation Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [120, 240],
+      "parameters": { "path": "ascenda/generate-presentation", "method": "POST", "responseMode": "lastNode" }
+    },
+    {
+      "id": "build-presentation-data",
+      "name": "Build Presentation Data from Pipeline",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [320, 240],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst fm = d.financialModel || {};\n\n// Map pipeline data to presentation sections\nconst presentation = {\n  brandName: d.brandName || d.company || 'Brand',\n  contactName: d.contactName || `${d.firstName || ''} ${d.lastName || ''}`.trim(),\n  email: d.email || '',\n  phone: d.phone || '',\n  category: d.category || '',\n  productName: d.productName || '',\n  productDescription: d.productDescription || '',\n  differentiation: d.differentiation || '',\n  memberValue: d.memberValue || '',\n  competitors: d.competitors || '',\n  revenue: d.revenue || '',\n  retailer: d.retailer || \"Sam's Club\",\n  \n  // Pricing\n  msrp: d.msrp || '',\n  samsPrice: d.samsPrice || '',\n  landedCost: d.landedCost || '',\n  vendorMargin: d.vendorMargin || '',\n  \n  // Readiness signals\n  has20PctValue: d.has20PctValue || '',\n  consignmentReady: d.consignmentReady || '',\n  multiClub: d.multiClub || '',\n  \n  // Scores\n  score: d.score || 0,\n  readinessScore: d.readinessScore || 0,\n  \n  // Financial model\n  revenuePerEvent: fm.revenuePerEvent || 0,\n  year1Projection: fm.year1Projection || 0,\n  year2Projection: fm.year2Projection || 0,\n  roi: fm.roi || 0,\n  recommendedShowLength: fm.recommendedShowLength || '4 days',\n  recommendedClubCount: fm.recommendedClubCount || 100,\n  projectedUnitsPerEvent: fm.projectedUnitsPerEvent || 0,\n  grossMarginPct: fm.grossMarginPct || 0,\n  breakEvenEvents: fm.breakEvenEvents || 0,\n  \n  // Pipeline ID for folder lookup\n  id: d.id || '',\n  phase: 6,\n  presentationRequestedAt: new Date().toISOString()\n};\n\nreturn [{ json: presentation }];"
+      }
+    },
+    {
+      "id": "claude-generate-slides",
+      "name": "Claude: Generate Slide Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [520, 240],
+      "parameters": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_ANTHROPIC_API_KEY" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 3000, messages: [{ role: 'user', content: 'Generate a structured Roadshow 2026 presentation brief for Sam\\'s Club Category 63 Pop-Up Shop program. Return ONLY valid JSON with these exact keys. Brand: ' + $json.brandName + '. Category: ' + $json.category + '. Product: ' + $json.productName + '. Description: ' + $json.productDescription + '. Differentiation: ' + $json.differentiation + '. Member Value: ' + $json.memberValue + '. Competitors: ' + $json.competitors + '. Revenue Tier: ' + $json.revenue + '. Sam\\'s Price: $' + ($json.samsPrice || 'TBD') + '. Landed Cost: $' + ($json.landedCost || 'TBD') + '. Margin: ' + ($json.vendorMargin || 'TBD') + '%. 20% Value Advantage: ' + $json.has20PctValue + '. Revenue/Event: $' + $json.revenuePerEvent + '. Y1 Projection: $' + $json.year1Projection + '. ROI: ' + $json.roi + '%. Recommended Clubs: ' + $json.recommendedClubCount + '. Show Length: ' + $json.recommendedShowLength + '. Return JSON: { \"executiveSummary\": \"2-3 sentence brand pitch for buyer\", \"valueProposition\": \"why Sam\\'s members will love this (3 bullets)\", \"competitiveAdvantage\": \"how this beats alternatives (3 bullets)\", \"roadshowStrategy\": \"recommended approach for in-club activation\", \"seasonalStrategy\": { \"q3\": \"Aug-Oct focus\", \"q4\": \"Nov-Jan focus\", \"q1\": \"Feb-Apr focus\", \"q2\": \"May-Jul focus\" }, \"staffingRecommendation\": \"staffing approach\", \"riskFactors\": \"2 key risks to watch\" }' }] }) }}"
+      }
+    },
+    {
+      "id": "parse-slide-content",
+      "name": "Parse Slide Content & Build Doc",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 240],
+      "parameters": {
+        "jsCode": "const httpResp = $input.first().json;\nconst brandData = $('Build Presentation Data from Pipeline').first().json;\n\nlet slideContent = {};\ntry {\n  const text = httpResp.content[0].text;\n  const clean = text.replace(/```json|```/g, '').trim();\n  slideContent = JSON.parse(clean);\n} catch(e) {\n  slideContent = {\n    executiveSummary: 'Presentation content generation pending manual review.',\n    valueProposition: 'TBD',\n    competitiveAdvantage: 'TBD',\n    roadshowStrategy: 'TBD',\n    seasonalStrategy: { q3: 'TBD', q4: 'TBD', q1: 'TBD', q2: 'TBD' },\n    staffingRecommendation: 'TBD',\n    riskFactors: 'TBD'\n  };\n}\n\n// Build the full presentation document as formatted text\n// This will be saved as a Google Doc in the brand folder\nconst docContent = `ROADSHOW 2026 PRESENTATION\\n${brandData.brandName}\\n${'='.repeat(50)}\\n\\nPrepared by Ascenda Group | Sam's Club Roadshow Partner\\nContact: ${brandData.contactName} | ${brandData.email} | ${brandData.phone}\\n\\n${'─'.repeat(50)}\\nEXECUTIVE SUMMARY\\n${'─'.repeat(50)}\\n${slideContent.executiveSummary}\\n\\n${'─'.repeat(50)}\\nCOMPANY & CATEGORY OVERVIEW\\n${'─'.repeat(50)}\\nCompany: ${brandData.brandName}\\nCategory: ${brandData.category}\\nProduct: ${brandData.productName}\\nRevenue Tier: ${brandData.revenue}\\nTarget Retailer: ${brandData.retailer}\\nPipeline Score: ${brandData.score}/100\\nReadiness Score: ${brandData.readinessScore}/100\\n\\nProduct Description:\\n${brandData.productDescription}\\n\\nDifferentiation:\\n${brandData.differentiation}\\n\\n${'─'.repeat(50)}\\nVALUE PROPOSITION FOR SAM'S CLUB MEMBERS\\n${'─'.repeat(50)}\\n${slideContent.valueProposition}\\n\\nMember Value Statement:\\n${brandData.memberValue}\\n\\n20% Value Advantage: ${brandData.has20PctValue === 'yes' ? 'CONFIRMED' : 'Under Review'}\\nConsignment Ready: ${brandData.consignmentReady === 'yes' ? 'YES' : 'No'}\\nMulti-Club Capable: ${brandData.multiClub === 'yes' ? 'YES' : 'No'}\\n\\n${'─'.repeat(50)}\\nCOMPETITIVE ADVANTAGE\\n${'─'.repeat(50)}\\n${slideContent.competitiveAdvantage}\\n\\nKey Competitors: ${brandData.competitors}\\n\\n${'─'.repeat(50)}\\nROADSHOW EVENT DETAILS\\n${'─'.repeat(50)}\\nShow Length: ${brandData.recommendedShowLength}\\nClub Reach: ${brandData.recommendedClubCount} clubs\\nFormat: Category 63 Pop-Up Shop / Roadshow\\nModel: ${brandData.consignmentReady === 'yes' ? 'Consignment' : 'Standard'}\\n\\nStrategy:\\n${slideContent.roadshowStrategy}\\n\\nStaffing:\\n${slideContent.staffingRecommendation}\\n\\n${'─'.repeat(50)}\\nFINANCIAL PROJECTIONS\\n${'─'.repeat(50)}\\nSam's Club Price: $${brandData.samsPrice || 'TBD'}\\nLanded Cost: $${brandData.landedCost || 'TBD'}\\nGross Margin: ${brandData.grossMarginPct || brandData.vendorMargin || 'TBD'}%\\nRevenue Per Event: $${brandData.revenuePerEvent || 'TBD'}\\nUnits Per Event: ${brandData.projectedUnitsPerEvent || 'TBD'}\\nBreak-Even Events: ${brandData.breakEvenEvents || 'TBD'}\\nYear 1 Projection: $${brandData.year1Projection ? (brandData.year1Projection / 1000000).toFixed(1) + 'M' : 'TBD'}\\nYear 2 Projection: $${brandData.year2Projection ? (brandData.year2Projection / 1000000).toFixed(1) + 'M' : 'TBD'}\\nROI: ${brandData.roi || 'TBD'}%\\n\\n${'─'.repeat(50)}\\nITEM DETAILS\\n${'─'.repeat(50)}\\nItem: ${brandData.productName}\\nMSRP: $${brandData.msrp || 'TBD'}\\nSam's Price: $${brandData.samsPrice || 'TBD'}\\nCost: $${brandData.landedCost || 'TBD'}\\nMargin: ${brandData.vendorMargin || 'TBD'}%\\n\\n${'─'.repeat(50)}\\n2026 SEASONAL ROADSHOW PLAN\\n${'─'.repeat(50)}\\nQ3 (Aug-Oct): ${slideContent.seasonalStrategy.q3}\\nQ4 (Nov-Jan): ${slideContent.seasonalStrategy.q4}\\nQ1 (Feb-Apr): ${slideContent.seasonalStrategy.q1}\\nQ2 (May-Jul): ${slideContent.seasonalStrategy.q2}\\n\\n${'─'.repeat(50)}\\nRISK FACTORS\\n${'─'.repeat(50)}\\n${slideContent.riskFactors}\\n\\n${'─'.repeat(50)}\\nPrepared by Ascenda Group\\nSam's Club & Costco Retail Readiness\\n${new Date().toISOString().split('T')[0]}\\n`;\n\nreturn [{ json: { ...brandData, slideContent, docContent, presentationGeneratedAt: new Date().toISOString() } }];"
+      }
+    },
+    {
+      "id": "save-to-drive",
+      "name": "Save Presentation to Brand Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [920, 160],
+      "credentials": {
+        "googleDriveOAuth2Api": { "id": "wFT7IFpkOzP6pZIB", "name": "Google Drive" }
+      },
+      "parameters": {
+        "operation": "upload",
+        "name": "={{ $json.brandName }} - Roadshow 2026 Presentation.txt",
+        "driveId": "myDrive",
+        "inputDataFieldName": "docContent"
+      }
+    },
+    {
+      "id": "update-master-presentation",
+      "name": "Update Master: Presentation Generated",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [920, 320],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "iAf8iDwbKFomAdUD", "name": "Google Sheets" }
+      },
+      "parameters": {
+        "operation": "update",
+        "documentId": { "value": "1zVPaQo5eSxj9rTFVXa4FPf-S7MFi-pEn-QT1D6s6mRc" },
+        "sheetName": "Phase1_Submissions",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "values": [
+            { "column": "PresentationGeneratedAt", "value": "={{ $json.presentationGeneratedAt }}" },
+            { "column": "Status", "value": "PRESENTATION_READY" }
+          ]
+        },
+        "options": { "lookupColumn": "ID", "lookupValue": "={{ $json.id }}" }
+      }
+    },
+    {
+      "id": "email-presentation",
+      "name": "Email: Presentation Ready for Review",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [1120, 240],
+      "credentials": {
+        "gmailOAuth2": { "id": "eukzBWMaeb8VtN1s", "name": "Gmail" }
+      },
+      "parameters": {
+        "sendTo": "errol.denger@ascendagrp.com, andrew.therrien@ascendagrp.com",
+        "subject": "=Roadshow 2026 Presentation Ready: {{ $json.brandName }}",
+        "emailType": "html",
+        "message": "=<div style='font-family:Arial,sans-serif;max-width:700px'><h2>Roadshow 2026 Presentation Generated</h2><p>A buyer-ready presentation has been auto-generated for <strong>{{ $json.brandName }}</strong> and saved to their Google Drive folder.</p><h3>Brand Summary</h3><table style='border-collapse:collapse;width:100%;margin:12px 0'><tr style='background:#f5f5f5'><td style='padding:8px;border:1px solid #ddd'><strong>Category</strong></td><td style='padding:8px;border:1px solid #ddd'>{{ $json.category }}</td></tr><tr><td style='padding:8px;border:1px solid #ddd'><strong>Product</strong></td><td style='padding:8px;border:1px solid #ddd'>{{ $json.productName }}</td></tr><tr style='background:#f5f5f5'><td style='padding:8px;border:1px solid #ddd'><strong>Pipeline Score</strong></td><td style='padding:8px;border:1px solid #ddd'>{{ $json.score }}/100</td></tr><tr><td style='padding:8px;border:1px solid #ddd'><strong>Readiness Score</strong></td><td style='padding:8px;border:1px solid #ddd'>{{ $json.readinessScore }}/100</td></tr><tr style='background:#f5f5f5'><td style='padding:8px;border:1px solid #ddd'><strong>Revenue/Event</strong></td><td style='padding:8px;border:1px solid #ddd'>${{ $json.revenuePerEvent || 'TBD' }}</td></tr><tr><td style='padding:8px;border:1px solid #ddd'><strong>Y1 Projection</strong></td><td style='padding:8px;border:1px solid #ddd'>${{ $json.year1Projection ? ($json.year1Projection / 1000000).toFixed(1) + 'M' : 'TBD' }}</td></tr></table><h3>AI-Generated Content</h3><p><strong>Executive Summary:</strong> {{ $json.slideContent.executiveSummary }}</p><h3>Next Steps</h3><ol><li>Review the generated presentation in the brand's Drive folder</li><li>Customize any sections as needed</li><li>If using the PPTX generator: run <code>node generate-from-pipeline.js</code> with brand data for polished slides</li><li>Submit to Sam's Club buyer with the two-pager</li></ol></div>"
+      }
+    }
+  ],
+  "connections": {
+    "Presentation Trigger": { "main": [[{ "node": "Build Presentation Data from Pipeline", "type": "main", "index": 0 }]] },
+    "Build Presentation Data from Pipeline": { "main": [[{ "node": "Claude: Generate Slide Content", "type": "main", "index": 0 }]] },
+    "Claude: Generate Slide Content": { "main": [[{ "node": "Parse Slide Content & Build Doc", "type": "main", "index": 0 }]] },
+    "Parse Slide Content & Build Doc": { "main": [[{ "node": "Save Presentation to Brand Folder", "type": "main", "index": 0 }, { "node": "Update Master: Presentation Generated", "type": "main", "index": 0 }]] },
+    "Save Presentation to Brand Folder": { "main": [[{ "node": "Email: Presentation Ready for Review", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "saveManualExecutions": true, "executionTimeout": 600, "timezone": "America/Los_Angeles" },
+  "meta": { "phase": 6, "ascendaVersion": "3.1", "description": "Auto-generates Roadshow 2026 presentation from pipeline brand data. Uses Claude to create buyer-facing content (executive summary, value proposition, competitive analysis, seasonal strategy). Saves to brand's Drive folder, updates master sheet, emails team for review." }
+}

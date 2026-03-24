@@ -1,0 +1,158 @@
+{
+  "name": "Ascenda WF-04: Committee Go/No-Go Router",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Go/No-Go Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [120, 240],
+      "parameters": { "path": "ascenda/gonogo", "method": "POST", "responseMode": "lastNode" }
+    },
+    {
+      "id": "build-summary",
+      "name": "Claude: Build Committee Brief",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [320, 240],
+      "parameters": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_ANTHROPIC_API_KEY" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: 'Create a concise committee decision brief for ' + $json.brandName + '. Phase 1 Score: ' + $json.score + '/100. Readiness Score: ' + ($json.readinessScore || 'N/A') + '/100. Category: ' + $json.category + '. Revenue: ' + $json.revenue + '. Retailer: ' + $json.retailer + '. Include: Executive Summary (2 sentences), Strengths (3 bullets), Risks (2 bullets), Recommended Economic Model (Consignment/Direct/Hybrid), Decision Recommendation (GO or NO-GO with reasoning). Be decisive.' }] }) }}"
+      }
+    },
+    {
+      "id": "parse-brief",
+      "name": "Parse Committee Brief",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 240],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nlet brief = '';\ntry {\n  brief = d.content[0].text;\n} catch(e) {\n  brief = 'Committee brief generation failed. Manual review required.';\n}\nreturn [{ json: { ...$input.first().json, committeeBrief: brief, phase: 4, briefGeneratedAt: new Date().toISOString() } }];"
+      }
+    },
+    {
+      "id": "update-master-phase4",
+      "name": "Update Master: Phase 4",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [720, 160],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "iAf8iDwbKFomAdUD", "name": "Google Sheets" }
+      },
+      "parameters": {
+        "operation": "update",
+        "documentId": { "value": "1zVPaQo5eSxj9rTFVXa4FPf-S7MFi-pEn-QT1D6s6mRc" },
+        "sheetName": "Phase1_Submissions",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "values": [
+            { "column": "Phase", "value": "4" },
+            { "column": "CommitteeBriefAt", "value": "={{ $json.briefGeneratedAt }}" }
+          ]
+        },
+        "options": { "lookupColumn": "ID", "lookupValue": "={{ $json.id }}" }
+      }
+    },
+    {
+      "id": "email-committee",
+      "name": "Email: Committee Brief",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [720, 320],
+      "credentials": {
+        "gmailOAuth2": { "id": "eukzBWMaeb8VtN1s", "name": "Gmail" }
+      },
+      "parameters": {
+        "sendTo": "errol.denger@ascendagrp.com, andrew.therrien@ascendagrp.com",
+        "subject": "=Go/No-Go Decision Required: {{ $json.brandName }} (Scores: {{ $json.score }}/{{ $json.readinessScore || 'N/A' }})",
+        "emailType": "html",
+        "message": "=<div style='font-family:Arial,sans-serif;max-width:700px'><h2>Committee Decision Brief: {{ $json.brandName }}</h2><p><strong>Phase 1 Score:</strong> {{ $json.score }}/100 | <strong>Readiness Score:</strong> {{ $json.readinessScore || 'N/A' }}/100</p><p><strong>Category:</strong> {{ $json.category }} | <strong>Revenue:</strong> {{ $json.revenue }} | <strong>Retailer:</strong> {{ $json.retailer }}</p><hr><div style='white-space:pre-wrap'>{{ $json.committeeBrief }}</div><hr><p><strong>Actions:</strong></p><ul><li><a href='https://edenger.app.n8n.cloud/webhook/ascenda/committee-decision?id={{ $json.id }}&decision=approve'>APPROVE - Advance to Financial Planning</a></li><li><a href='https://edenger.app.n8n.cloud/webhook/ascenda/committee-decision?id={{ $json.id }}&decision=reject'>REJECT - Send Decline Notice</a></li></ul></div>"
+      }
+    },
+    {
+      "id": "decision-webhook",
+      "name": "Committee Decision Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [120, 500],
+      "parameters": { "path": "ascenda/committee-decision", "method": "=GET", "responseMode": "lastNode" }
+    },
+    {
+      "id": "enrich-decision",
+      "name": "Enrich Decision Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [320, 500],
+      "parameters": {
+        "jsCode": "const q = $input.first().json.query || $input.first().json;\nreturn [{ json: { ...q, decision: q.decision, decisionAt: new Date().toISOString() } }];"
+      }
+    },
+    {
+      "id": "route-decision",
+      "name": "Go or No-Go?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [520, 500],
+      "parameters": {
+        "conditions": { "string": [{ "value1": "={{ $json.decision }}", "value2": "approve", "operation": "equal" }] }
+      }
+    },
+    {
+      "id": "trigger-phase5",
+      "name": "Trigger WF-05: Financial Planning",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [720, 440],
+      "parameters": {
+        "url": "https://edenger.app.n8n.cloud/webhook/ascenda/phase5-start",
+        "method": "POST",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}"
+      }
+    },
+    {
+      "id": "reject-email",
+      "name": "Send Committee Rejection",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [720, 560],
+      "credentials": {
+        "gmailOAuth2": { "id": "eukzBWMaeb8VtN1s", "name": "Gmail" }
+      },
+      "parameters": {
+        "sendTo": "={{ $json.email }}, errol.denger@ascendagrp.com, andrew.therrien@ascendagrp.com",
+        "subject": "=Ascenda: Update on {{ $json.brandName }} Application",
+        "emailType": "html",
+        "message": "<div style='font-family:Arial,sans-serif'><h2>Application Update</h2><p>After committee review, we are unable to proceed with <strong>{{ $json.brandName }}</strong> at this time.</p><p>{{ $json.rejectionReason || 'The program does not currently meet our roadshow placement criteria.' }}</p><p>We encourage you to address the identified gaps and reapply.</p><hr><p style='color:#999;font-size:12px'>Ascenda Group</p></div>"
+      }
+    }
+  ],
+  "connections": {
+    "Go/No-Go Trigger": { "main": [[{ "node": "Claude: Build Committee Brief", "type": "main", "index": 0 }]] },
+    "Claude: Build Committee Brief": { "main": [[{ "node": "Parse Committee Brief", "type": "main", "index": 0 }]] },
+    "Parse Committee Brief": { "main": [[{ "node": "Update Master: Phase 4", "type": "main", "index": 0 }, { "node": "Email: Committee Brief", "type": "main", "index": 0 }]] },
+    "Committee Decision Webhook": { "main": [[{ "node": "Enrich Decision Data", "type": "main", "index": 0 }]] },
+    "Enrich Decision Data": { "main": [[{ "node": "Go or No-Go?", "type": "main", "index": 0 }]] },
+    "Go or No-Go?": {
+      "main": [
+        [{ "node": "Trigger WF-05: Financial Planning", "type": "main", "index": 0 }],
+        [{ "node": "Send Committee Rejection", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "saveManualExecutions": true, "executionTimeout": 300, "timezone": "America/Los_Angeles" },
+  "meta": { "phase": 4, "ascendaVersion": "3.0", "description": "Go/No-Go committee router. Generates AI decision brief, emails committee with approve/reject links, routes decision to WF-05 or rejection email." }
+}

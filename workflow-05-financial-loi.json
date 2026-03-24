@@ -1,0 +1,151 @@
+{
+  "name": "Ascenda WF-05: Financial Model & LOI Generation",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Phase 5 Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [120, 240],
+      "parameters": { "path": "ascenda/phase5-start", "method": "POST", "responseMode": "lastNode" }
+    },
+    {
+      "id": "build-model",
+      "name": "Claude: Generate Financial Model",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [320, 240],
+      "parameters": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_ANTHROPIC_API_KEY" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, messages: [{ role: 'user', content: 'Generate a structured financial model JSON for brand ' + $json.brandName + ' entering ' + $json.retailer + ' via Roadshow model. Category: ' + $json.category + '. Revenue tier: ' + $json.revenue + '. Include these exact JSON keys: projectedUnitsPerEvent (number), revenuePerEvent (number), retailPrice (number), cogsPct (number 0-100), grossMarginPct (number 0-100), ascendaCommissionPct (number), breakEvenEvents (number), year1Projection (number), year2Projection (number), roi (number 0-100), recommendedShowLength (string: 4/11/18 days), recommendedClubCount (number). Return ONLY valid JSON, no explanation.' }] }) }}"
+      }
+    },
+    {
+      "id": "parse-model",
+      "name": "Parse Financial Model",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 240],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nlet model = {};\ntry {\n  const text = d.content[0].text;\n  const clean = text.replace(/```json|```/g, '').trim();\n  model = JSON.parse(clean);\n} catch(e) {\n  model = { error: 'Could not parse financial model', raw: d.content ? d.content[0].text : 'No response' };\n}\n// Merge brand data back in (it was lost after HTTP request)\nconst brandData = $('Phase 5 Trigger').first().json;\nreturn [{ json: { ...brandData, financialModel: model, phase: 5, financialModelAt: new Date().toISOString() } }];"
+      }
+    },
+    {
+      "id": "gen-loi",
+      "name": "Claude: Draft LOI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [720, 240],
+      "parameters": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_ANTHROPIC_API_KEY" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, messages: [{ role: 'user', content: 'Draft a professional Letter of Intent for brand ' + $json.brandName + ' entering into a Roadshow/Consignment agreement with Ascenda Group for ' + $json.retailer + ' retail placement. Contact: ' + $json.contactName + '. Category: ' + $json.category + '. Include: Parties, Purpose, Economic Terms (based on roadshow model), Program Scope, Exclusivity, Timeline, Confidentiality, Next Steps. Professional legal language but clear terms. Reference Sam\\'s Club Category 63 Pop-Up Shop program.' }] }) }}"
+      }
+    },
+    {
+      "id": "parse-loi",
+      "name": "Parse LOI Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [920, 240],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nlet loiText = '';\ntry {\n  loiText = d.content[0].text;\n} catch(e) {\n  loiText = 'LOI generation failed. Manual draft required.';\n}\nconst brandData = $('Parse Financial Model').first().json;\nreturn [{ json: { ...brandData, loiText, loiGeneratedAt: new Date().toISOString() } }];"
+      }
+    },
+    {
+      "id": "save-loi-drive",
+      "name": "Save LOI to Brand Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [1120, 240],
+      "credentials": {
+        "googleDriveOAuth2Api": { "id": "wFT7IFpkOzP6pZIB", "name": "Google Drive" }
+      },
+      "parameters": {
+        "operation": "upload",
+        "name": "={{ $json.brandName }}-LOI-{{ $now.format('yyyy-MM-dd') }}.txt",
+        "driveId": "myDrive",
+        "folderId": {
+          "mode": "list",
+          "value": ""
+        },
+        "inputDataFieldName": "loiText"
+      }
+    },
+    {
+      "id": "update-master-phase5",
+      "name": "Update Master: Phase 5",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [1320, 160],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "iAf8iDwbKFomAdUD", "name": "Google Sheets" }
+      },
+      "parameters": {
+        "operation": "update",
+        "documentId": { "value": "1zVPaQo5eSxj9rTFVXa4FPf-S7MFi-pEn-QT1D6s6mRc" },
+        "sheetName": "Phase1_Submissions",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "values": [
+            { "column": "Phase", "value": "5" },
+            { "column": "FinancialModelAt", "value": "={{ $json.financialModelAt }}" },
+            { "column": "LOIGeneratedAt", "value": "={{ $json.loiGeneratedAt }}" },
+            { "column": "ProjectedRevenuePerEvent", "value": "={{ $json.financialModel.revenuePerEvent || '' }}" },
+            { "column": "ProjectedROI", "value": "={{ $json.financialModel.roi || '' }}" }
+          ]
+        },
+        "options": { "lookupColumn": "ID", "lookupValue": "={{ $json.id }}" }
+      }
+    },
+    {
+      "id": "email-loi",
+      "name": "Email LOI to Team",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [1320, 320],
+      "credentials": {
+        "gmailOAuth2": { "id": "eukzBWMaeb8VtN1s", "name": "Gmail" }
+      },
+      "parameters": {
+        "sendTo": "errol.denger@ascendagrp.com, andrew.therrien@ascendagrp.com",
+        "subject": "=LOI Ready for Review: {{ $json.brandName }} x Ascenda Group",
+        "emailType": "html",
+        "message": "=<div style='font-family:Arial,sans-serif;max-width:600px'><h2>Letter of Intent Ready</h2><p>LOI and financial model have been generated for <strong>{{ $json.brandName }}</strong>.</p><h3>Financial Model Summary</h3><ul><li>Projected Revenue/Event: ${{ $json.financialModel.revenuePerEvent || 'TBD' }}</li><li>Gross Margin: {{ $json.financialModel.grossMarginPct || 'TBD' }}%</li><li>Break-Even Events: {{ $json.financialModel.breakEvenEvents || 'TBD' }}</li><li>Year 1 Projection: ${{ $json.financialModel.year1Projection || 'TBD' }}</li><li>ROI: {{ $json.financialModel.roi || 'TBD' }}%</li><li>Recommended Show Length: {{ $json.financialModel.recommendedShowLength || 'TBD' }}</li></ul><p>LOI saved to brand folder in Google Drive. Review, adjust terms, and send to brand for signature.</p><p>Once LOI is signed, advance brand to Phase 6 (Roadshow Program Design).</p></div>"
+      }
+    }
+  ],
+  "connections": {
+    "Phase 5 Trigger": { "main": [[{ "node": "Claude: Generate Financial Model", "type": "main", "index": 0 }]] },
+    "Claude: Generate Financial Model": { "main": [[{ "node": "Parse Financial Model", "type": "main", "index": 0 }]] },
+    "Parse Financial Model": { "main": [[{ "node": "Claude: Draft LOI", "type": "main", "index": 0 }]] },
+    "Claude: Draft LOI": { "main": [[{ "node": "Parse LOI Content", "type": "main", "index": 0 }]] },
+    "Parse LOI Content": { "main": [[{ "node": "Save LOI to Brand Folder", "type": "main", "index": 0 }]] },
+    "Save LOI to Brand Folder": { "main": [[{ "node": "Update Master: Phase 5", "type": "main", "index": 0 }, { "node": "Email LOI to Team", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "saveManualExecutions": true, "executionTimeout": 600, "timezone": "America/Los_Angeles" },
+  "meta": { "phase": 5, "ascendaVersion": "3.0", "description": "Stage 0 completion - Financial Model & LOI. Generates financial projections and Letter of Intent via Claude, saves to Drive, emails team for review." }
+}

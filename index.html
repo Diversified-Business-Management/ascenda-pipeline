@@ -577,7 +577,7 @@ footer { border-top:1px solid var(--border); padding:2rem; text-align:center; co
 // ============================================================
 const CONFIG = {
   sheetsId: '1zVPaQo5eSxj9rTFVXa4FPf-S7MFi-pEn-QT1D6s6mRc',
-  sheetsTab: 'Sheet1',
+  sheetsTab: 'Phase1_Submissions',
   masterSheetsId: '1zVPaQo5eSxj9rTFVXa4FPf-S7MFi-pEn-QT1D6s6mRc',
   n8nBase: 'https://edenger.app.n8n.cloud',
   webhookPath: '/webhook/ascenda/intake',
@@ -611,7 +611,7 @@ async function loadBrandsFromSheets() {
         const tier = get('tier') || '';
         const score = parseInt(get('score')) || 0;
         // Re-compute routing from score using current thresholds (25/15)
-        const routing = score >= 25 ? 'AUTO_APPROVE' : score >= 15 ? 'MANUAL_REVIEW' : 'AUTO_REJECT';
+        const routing = score >= 70 ? 'AUTO_APPROVE' : score >= 40 ? 'MANUAL_REVIEW' : 'AUTO_REJECT';
         return {
           id: get('prospectid') || `BRAND-${idx}`,
           name: get('p1company') || row[5] || '',

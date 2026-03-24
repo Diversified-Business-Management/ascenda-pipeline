@@ -1,0 +1,61 @@
+{
+  "companyName": "NutriPure Foods",
+  "supplierTeam": "Sarah Chen, VP of Retail | Marcus Johnson, National Accounts",
+  "contactEmail": "sarah.chen@nutripure.com",
+  "contactPhone": "(555) 234-5678",
+  "categories": "Health & Wellness, Organic Snacks",
+  "brands": "NutriPure, VitaBites, CleanBar",
+  "marketShareUS": "4.2% (Organic Snacks)",
+  "retailerPresence": "Whole Foods, Target, Kroger, Costco",
+  "scPartnerships": "Category: Organic Snacks — Merchant: Lisa Park",
+  "vendorNumber": "VN-2024-0891",
+  "longTermGoalCompany": "Become #1 organic snack brand in club channel by 2028",
+  "roadshowCategories": "Organic Snacks, Protein Bars",
+  "supplierMarketShareCategory": "12.3% of club channel organic snacks",
+  "retailerPresenceCategory": "Present in 85% of Sam's Club locations",
+  "scMerchantPartnership": "Active partnership since Q2 2024",
+  "longTermGoalSC": "Expand from 2 SKUs to 5 SKUs, achieve $8M annual in-club",
+  "eventDescription": "Live sampling station with branded display and digital engagement",
+  "palletSpace": "2 pallets (double-stack)",
+  "scheduleType": "Ongoing — Year-round rotation",
+  "clubReach": "450+ clubs nationwide",
+  "proposedLength": "3-day events (Thu–Sat)",
+  "seasonalPeak": "January (New Year wellness), September (Back to School)",
+  "staffingPartner": "Club Demos Inc.",
+  "staffingHours": "8 hours/day, 2 staff per location",
+  "prjDailySales": "$2,400",
+  "prjSalesPerShow": "$7,200",
+  "prjAnnualSales": "$3.2M",
+  "prjAnnualShowCount": "450",
+  "isExistingSupplier": false,
+  "items": [
+    {
+      "description": "NutriPure Organic Trail Mix 24oz",
+      "cost": "$8.50",
+      "retail": "$14.98",
+      "scMargin": "43.3%",
+      "lowestMarketRetail": "$16.99 (Whole Foods)",
+      "currentlySold": "Target, Kroger, Whole Foods, Amazon",
+      "scValueToMarket": "12% below market",
+      "prjSalesPerDay": "$1,400",
+      "prjUnitsPerDay": "94 units"
+    },
+    {
+      "description": "VitaBites Protein Bar 12-Pack",
+      "cost": "$12.00",
+      "retail": "$19.98",
+      "scMargin": "39.9%",
+      "lowestMarketRetail": "$22.99 (Target)",
+      "currentlySold": "Target, GNC, Amazon",
+      "scValueToMarket": "13% below market",
+      "prjSalesPerDay": "$1,000",
+      "prjUnitsPerDay": "50 units"
+    }
+  ],
+  "annualPlan": {
+    "q3": { "showItems": "Trail Mix 24oz, Protein Bars 12pk", "prjShowReach": "120 clubs", "prjShowSales": "$864K" },
+    "q4": { "showItems": "Holiday Gift Sampler, Trail Mix", "prjShowReach": "150 clubs", "prjShowSales": "$1.08M" },
+    "q1": { "showItems": "New Year Wellness Pack, Protein Bars", "prjShowReach": "100 clubs", "prjShowSales": "$720K" },
+    "q2": { "showItems": "Summer Snack Bundle, Trail Mix", "prjShowReach": "80 clubs", "prjShowSales": "$576K" }
+  }
+}

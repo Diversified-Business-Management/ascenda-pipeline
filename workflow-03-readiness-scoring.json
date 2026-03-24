@@ -1,0 +1,108 @@
+{
+  "name": "Ascenda WF-03: Item Strategy & Value Validation",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Phase 3 Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [120, 240],
+      "parameters": { "path": "ascenda/phase3-start", "method": "POST", "responseMode": "lastNode" }
+    },
+    {
+      "id": "readiness-score",
+      "name": "Compute Readiness & Value Index",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [320, 240],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nlet score = 0;\nconst components = {};\n\n// 1. 20% Value Advantage (25 pts) - Sam's Club requirement\ncomponents.valueAdvantage = d.has20PctValue === 'yes' ? 25 : 10;\nscore += components.valueAdvantage;\n\n// 2. Pricing & Margin Fit (25 pts)\nlet priceFit = 0;\nif (d.pricingWorks === 'yes') priceFit += 12;\nif (d.canBreakEven === 'yes') priceFit += 8;\nif (d.canProvideCOGS === 'yes') priceFit += 5;\ncomponents.pricingFit = priceFit;\nscore += components.pricingFit;\n\n// 3. Operational Readiness (20 pts)\nlet ops = 0;\nif (d.consignmentReady === 'yes') ops += 8;\nif (d.multiClub === 'yes') ops += 7;\nif (d.hasInsurance === 'yes') ops += 5;\ncomponents.operationalReadiness = ops;\nscore += components.operationalReadiness;\n\n// 4. Product Differentiation (20 pts)\nconst diffLen = (d.differentiation || '').length + (d.memberValue || '').length;\ncomponents.differentiation = diffLen > 400 ? 20 : diffLen > 200 ? 15 : diffLen > 80 ? 10 : 5;\nscore += components.differentiation;\n\n// 5. Compliance Readiness (10 pts)\ncomponents.compliance = d.complianceScore ? Math.round(d.complianceScore * 0.1) : 5;\nscore += components.compliance;\n\nscore = Math.min(score, 100);\n\nreturn [{ json: {\n  ...d,\n  readinessScore: score,\n  readinessComponents: components,\n  readinessComputedAt: new Date().toISOString(),\n  phase: 3,\n  readinessPass: score >= 60\n} }];"
+      }
+    },
+    {
+      "id": "claude-summary",
+      "name": "Claude: Generate Readiness Summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [520, 240],
+      "parameters": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_ANTHROPIC_API_KEY" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 800, messages: [{ role: 'user', content: 'Generate a concise retail readiness assessment for brand ' + $json.brandName + '. Readiness Score: ' + $json.readinessScore + '/100. Category: ' + $json.category + '. Revenue: ' + $json.revenue + '. Target Retailer: ' + $json.retailer + '. Value Advantage score: ' + $json.readinessComponents.valueAdvantage + '/25. Pricing Fit: ' + $json.readinessComponents.pricingFit + '/25. Operational Readiness: ' + $json.readinessComponents.operationalReadiness + '/20. Format: Executive Summary (2 sentences), Strengths (3 bullets), Gaps (2 bullets), Top 3 Recommendations. Professional tone.' }] }) }}"
+      }
+    },
+    {
+      "id": "log-phase3",
+      "name": "Update Master: Phase 3 Readiness",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [720, 240],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "iAf8iDwbKFomAdUD", "name": "Google Sheets" }
+      },
+      "parameters": {
+        "operation": "update",
+        "documentId": { "value": "1zVPaQo5eSxj9rTFVXa4FPf-S7MFi-pEn-QT1D6s6mRc" },
+        "sheetName": "Phase1_Submissions",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "values": [
+            { "column": "Phase", "value": "3" },
+            { "column": "ReadinessScore", "value": "={{ $json.readinessScore }}" },
+            { "column": "ReadinessComputedAt", "value": "={{ $json.readinessComputedAt }}" }
+          ]
+        },
+        "options": { "lookupColumn": "ID", "lookupValue": "={{ $json.id }}" }
+      }
+    },
+    {
+      "id": "trigger-gonogo",
+      "name": "Trigger WF-04: Go/No-Go",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [920, 240],
+      "parameters": {
+        "url": "https://edenger.app.n8n.cloud/webhook/ascenda/gonogo",
+        "method": "POST",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}"
+      }
+    },
+    {
+      "id": "email-readiness",
+      "name": "Email: Readiness Score Report",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [920, 400],
+      "credentials": {
+        "gmailOAuth2": { "id": "eukzBWMaeb8VtN1s", "name": "Gmail" }
+      },
+      "parameters": {
+        "sendTo": "errol.denger@ascendagrp.com, andrew.therrien@ascendagrp.com",
+        "subject": "=Readiness Score: {{ $json.brandName }} - {{ $json.readinessScore }}/100",
+        "emailType": "html",
+        "message": "=<div style='font-family:Arial,sans-serif'><h2>{{ $json.brandName }} - Retail Readiness Assessment</h2><p><strong>Readiness Score: {{ $json.readinessScore }}/100</strong> | Phase 1 Score: {{ $json.score }}/100</p><table style='border-collapse:collapse;width:100%;margin:16px 0'><tr><td style='padding:8px;border:1px solid #ddd'>Value Advantage (20% req.)</td><td style='padding:8px;border:1px solid #ddd'>{{ $json.readinessComponents.valueAdvantage }}/25</td></tr><tr><td style='padding:8px;border:1px solid #ddd'>Pricing & Margin Fit</td><td style='padding:8px;border:1px solid #ddd'>{{ $json.readinessComponents.pricingFit }}/25</td></tr><tr><td style='padding:8px;border:1px solid #ddd'>Operational Readiness</td><td style='padding:8px;border:1px solid #ddd'>{{ $json.readinessComponents.operationalReadiness }}/20</td></tr><tr><td style='padding:8px;border:1px solid #ddd'>Product Differentiation</td><td style='padding:8px;border:1px solid #ddd'>{{ $json.readinessComponents.differentiation }}/20</td></tr><tr><td style='padding:8px;border:1px solid #ddd'>Compliance</td><td style='padding:8px;border:1px solid #ddd'>{{ $json.readinessComponents.compliance }}/10</td></tr></table><p>Advancing to Go/No-Go committee review.</p></div>"
+      }
+    }
+  ],
+  "connections": {
+    "Phase 3 Trigger": { "main": [[{ "node": "Compute Readiness & Value Index", "type": "main", "index": 0 }]] },
+    "Compute Readiness & Value Index": { "main": [[{ "node": "Claude: Generate Readiness Summary", "type": "main", "index": 0 }]] },
+    "Claude: Generate Readiness Summary": { "main": [[{ "node": "Update Master: Phase 3 Readiness", "type": "main", "index": 0 }]] },
+    "Update Master: Phase 3 Readiness": { "main": [[{ "node": "Trigger WF-04: Go/No-Go", "type": "main", "index": 0 }, { "node": "Email: Readiness Score Report", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "saveManualExecutions": true, "executionTimeout": 300, "timezone": "America/Los_Angeles" },
+  "meta": { "phase": 3, "ascendaVersion": "3.0", "description": "Stage 2 - Item Strategy & Value Validation. Scores readiness across value advantage, pricing fit, operational readiness, differentiation, and compliance. Triggers Go/No-Go." }
+}

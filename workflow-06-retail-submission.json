@@ -1,0 +1,124 @@
+{
+  "name": "Ascenda WF-06: Roadshow Program Design & Submission",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "LOI Signed Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [120, 240],
+      "parameters": { "path": "ascenda/loi-signed", "method": "POST", "responseMode": "lastNode" }
+    },
+    {
+      "id": "gen-twopager",
+      "name": "Claude: Generate Buyer Two-Pager",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [320, 240],
+      "parameters": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_ANTHROPIC_API_KEY" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, messages: [{ role: 'user', content: 'Write a compelling buyer-ready two-pager for brand ' + $json.brandName + ' targeting ' + $json.retailer + ' Category 63 Pop-Up Shop program. Category: ' + $json.category + '. Revenue: ' + $json.revenue + '. Include: Brand Story (2 sentences), Product Highlights (4 bullets), Why Sam\\'s Club Members Will Love It (member value proposition with 20%+ value advantage), Price Point & Margin Structure, Volume Projections, Roadshow Format (show length, pallet footprint, power needs), Social Proof, and Call to Action. Tone: confident, retail-buyer-focused. Reference Sam\\'s Club Roadshow 2026 Planning format.' }] }) }}"
+      }
+    },
+    {
+      "id": "parse-twopager",
+      "name": "Parse Two-Pager",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 240],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nlet twoPager = '';\ntry {\n  twoPager = d.content[0].text;\n} catch(e) {\n  twoPager = 'Two-pager generation failed.';\n}\nconst brandData = $('LOI Signed Trigger').first().json;\nreturn [{ json: { ...brandData, twoPager, submissionDate: new Date().toISOString(), phase: 6 } }];"
+      }
+    },
+    {
+      "id": "save-twopager",
+      "name": "Save Two-Pager to Brand Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [720, 240],
+      "credentials": {
+        "googleDriveOAuth2Api": { "id": "wFT7IFpkOzP6pZIB", "name": "Google Drive" }
+      },
+      "parameters": {
+        "operation": "upload",
+        "name": "={{ $json.brandName }}-BuyerTwoPager-{{ $now.format('yyyy-MM-dd') }}.txt",
+        "driveId": "myDrive",
+        "inputDataFieldName": "twoPager"
+      }
+    },
+    {
+      "id": "update-master-phase6",
+      "name": "Update Master: Phase 6",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [920, 160],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "iAf8iDwbKFomAdUD", "name": "Google Sheets" }
+      },
+      "parameters": {
+        "operation": "update",
+        "documentId": { "value": "1zVPaQo5eSxj9rTFVXa4FPf-S7MFi-pEn-QT1D6s6mRc" },
+        "sheetName": "Phase1_Submissions",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "values": [
+            { "column": "Phase", "value": "6" },
+            { "column": "SubmissionDate", "value": "={{ $json.submissionDate }}" },
+            { "column": "Status", "value": "ROADSHOW_SUBMITTED" }
+          ]
+        },
+        "options": { "lookupColumn": "ID", "lookupValue": "={{ $json.id }}" }
+      }
+    },
+    {
+      "id": "notify-submitted",
+      "name": "Email: Submission Confirmation",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [920, 320],
+      "credentials": {
+        "gmailOAuth2": { "id": "eukzBWMaeb8VtN1s", "name": "Gmail" }
+      },
+      "parameters": {
+        "sendTo": "={{ $json.email }}, errol.denger@ascendagrp.com, andrew.therrien@ascendagrp.com",
+        "subject": "=Roadshow Program Submitted: {{ $json.brandName }} to {{ $json.retailer }}",
+        "emailType": "html",
+        "message": "=<div style='font-family:Arial,sans-serif'><h2>Roadshow Program Package Submitted</h2><p>Your brand <strong>{{ $json.brandName }}</strong> has been officially submitted to {{ $json.retailer }} for the Category 63 Pop-Up Shop / Roadshow program.</p><p><strong>What happens next:</strong></p><ol><li>Buyer review period (2-3 weeks)</li><li>Item creation and system setup (Stage 4)</li><li>Store selection and scheduling (Stage 5)</li><li>Logistics and field readiness (Stage 6)</li></ol><p>Our team will keep you informed throughout the process.</p></div>"
+      }
+    }
+    ,{
+      "id": "trigger-presentation",
+      "name": "Trigger WF-06b: Generate Presentation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1120, 160],
+      "parameters": {
+        "url": "https://edenger.app.n8n.cloud/webhook/ascenda/generate-presentation",
+        "method": "POST",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}"
+      }
+    }
+  ],
+  "connections": {
+    "LOI Signed Trigger": { "main": [[{ "node": "Claude: Generate Buyer Two-Pager", "type": "main", "index": 0 }]] },
+    "Claude: Generate Buyer Two-Pager": { "main": [[{ "node": "Parse Two-Pager", "type": "main", "index": 0 }]] },
+    "Parse Two-Pager": { "main": [[{ "node": "Save Two-Pager to Brand Folder", "type": "main", "index": 0 }]] },
+    "Save Two-Pager to Brand Folder": { "main": [[{ "node": "Update Master: Phase 6", "type": "main", "index": 0 }, { "node": "Email: Submission Confirmation", "type": "main", "index": 0 }, { "node": "Trigger WF-06b: Generate Presentation", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "saveManualExecutions": true, "executionTimeout": 600, "timezone": "America/Los_Angeles" },
+  "meta": { "phase": 6, "ascendaVersion": "3.0", "description": "Stage 3 - Roadshow Program Design. Generates buyer-ready two-pager, saves to Drive, updates master, sends confirmation. Triggered after LOI is signed." }
+}

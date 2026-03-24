@@ -1,0 +1,93 @@
+{
+  "name": "Ascenda WF-09: Growth Trigger & Expansion Analysis",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Growth Analysis Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [120, 240],
+      "parameters": { "path": "ascenda/growth-analysis", "method": "POST", "responseMode": "lastNode" }
+    },
+    {
+      "id": "expansion-analysis",
+      "name": "Claude: Expansion Path Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [320, 240],
+      "parameters": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_ANTHROPIC_API_KEY" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, messages: [{ role: 'user', content: 'Analyze expansion opportunities for ' + $json.brandName + ' after successful Sam\\'s Club roadshow. ROI: ' + $json.roi + '%. Revenue: $' + $json.totalRevenue + '. Units sold: ' + $json.unitsSold + '. Category: ' + $json.category + '. Consider: 1) Additional Sam\\'s Club locations (scaling from current clubs), 2) Costco crossover potential, 3) Puerto Rico / mainland expansion, 4) Seasonal optimization (Q1-Q4 strategy), 5) Program graduation (from Pop-Up to permanent shelf). Recommend: Primary expansion path, Timeline (30/60/90 day), Capital requirements, Expected ROI at scale. Be specific with numbers.' }] }) }}"
+      }
+    },
+    {
+      "id": "parse-analysis",
+      "name": "Parse Expansion Analysis",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 240],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nlet analysis = '';\ntry { analysis = d.content[0].text; } catch(e) { analysis = 'Analysis generation failed.'; }\nconst brandData = $('Growth Analysis Trigger').first().json;\nreturn [{ json: { ...brandData, expansionAnalysis: analysis, phase: 9, analysisAt: new Date().toISOString() } }];"
+      }
+    },
+    {
+      "id": "update-master-phase9",
+      "name": "Update Master: Growth Phase",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [720, 160],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "iAf8iDwbKFomAdUD", "name": "Google Sheets" }
+      },
+      "parameters": {
+        "operation": "update",
+        "documentId": { "value": "1zVPaQo5eSxj9rTFVXa4FPf-S7MFi-pEn-QT1D6s6mRc" },
+        "sheetName": "Phase1_Submissions",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "values": [
+            { "column": "Phase", "value": "9" },
+            { "column": "Status", "value": "GROWTH_ANALYSIS" },
+            { "column": "GrowthAnalysisAt", "value": "={{ $json.analysisAt }}" }
+          ]
+        },
+        "options": { "lookupColumn": "ID", "lookupValue": "={{ $json.id }}" }
+      }
+    },
+    {
+      "id": "email-expansion",
+      "name": "Email: Expansion Recommendations",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [720, 320],
+      "credentials": {
+        "gmailOAuth2": { "id": "eukzBWMaeb8VtN1s", "name": "Gmail" }
+      },
+      "parameters": {
+        "sendTo": "errol.denger@ascendagrp.com, andrew.therrien@ascendagrp.com",
+        "subject": "=Growth Opportunity: {{ $json.brandName }} (ROI: {{ $json.roi }}%)",
+        "emailType": "html",
+        "message": "=<div style='font-family:Arial,sans-serif;max-width:700px'><h2>Expansion Analysis: {{ $json.brandName }}</h2><p><strong>Post-Show ROI:</strong> {{ $json.roi }}% | <strong>Revenue:</strong> ${{ $json.totalRevenue }} | <strong>Units:</strong> {{ $json.unitsSold }}</p><hr><div style='white-space:pre-wrap'>{{ $json.expansionAnalysis }}</div><hr><p><strong>Next Steps:</strong></p><ul><li>Review expansion recommendations</li><li>Schedule buyer follow-up meeting</li><li>Prepare 2026 roadmap alignment proposal</li><li>Evaluate SPV reinvestment structure if scaling</li></ul></div>"
+      }
+    }
+  ],
+  "connections": {
+    "Growth Analysis Trigger": { "main": [[{ "node": "Claude: Expansion Path Analysis", "type": "main", "index": 0 }]] },
+    "Claude: Expansion Path Analysis": { "main": [[{ "node": "Parse Expansion Analysis", "type": "main", "index": 0 }]] },
+    "Parse Expansion Analysis": { "main": [[{ "node": "Update Master: Growth Phase", "type": "main", "index": 0 }, { "node": "Email: Expansion Recommendations", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "saveManualExecutions": true, "executionTimeout": 600, "timezone": "America/Los_Angeles" },
+  "meta": { "phase": 9, "ascendaVersion": "3.0", "description": "Growth analysis and expansion planning. Triggered by successful roadshow (ROI >= 20%). Generates AI expansion analysis covering additional clubs, Costco crossover, seasonal strategy." }
+}

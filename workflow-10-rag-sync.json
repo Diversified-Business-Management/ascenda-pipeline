@@ -1,0 +1,82 @@
+{
+  "name": "Ascenda WF-10: Master Data Sync & RAG Update",
+  "nodes": [
+    {
+      "id": "trigger-webhook",
+      "name": "Phase Gate Transition Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [120, 240],
+      "parameters": { "path": "ascenda/rag-sync", "method": "POST", "responseMode": "lastNode" }
+    },
+    {
+      "id": "schedule-trigger",
+      "name": "Daily Sync Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [120, 400],
+      "parameters": {
+        "rule": { "interval": [{ "field": "hours", "hoursInterval": 6 }] }
+      }
+    },
+    {
+      "id": "pull-sheets",
+      "name": "Pull All Brands from Master",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [320, 320],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "iAf8iDwbKFomAdUD", "name": "Google Sheets" }
+      },
+      "parameters": {
+        "operation": "read",
+        "documentId": { "value": "1zVPaQo5eSxj9rTFVXa4FPf-S7MFi-pEn-QT1D6s6mRc" },
+        "sheetName": "Phase1_Submissions",
+        "options": {}
+      }
+    },
+    {
+      "id": "build-sync-summary",
+      "name": "Build Sync Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 320],
+      "parameters": {
+        "jsCode": "const rows = $input.all();\nconst brands = rows.map(row => ({\n  id: row.json.ID || '',\n  brandName: row.json.BrandName || '',\n  category: row.json.Category || '',\n  score: parseFloat(row.json.Score) || 0,\n  readinessScore: parseFloat(row.json.ReadinessScore) || 0,\n  phase: parseInt(row.json.Phase) || 1,\n  routing: row.json.Routing || '',\n  revenue: row.json.Revenue || '',\n  retailer: row.json.Retailer || '',\n  status: row.json.Status || '',\n  roi: parseFloat(row.json.ROI) || 0\n})).filter(b => b.brandName);\n\nconst summary = {\n  totalBrands: brands.length,\n  byPhase: {},\n  byRouting: {},\n  avgScore: 0\n};\n\nbrands.forEach(b => {\n  summary.byPhase[b.phase] = (summary.byPhase[b.phase] || 0) + 1;\n  summary.byRouting[b.routing] = (summary.byRouting[b.routing] || 0) + 1;\n});\n\nif (brands.length > 0) {\n  summary.avgScore = Math.round(brands.reduce((s, b) => s + b.score, 0) / brands.length);\n}\n\nreturn [{ json: { brands, summary, syncedAt: new Date().toISOString(), count: brands.length } }];"
+      }
+    },
+    {
+      "id": "log-sync",
+      "name": "Log Sync Stats",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [720, 320],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "iAf8iDwbKFomAdUD", "name": "Google Sheets" }
+      },
+      "parameters": {
+        "operation": "append",
+        "documentId": { "value": "1zVPaQo5eSxj9rTFVXa4FPf-S7MFi-pEn-QT1D6s6mRc" },
+        "sheetName": "RAG_Sync_Log",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "values": [
+            { "column": "SyncedAt", "value": "={{ $json.syncedAt }}" },
+            { "column": "BrandCount", "value": "={{ $json.count }}" },
+            { "column": "AvgScore", "value": "={{ $json.summary.avgScore }}" },
+            { "column": "Status", "value": "SUCCESS" }
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Phase Gate Transition Trigger": { "main": [[{ "node": "Pull All Brands from Master", "type": "main", "index": 0 }]] },
+    "Daily Sync Schedule": { "main": [[{ "node": "Pull All Brands from Master", "type": "main", "index": 0 }]] },
+    "Pull All Brands from Master": { "main": [[{ "node": "Build Sync Summary", "type": "main", "index": 0 }]] },
+    "Build Sync Summary": { "main": [[{ "node": "Log Sync Stats", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "saveManualExecutions": true, "executionTimeout": 300, "timezone": "America/Los_Angeles" },
+  "meta": { "phase": 0, "ascendaVersion": "3.0", "description": "Cross-phase data sync. Runs every 6 hours and on every phase gate transition. Pulls master data, builds portfolio summary, logs sync stats. Pinecone RAG upsert ready to enable once embedding API is configured." }
+}

@@ -1182,7 +1182,8 @@
 <script>
 // ── CONFIG ──────────────────────────────────────────────────────────────────
 const N8N_WEBHOOK = 'https://edenger.app.n8n.cloud/webhook/ascenda/intake';
-// Update this URL after importing workflows to n8n
+const N8N_DOC_UPLOAD = 'https://edenger.app.n8n.cloud/webhook/ascenda/doc-upload';
+// Phase 1 goes to WF-01 intake webhook. Phases 2-4 go to doc-upload webhook for compliance data.
 
 // ── STATE ───────────────────────────────────────────────────────────────────
 let prospectId = '';
@@ -1371,7 +1372,7 @@ function submitPhase2() {
     testingNotes: document.getElementById('p2-testing-notes').value,
     submittedAt: new Date().toISOString()
   };
-  fetch(N8N_WEBHOOK + '/phase2', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phase:2, ...formData.phase2 }) }).catch(()=>{});
+  fetch(N8N_DOC_UPLOAD, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phase:2, id: prospectId, brandName: formData.phase1.company, email: formData.phase1.email, ...formData.phase2 }) }).catch(()=>{});
   goToPhase(3);
 }
 
@@ -1397,7 +1398,7 @@ function submitPhase3() {
     allergens: document.getElementById('p3-allergens').value,
     submittedAt: new Date().toISOString()
   };
-  fetch(N8N_WEBHOOK + '/phase3', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phase:3, ...formData.phase3 }) }).catch(()=>{});
+  fetch(N8N_DOC_UPLOAD, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phase:3, id: prospectId, brandName: formData.phase1.company, email: formData.phase1.email, ...formData.phase3 }) }).catch(()=>{});
   goToPhase(4);
 }
 
@@ -1415,7 +1416,7 @@ function submitFinal() {
     notes: document.getElementById('p4-notes').value,
     submittedAt: new Date().toISOString()
   };
-  fetch(N8N_WEBHOOK + '/phase4', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phase:4, complete:true, ...formData }) }).catch(()=>{});
+  fetch(N8N_DOC_UPLOAD, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phase:4, complete:true, id: prospectId, brandName: formData.phase1.company, email: formData.phase1.email, ...formData.phase4 }) }).catch(()=>{});
 
   document.getElementById('phase-4').classList.remove('active');
   document.getElementById('success-panel').classList.add('active');

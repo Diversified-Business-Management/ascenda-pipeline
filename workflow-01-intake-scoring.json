@@ -1,0 +1,421 @@
+{
+  "name": "Ascenda WF-01: Brand Intake & Auto-Scoring",
+  "nodes": [
+    {
+      "id": "webhook-intake",
+      "name": "Brand Intake Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [120, 240],
+      "parameters": {
+        "path": "ascenda/intake",
+        "method": "POST",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": false
+        }
+      }
+    },
+    {
+      "id": "validate-input",
+      "name": "Validate & Normalize Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [320, 240],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\n\n// Required fields from form's n8nPayload\nconst required = ['brandName','email','category','revenue','retailer','productDescription'];\nconst missing = required.filter(k => !d[k] || d[k].toString().trim() === '');\n\nif (missing.length > 0) {\n  return [{ json: { valid: false, missing, error: `Missing required fields: ${missing.join(', ')}` } }];\n}\n\nconst prospectId = `BRAND-${Date.now()}`;\nconst now = new Date().toISOString();\n\n// Pass through ALL fields from the form payload\nreturn [{ json: {\n  valid: true,\n  id: prospectId,\n  // Core identity\n  brandName: (d.brandName || d.company || '').trim(),\n  company: (d.company || d.brandName || '').trim(),\n  contactName: (d.contactName || `${d.firstName || ''} ${d.lastName || ''}`.trim()),\n  firstName: (d.firstName || '').trim(),\n  lastName: (d.lastName || '').trim(),\n  email: (d.email || '').toLowerCase().trim(),\n  phone: (d.phone || '').trim(),\n  website: (d.website || '').trim(),\n  // Product info\n  productName: (d.productName || '').trim(),\n  category: d.category,\n  productDescription: d.productDescription,\n  differentiation: (d.differentiation || ''),\n  memberValue: (d.memberValue || ''),\n  competitors: (d.competitors || ''),\n  // Business info\n  revenue: d.revenue,\n  retailer: d.retailer,\n  preferredModel: (d.preferredModel || 'Roadshow'),\n  currentFootprint: (d.currentFootprint || ''),\n  timeline: (d.timeline || ''),\n  econNotes: (d.econNotes || ''),\n  constraints: (d.constraints || ''),\n  // Yes/No compliance fields\n  has20PctValue: (d.has20PctValue || ''),\n  consignmentReady: (d.consignmentReady || ''),\n  multiClub: (d.multiClub || ''),\n  pricingWorks: (d.pricingWorks || ''),\n  canProvideCOGS: (d.canProvideCOGS || ''),\n  canBreakEven: (d.canBreakEven || ''),\n  hasInsurance: (d.hasInsurance || ''),\n  coverage: (d.coverage || ''),\n  nutritionalLabel: (d.nutritionalLabel || ''),\n  testing: (d.testing || ''),\n  certifications: (d.certifications || ''),\n  // Meta\n  submittedAt: now,\n  phase: 1\n} }];"
+      }
+    },
+    {
+      "id": "check-valid",
+      "name": "Valid Submission?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [520, 240],
+      "parameters": {
+        "conditions": {
+          "boolean": [{ "value1": "={{ $json.valid }}", "value2": true, "operation": "equal" }]
+        }
+      }
+    },
+    {
+      "id": "score-brand",
+      "name": "Phase 1 Auto-Scoring Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 160],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nlet score = 0;\nconst breakdown = {};\n\n// CATEGORY 1: Revenue Scale (25 pts)\nconst revenueMap = {\n  'Under $500K': 5, '$500K – $1M': 12, '$500K - $1M': 12,\n  '$1M – $5M': 20, '$1M - $5M': 20,\n  '$5M – $20M': 23, '$5M - $20M': 23,\n  'Over $20M': 25\n};\nbreakdown.revenue = revenueMap[d.revenue] || 5;\nscore += breakdown.revenue;\n\n// CATEGORY 2: Retailer Fit (20 pts)\nconst r = (d.retailer || '').toLowerCase();\nbreakdown.retailerFit = r.includes('sam') ? 20 : r.includes('costco') ? 18 : r.includes('both') ? 20 : 10;\nscore += breakdown.retailerFit;\n\n// CATEGORY 3: Product Description Quality (25 pts)\nconst descLen = (d.productDescription || '').length;\nbreakdown.productQuality = descLen > 500 ? 25 : descLen > 300 ? 20 : descLen > 150 ? 14 : descLen > 50 ? 8 : 3;\nscore += breakdown.productQuality;\n\n// CATEGORY 4: Market Readiness - yes/no signals (15 pts)\nlet readiness = 0;\nif (d.has20PctValue === 'yes') readiness += 3;\nif (d.consignmentReady === 'yes') readiness += 3;\nif (d.multiClub === 'yes') readiness += 3;\nif (d.pricingWorks === 'yes') readiness += 3;\nif (d.hasInsurance === 'yes') readiness += 3;\nbreakdown.marketReadiness = Math.min(readiness, 15);\nscore += breakdown.marketReadiness;\n\n// CATEGORY 5: Economics Clarity (10 pts)\nlet econ = 0;\nif (d.canProvideCOGS === 'yes') econ += 4;\nif (d.canBreakEven === 'yes') econ += 3;\nif ((d.econNotes || '').length > 20) econ += 3;\nbreakdown.economics = Math.min(econ, 10);\nscore += breakdown.economics;\n\n// CATEGORY 6: Category Fit (5 pts)\nconst highFit = ['Food & Beverage','Health & Beauty','Home & Kitchen','Wellness/Supplements','Pet'];\nbreakdown.categoryFit = highFit.some(c => (d.category || '').includes(c)) ? 5 : 3;\nscore += breakdown.categoryFit;\n\nscore = Math.round(Math.min(score, 100));\n\nlet routing, routingReason;\nif (score >= 70) {\n  routing = 'AUTO_APPROVE';\n  routingReason = 'Score meets auto-approval threshold (>=70). Advancing to Phase 2.';\n} else if (score >= 40) {\n  routing = 'MANUAL_REVIEW';\n  routingReason = 'Score in review range (40-69). Flagged for committee evaluation.';\n} else {\n  routing = 'AUTO_REJECT';\n  routingReason = 'Score below minimum threshold (<40). Auto-rejection with feedback.';\n}\n\nreturn [{ json: { ...d, score, breakdown, routing, routingReason, phase1Complete: true } }];"
+      }
+    },
+    {
+      "id": "log-to-master",
+      "name": "Log to Ascenda Intake Master",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [920, 160],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "iAf8iDwbKFomAdUD", "name": "Google Sheets" }
+      },
+      "parameters": {
+        "operation": "append",
+        "documentId": { "value": "1zVPaQo5eSxj9rTFVXa4FPf-S7MFi-pEn-QT1D6s6mRc" },
+        "sheetName": "Phase1_Submissions",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "values": [
+            { "column": "ID", "value": "={{ $json.id }}" },
+            { "column": "BrandName", "value": "={{ $json.brandName }}" },
+            { "column": "Company", "value": "={{ $json.company }}" },
+            { "column": "ContactName", "value": "={{ $json.contactName }}" },
+            { "column": "FirstName", "value": "={{ $json.firstName }}" },
+            { "column": "LastName", "value": "={{ $json.lastName }}" },
+            { "column": "Email", "value": "={{ $json.email }}" },
+            { "column": "Phone", "value": "={{ $json.phone }}" },
+            { "column": "Website", "value": "={{ $json.website }}" },
+            { "column": "ProductName", "value": "={{ $json.productName }}" },
+            { "column": "Category", "value": "={{ $json.category }}" },
+            { "column": "ProductDescription", "value": "={{ $json.productDescription }}" },
+            { "column": "Differentiation", "value": "={{ $json.differentiation }}" },
+            { "column": "MemberValue", "value": "={{ $json.memberValue }}" },
+            { "column": "Competitors", "value": "={{ $json.competitors }}" },
+            { "column": "Revenue", "value": "={{ $json.revenue }}" },
+            { "column": "Retailer", "value": "={{ $json.retailer }}" },
+            { "column": "PreferredModel", "value": "={{ $json.preferredModel }}" },
+            { "column": "EconNotes", "value": "={{ $json.econNotes }}" },
+            { "column": "Constraints", "value": "={{ $json.constraints }}" },
+            { "column": "Has20PctValue", "value": "={{ $json.has20PctValue }}" },
+            { "column": "ConsignmentReady", "value": "={{ $json.consignmentReady }}" },
+            { "column": "MultiClub", "value": "={{ $json.multiClub }}" },
+            { "column": "PricingWorks", "value": "={{ $json.pricingWorks }}" },
+            { "column": "CanProvideCOGS", "value": "={{ $json.canProvideCOGS }}" },
+            { "column": "CanBreakEven", "value": "={{ $json.canBreakEven }}" },
+            { "column": "HasInsurance", "value": "={{ $json.hasInsurance }}" },
+            { "column": "Coverage", "value": "={{ $json.coverage }}" },
+            { "column": "NutritionalLabel", "value": "={{ $json.nutritionalLabel }}" },
+            { "column": "Testing", "value": "={{ $json.testing }}" },
+            { "column": "Certifications", "value": "={{ $json.certifications }}" },
+            { "column": "Score", "value": "={{ $json.score }}" },
+            { "column": "Routing", "value": "={{ $json.routing }}" },
+            { "column": "RoutingReason", "value": "={{ $json.routingReason }}" },
+            { "column": "Phase", "value": "1" },
+            { "column": "SubmittedAt", "value": "={{ $json.submittedAt }}" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "route-by-score",
+      "name": "Route by Score",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [1120, 160],
+      "parameters": {
+        "rules": {
+          "values": [
+            { "outputKey": "APPROVE", "conditions": { "conditions": [{ "leftValue": "={{ $json.routing }}", "rightValue": "AUTO_APPROVE", "operator": { "type": "string", "operation": "equals" } }] } },
+            { "outputKey": "REVIEW", "conditions": { "conditions": [{ "leftValue": "={{ $json.routing }}", "rightValue": "MANUAL_REVIEW", "operator": { "type": "string", "operation": "equals" } }] } },
+            { "outputKey": "REJECT", "conditions": { "conditions": [{ "leftValue": "={{ $json.routing }}", "rightValue": "AUTO_REJECT", "operator": { "type": "string", "operation": "equals" } }] } }
+          ]
+        },
+        "options": { "fallbackOutput": "extra" }
+      }
+    },
+    {
+      "id": "create-brand-folder",
+      "name": "Create Brand Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [1320, 60],
+      "credentials": {
+        "googleDriveOAuth2Api": { "id": "wFT7IFpkOzP6pZIB", "name": "Google Drive" }
+      },
+      "parameters": {
+        "operation": "createFolder",
+        "name": "=Ascenda - {{ $json.brandName }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "create-brand-spreadsheet",
+      "name": "Create Brand Spreadsheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [1520, 60],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "iAf8iDwbKFomAdUD", "name": "Google Sheets" }
+      },
+      "parameters": {
+        "operation": "create",
+        "title": "=Ascenda - {{ $json.brandName }} - A&P Promo Plan",
+        "sheetName": "Promo Plan",
+        "options": {
+          "folderId": "={{ $json.id }}"
+        }
+      }
+    },
+    {
+      "id": "save-form-data-to-folder",
+      "name": "Save Intake Data to Brand Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [1720, 60],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "iAf8iDwbKFomAdUD", "name": "Google Sheets" }
+      },
+      "parameters": {
+        "operation": "append",
+        "documentId": { "value": "={{ $json.spreadsheetId }}" },
+        "sheetName": "Promo Plan",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "values": [
+            { "column": "Field", "value": "Brand Name" },
+            { "column": "Value", "value": "={{ $json.brandName }}" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "email-approve",
+      "name": "Send Approval Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [1920, 60],
+      "credentials": {
+        "gmailOAuth2": { "id": "eukzBWMaeb8VtN1s", "name": "Gmail" }
+      },
+      "parameters": {
+        "sendTo": "={{ $json.email }}, errol.denger@ascendagrp.com, andrew.therrien@ascendagrp.com",
+        "subject": "=Ascenda: {{ $json.brandName }} - Approved for Phase 2 (Score: {{ $json.score }})",
+        "emailType": "html",
+        "message": "<div style='font-family:Arial,sans-serif;max-width:600px'><h2 style='color:#2d7a5f'>Congratulations, {{ $json.brandName }}!</h2><p>Your brand has been <strong>approved</strong> to advance to Phase 2: Compliance & Due Diligence.</p><p><strong>Readiness Score: {{ $json.score }}/100</strong></p><table style='width:100%;border-collapse:collapse;margin:16px 0'><tr><td style='padding:8px;border:1px solid #ddd'>Revenue Scale</td><td style='padding:8px;border:1px solid #ddd'>{{ $json.breakdown.revenue }}/25</td></tr><tr><td style='padding:8px;border:1px solid #ddd'>Retailer Fit</td><td style='padding:8px;border:1px solid #ddd'>{{ $json.breakdown.retailerFit }}/20</td></tr><tr><td style='padding:8px;border:1px solid #ddd'>Product Quality</td><td style='padding:8px;border:1px solid #ddd'>{{ $json.breakdown.productQuality }}/25</td></tr><tr><td style='padding:8px;border:1px solid #ddd'>Market Readiness</td><td style='padding:8px;border:1px solid #ddd'>{{ $json.breakdown.marketReadiness }}/15</td></tr><tr><td style='padding:8px;border:1px solid #ddd'>Economics</td><td style='padding:8px;border:1px solid #ddd'>{{ $json.breakdown.economics }}/10</td></tr><tr><td style='padding:8px;border:1px solid #ddd'>Category Fit</td><td style='padding:8px;border:1px solid #ddd'>{{ $json.breakdown.categoryFit }}/5</td></tr></table><p>Our team will send your compliance document checklist within 24 hours.</p><hr><p style='color:#999;font-size:12px'>Ascenda Group | Sam's Club & Costco Retail Readiness</p></div>"
+      }
+    },
+    {
+      "id": "create-calendar-event",
+      "name": "Create Follow-Up Calendar Event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [2120, 60],
+      "credentials": {
+        "googleCalendarOAuth2": { "id": "mhoZydefsYryGfxM", "name": "Google Calendar" }
+      },
+      "parameters": {
+        "operation": "create",
+        "calendarId": "primary",
+        "summary": "=Follow-Up: {{ $json.brandName }} - Phase 2 Compliance Review",
+        "start": "={{ DateTime.now().plus({ days: 2 }).toISO() }}",
+        "end": "={{ DateTime.now().plus({ days: 2, hours: 1 }).toISO() }}",
+        "additionalFields": {
+          "description": "=Brand: {{ $json.brandName }}\nContact: {{ $json.contactName }} ({{ $json.email }})\nScore: {{ $json.score }}/100\nCategory: {{ $json.category }}\nRetailer: {{ $json.retailer }}\nRevenue: {{ $json.revenue }}\n\nAction: Send compliance checklist and schedule introductory call."
+        }
+      }
+    },
+    {
+      "id": "trigger-phase2",
+      "name": "Trigger WF-02: Compliance",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2320, 60],
+      "parameters": {
+        "url": "https://edenger.app.n8n.cloud/webhook/ascenda/phase2-start",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": []
+        },
+        "options": {},
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify($json) }}"
+      }
+    },
+    {
+      "id": "respond-approve",
+      "name": "Respond: Approved",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2520, 60],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, id: $json.id, score: $json.score, routing: 'AUTO_APPROVE', message: $json.routingReason }) }}",
+        "options": {
+          "responseHeaders": { "entries": [{ "name": "Content-Type", "value": "application/json" }] }
+        }
+      }
+    },
+    {
+      "id": "email-review",
+      "name": "Send Review Notification",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [1320, 220],
+      "credentials": {
+        "gmailOAuth2": { "id": "eukzBWMaeb8VtN1s", "name": "Gmail" }
+      },
+      "parameters": {
+        "sendTo": "={{ $json.email }}, errol.denger@ascendagrp.com, andrew.therrien@ascendagrp.com",
+        "subject": "=Ascenda: {{ $json.brandName }} - Under Committee Review (Score: {{ $json.score }})",
+        "emailType": "html",
+        "message": "<div style='font-family:Arial,sans-serif;max-width:600px'><h2>Thank you, {{ $json.brandName }}</h2><p>Your application is under <strong>committee review</strong>. A member of our team will contact you within 48 business hours.</p><p><strong>Your Score: {{ $json.score }}/100</strong></p><p>We may request additional information to complete our evaluation.</p><hr><p style='color:#999;font-size:12px'>Ascenda Group | Sam's Club & Costco Retail Readiness</p></div>"
+      }
+    },
+    {
+      "id": "slack-review-alert",
+      "name": "Slack: Alert for Manual Review",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [1520, 220],
+      "parameters": {
+        "channel": "#brand-reviews",
+        "text": "=:yellow_circle: *Manual Review Required*\n*Brand:* {{ $json.brandName }}\n*Score:* {{ $json.score }}/100\n*Category:* {{ $json.category }}\n*Revenue:* {{ $json.revenue }}\n*Contact:* {{ $json.contactName }} ({{ $json.email }})\n*Retailer:* {{ $json.retailer }}\n\nReview in dashboard: https://diversified-business-management.github.io/ascenda-pipeline/"
+      }
+    },
+    {
+      "id": "respond-review",
+      "name": "Respond: Under Review",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1720, 220],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, id: $json.id, score: $json.score, routing: 'MANUAL_REVIEW', message: $json.routingReason }) }}",
+        "options": {
+          "responseHeaders": { "entries": [{ "name": "Content-Type", "value": "application/json" }] }
+        }
+      }
+    },
+    {
+      "id": "email-reject",
+      "name": "Send Rejection Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [1320, 380],
+      "credentials": {
+        "gmailOAuth2": { "id": "eukzBWMaeb8VtN1s", "name": "Gmail" }
+      },
+      "parameters": {
+        "sendTo": "={{ $json.email }}, errol.denger@ascendagrp.com, andrew.therrien@ascendagrp.com",
+        "subject": "=Ascenda: Application Update for {{ $json.brandName }}",
+        "emailType": "html",
+        "message": "<div style='font-family:Arial,sans-serif;max-width:600px'><h2>Application Update</h2><p>Thank you for your interest in working with Ascenda Group. At this time, <strong>{{ $json.brandName }}</strong> does not meet our current threshold for the Sam's Club/Costco roadshow program.</p><p><strong>Score: {{ $json.score }}/100</strong></p><p>Common areas for improvement:</p><ul><li>Revenue scale and market traction</li><li>Pricing alignment with warehouse club economics</li><li>Insurance and compliance readiness</li></ul><p>We encourage you to reapply in 6 months after addressing these areas.</p><hr><p style='color:#999;font-size:12px'>Ascenda Group | Sam's Club & Costco Retail Readiness</p></div>"
+      }
+    },
+    {
+      "id": "respond-reject",
+      "name": "Respond: Rejected",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1520, 380],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, id: $json.id, score: $json.score, routing: 'AUTO_REJECT', message: $json.routingReason }) }}",
+        "options": {
+          "responseHeaders": { "entries": [{ "name": "Content-Type", "value": "application/json" }] }
+        }
+      }
+    },
+    {
+      "id": "trigger-promo-plan",
+      "name": "Trigger WF-01b: Populate Promo Plan",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1720, 160],
+      "parameters": {
+        "url": "https://edenger.app.n8n.cloud/webhook/ascenda/setup-promo-plan",
+        "method": "POST",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify({ brandName: $json.brandName, category: $json.category, revenue: $json.revenue, retailer: $json.retailer, spreadsheetId: $json.spreadsheetId || $json.id, email: $json.email }) }}"
+      }
+    },
+    {
+      "id": "respond-invalid",
+      "name": "Respond: Invalid Submission",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [720, 340],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: false, error: $json.error, missing: $json.missing }) }}",
+        "options": {
+          "responseCode": 400,
+          "responseHeaders": { "entries": [{ "name": "Content-Type", "value": "application/json" }] }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Brand Intake Webhook": {
+      "main": [[{ "node": "Validate & Normalize Input", "type": "main", "index": 0 }]]
+    },
+    "Validate & Normalize Input": {
+      "main": [[{ "node": "Valid Submission?", "type": "main", "index": 0 }]]
+    },
+    "Valid Submission?": {
+      "main": [
+        [{ "node": "Phase 1 Auto-Scoring Engine", "type": "main", "index": 0 }],
+        [{ "node": "Respond: Invalid Submission", "type": "main", "index": 0 }]
+      ]
+    },
+    "Phase 1 Auto-Scoring Engine": {
+      "main": [[{ "node": "Log to Ascenda Intake Master", "type": "main", "index": 0 }]]
+    },
+    "Log to Ascenda Intake Master": {
+      "main": [[{ "node": "Route by Score", "type": "main", "index": 0 }]]
+    },
+    "Route by Score": {
+      "main": [
+        [{ "node": "Create Brand Folder", "type": "main", "index": 0 }],
+        [{ "node": "Send Review Notification", "type": "main", "index": 0 }],
+        [{ "node": "Send Rejection Email", "type": "main", "index": 0 }]
+      ]
+    },
+    "Create Brand Folder": {
+      "main": [[{ "node": "Create Brand Spreadsheet", "type": "main", "index": 0 }]]
+    },
+    "Create Brand Spreadsheet": {
+      "main": [[{ "node": "Save Intake Data to Brand Sheet", "type": "main", "index": 0 }, { "node": "Trigger WF-01b: Populate Promo Plan", "type": "main", "index": 0 }]]
+    },
+    "Save Intake Data to Brand Sheet": {
+      "main": [[{ "node": "Send Approval Email", "type": "main", "index": 0 }]]
+    },
+    "Send Approval Email": {
+      "main": [[{ "node": "Create Follow-Up Calendar Event", "type": "main", "index": 0 }]]
+    },
+    "Create Follow-Up Calendar Event": {
+      "main": [[{ "node": "Trigger WF-02: Compliance", "type": "main", "index": 0 }]]
+    },
+    "Trigger WF-02: Compliance": {
+      "main": [[{ "node": "Respond: Approved", "type": "main", "index": 0 }]]
+    },
+    "Send Review Notification": {
+      "main": [[{ "node": "Slack: Alert for Manual Review", "type": "main", "index": 0 }]]
+    },
+    "Slack: Alert for Manual Review": {
+      "main": [[{ "node": "Respond: Under Review", "type": "main", "index": 0 }]]
+    },
+    "Send Rejection Email": {
+      "main": [[{ "node": "Respond: Rejected", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 300,
+    "timezone": "America/Los_Angeles"
+  },
+  "meta": {
+    "instanceId": "ascenda-n8n",
+    "ascendaVersion": "3.0",
+    "phase": 1,
+    "description": "Phase 1 brand intake: validates form data, scores 0-100 across 6 categories, logs ALL fields to master sheet, routes to approve/review/reject. Approved brands get Drive folder, brand spreadsheet, calendar event, and auto-trigger to WF-02."
+  }
+}

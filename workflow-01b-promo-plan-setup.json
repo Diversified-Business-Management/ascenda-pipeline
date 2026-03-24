@@ -1,0 +1,65 @@
+{
+  "name": "Ascenda WF-01b: A&P Promo Plan Template Population",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Promo Plan Setup Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [120, 240],
+      "parameters": { "path": "ascenda/setup-promo-plan", "method": "POST", "responseMode": "lastNode" }
+    },
+    {
+      "id": "build-template",
+      "name": "Build A&P Template Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [320, 240],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst category = (d.category || '').toLowerCase();\nconst isFoodOrSupp = category.includes('food') || category.includes('beverage') || category.includes('supplement') || category.includes('wellness');\nconst isElectronics = category.includes('electronic');\n\n// Category-aware line items with default monthly amounts\nlet advItems, promoItems, nwItems;\n\nif (isFoodOrSupp) {\n  advItems = [\n    { desc: 'In-Store Sampling Materials', monthly: 500 },\n    { desc: 'Influencer / Food Blogger Partnerships', monthly: 2000 },\n    { desc: 'Product Photography & Video', monthly: 1500 },\n    { desc: 'Press Kits & Mailers', monthly: 300 },\n    { desc: 'Sam\\'s Club Co-Op Signage', monthly: 0 },\n  ];\n  promoItems = [\n    { desc: 'Sam\\'s Club Roadshow Promo', monthly: 0 },\n    { desc: 'Digital Coupons / Instant Savings', monthly: 0 },\n    { desc: 'Google (PMAX, Search, YouTube)', monthly: 0 },\n    { desc: 'Meta (Facebook/Instagram)', monthly: 0 },\n    { desc: 'Instacart / Retailer Media', monthly: 0 },\n    { desc: 'UGC / Affiliate', monthly: 1000 },\n  ];\n  nwItems = [\n    { desc: 'Shopify / E-Commerce Platform', monthly: 500 },\n    { desc: 'Email Marketing (Klaviyo/Mailchimp)', monthly: 400 },\n    { desc: 'Food Safety Compliance Costs', monthly: 200 },\n    { desc: 'Analytics & Reporting Tools', monthly: 150 },\n  ];\n} else {\n  advItems = [\n    { desc: 'Press Kits & Mailers', monthly: 300 },\n    { desc: 'Influencer Partnerships', monthly: 3000 },\n    { desc: 'Product Samples / Demos', monthly: 0 },\n    { desc: 'Product Photography & Video', monthly: 1000 },\n    { desc: 'Sam\\'s Club Co-Op Signage', monthly: 0 },\n  ];\n  promoItems = [\n    { desc: 'UGC / Affiliate', monthly: 1000 },\n    { desc: 'Google (PMAX, Search, YouTube)', monthly: 0 },\n    { desc: 'Meta (Facebook/Instagram)', monthly: 0 },\n    { desc: 'Advertorial (news/feature ads)', monthly: 0 },\n    { desc: 'Retailer Media Buys', monthly: 0 },\n    { desc: 'Instacart', monthly: 0 },\n  ];\n  nwItems = [\n    { desc: 'Shopify / E-Commerce Platform', monthly: 500 },\n    { desc: 'Email Marketing (Klaviyo/Mailchimp)', monthly: 1200 },\n    { desc: 'Analytics & Reporting Tools', monthly: 0 },\n  ];\n}\n\n// Build rows for Google Sheets append\nconst months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];\nconst rows = [];\n\n// Header row\nrows.push({ Section: 'A&P MARKETING BUDGET TRACKER', Description: `${d.brandName} - Sam\\'s Club Roadshow 2026`, Category: d.category || '' });\nrows.push({ Section: '', Description: `Prepared by Ascenda Group | Revenue: ${d.revenue || 'TBD'}` });\nrows.push({ Section: '' });\n\n// Advertising section\nrows.push({ Section: 'ADVERTISING', Description: 'Awareness / Brand Building (55% allocation)', Allocation: '55%' });\nrows.push({ Section: 'Line Item', Description: 'Description', JAN: 'JAN', FEB: 'FEB', MAR: 'MAR', APR: 'APR', MAY: 'MAY', JUN: 'JUN', JUL: 'JUL', AUG: 'AUG', SEP: 'SEP', OCT: 'OCT', NOV: 'NOV', DEC: 'DEC', TOTAL: 'TOTAL' });\nadvItems.forEach(item => {\n  const row = { Description: item.desc };\n  months.forEach(m => row[m] = item.monthly);\n  row.TOTAL = item.monthly * 12;\n  rows.push(row);\n});\nrows.push({ Description: 'ADVERTISING SUBTOTAL', TOTAL: advItems.reduce((s, i) => s + i.monthly * 12, 0) });\nrows.push({ Section: '' });\n\n// Promotional section\nrows.push({ Section: 'PROMOTIONAL', Description: 'Conversion / Performance (17% allocation)', Allocation: '17%' });\nrows.push({ Section: 'Line Item', Description: 'Description', JAN: 'JAN', FEB: 'FEB', MAR: 'MAR', APR: 'APR', MAY: 'MAY', JUN: 'JUN', JUL: 'JUL', AUG: 'AUG', SEP: 'SEP', OCT: 'OCT', NOV: 'NOV', DEC: 'DEC', TOTAL: 'TOTAL' });\npromoItems.forEach(item => {\n  const row = { Description: item.desc };\n  months.forEach(m => row[m] = item.monthly);\n  row.TOTAL = item.monthly * 12;\n  rows.push(row);\n});\nrows.push({ Description: 'PROMOTIONAL SUBTOTAL', TOTAL: promoItems.reduce((s, i) => s + i.monthly * 12, 0) });\nrows.push({ Section: '' });\n\n// Non-Working section\nrows.push({ Section: 'NON WORKING', Description: 'Subscriptions / Platforms / Consulting (28% allocation)', Allocation: '28%' });\nrows.push({ Section: 'Line Item', Description: 'Description', JAN: 'JAN', FEB: 'FEB', MAR: 'MAR', APR: 'APR', MAY: 'MAY', JUN: 'JUN', JUL: 'JUL', AUG: 'AUG', SEP: 'SEP', OCT: 'OCT', NOV: 'NOV', DEC: 'DEC', TOTAL: 'TOTAL' });\nnwItems.forEach(item => {\n  const row = { Description: item.desc };\n  months.forEach(m => row[m] = item.monthly);\n  row.TOTAL = item.monthly * 12;\n  rows.push(row);\n});\nrows.push({ Description: 'NON WORKING SUBTOTAL', TOTAL: nwItems.reduce((s, i) => s + i.monthly * 12, 0) });\nrows.push({ Section: '' });\n\nconst grandTotal = [...advItems, ...promoItems, ...nwItems].reduce((s, i) => s + i.monthly * 12, 0);\nrows.push({ Description: 'GRAND TOTAL A&P BUDGET', TOTAL: grandTotal });\n\nreturn rows.map(r => ({ json: r }));"
+      }
+    },
+    {
+      "id": "write-to-brand-sheet",
+      "name": "Write Template to Brand Spreadsheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [520, 240],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "iAf8iDwbKFomAdUD", "name": "Google Sheets" }
+      },
+      "parameters": {
+        "operation": "append",
+        "documentId": { "value": "={{ $('Promo Plan Setup Trigger').first().json.spreadsheetId }}" },
+        "sheetName": "Promo Plan",
+        "columns": {
+          "mappingMode": "autoMapInputData"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "email-confirm",
+      "name": "Email: Promo Plan Ready",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [720, 240],
+      "credentials": {
+        "gmailOAuth2": { "id": "eukzBWMaeb8VtN1s", "name": "Gmail" }
+      },
+      "parameters": {
+        "sendTo": "errol.denger@ascendagrp.com, andrew.therrien@ascendagrp.com",
+        "subject": "=A&P Promo Plan Created: {{ $('Promo Plan Setup Trigger').first().json.brandName }}",
+        "emailType": "html",
+        "message": "=<div style='font-family:Arial,sans-serif'><h2>A&P Promo Plan Template Populated</h2><p>The A&P Marketing Budget Tracker has been populated for <strong>{{ $('Promo Plan Setup Trigger').first().json.brandName }}</strong> with category-specific line items.</p><p><strong>Sections:</strong></p><ul><li>Advertising (55% allocation) — brand awareness activities</li><li>Promotional (17% allocation) — conversion/performance media</li><li>Non-Working (28% allocation) — tools, platforms, compliance</li></ul><p>Default monthly amounts are pre-filled based on the {{ $('Promo Plan Setup Trigger').first().json.category }} category. Adjust as needed during planning sessions with the brand.</p></div>"
+      }
+    }
+  ],
+  "connections": {
+    "Promo Plan Setup Trigger": { "main": [[{ "node": "Build A&P Template Data", "type": "main", "index": 0 }]] },
+    "Build A&P Template Data": { "main": [[{ "node": "Write Template to Brand Spreadsheet", "type": "main", "index": 0 }]] },
+    "Write Template to Brand Spreadsheet": { "main": [[{ "node": "Email: Promo Plan Ready", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "saveManualExecutions": true, "executionTimeout": 300, "timezone": "America/Los_Angeles" },
+  "meta": { "phase": 1, "ascendaVersion": "3.1", "description": "Populates the per-brand A&P Promo Plan spreadsheet with category-aware template data. Triggered by WF-01 after brand spreadsheet is created. Three budget sections: Advertising (55%), Promotional (17%), Non-Working (28%) with line items customized by product category." }
+}

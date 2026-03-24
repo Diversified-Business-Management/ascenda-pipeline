@@ -1,0 +1,92 @@
+{
+  "name": "Ascenda WF-07: Logistics & Event Scheduling",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Retailer Approval Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [120, 240],
+      "parameters": { "path": "ascenda/retailer-approved", "method": "POST", "responseMode": "lastNode" }
+    },
+    {
+      "id": "build-logistics",
+      "name": "Build Logistics Plan",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [320, 240],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst eventDate = d.eventDate || new Date(Date.now() + 60*24*60*60*1000).toISOString().split('T')[0];\nconst eventEndDate = d.eventEndDate || new Date(new Date(eventDate).getTime() + 4*24*60*60*1000).toISOString().split('T')[0];\n\nreturn [{ json: {\n  ...d,\n  phase: 7,\n  eventDate,\n  eventEndDate,\n  showLength: d.showLength || '4 days',\n  retailerLocation: d.retailerLocation || 'TBD - Pending Store Selection',\n  logisticsPlan: {\n    inboundShipping: 'Scheduled',\n    deliveryAppointment: 'Pending',\n    bolPrepared: false,\n    staffingConfirmed: false,\n    powerDropConfirmed: false,\n    preEventCallCompleted: false\n  },\n  staffingNeeds: '2 trained brand ambassadors per location',\n  shippingDeadline: new Date(new Date(eventDate).getTime() - 7*24*60*60*1000).toISOString().split('T')[0],\n  logisticsCreatedAt: new Date().toISOString()\n} }];"
+      }
+    },
+    {
+      "id": "create-calendar",
+      "name": "Create Roadshow Calendar Event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [520, 160],
+      "credentials": {
+        "googleCalendarOAuth2": { "id": "mhoZydefsYryGfxM", "name": "Google Calendar" }
+      },
+      "parameters": {
+        "operation": "create",
+        "calendarId": "primary",
+        "summary": "=ROADSHOW: {{ $json.brandName }} @ {{ $json.retailerLocation }}",
+        "start": "={{ $json.eventDate }}",
+        "end": "={{ $json.eventEndDate }}",
+        "additionalFields": {
+          "description": "=Brand: {{ $json.brandName }}\nRetailer: {{ $json.retailer }}\nShow Length: {{ $json.showLength }}\nContact: {{ $json.contactName }} ({{ $json.email }})\nStaffing: {{ $json.staffingNeeds }}\nShipping Deadline: {{ $json.shippingDeadline }}\n\nLogistics Checklist:\n- [ ] Inbound shipping scheduled\n- [ ] Delivery appointments booked\n- [ ] BOLs prepared\n- [ ] Staff trained and assigned\n- [ ] Pre-event club call completed\n- [ ] Power drops confirmed"
+        }
+      }
+    },
+    {
+      "id": "update-master-phase7",
+      "name": "Update Master: Phase 7",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [520, 320],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "iAf8iDwbKFomAdUD", "name": "Google Sheets" }
+      },
+      "parameters": {
+        "operation": "update",
+        "documentId": { "value": "1zVPaQo5eSxj9rTFVXa4FPf-S7MFi-pEn-QT1D6s6mRc" },
+        "sheetName": "Phase1_Submissions",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "values": [
+            { "column": "Phase", "value": "7" },
+            { "column": "EventDate", "value": "={{ $json.eventDate }}" },
+            { "column": "EventEndDate", "value": "={{ $json.eventEndDate }}" },
+            { "column": "RetailerLocation", "value": "={{ $json.retailerLocation }}" },
+            { "column": "Status", "value": "LOGISTICS_ACTIVE" }
+          ]
+        },
+        "options": { "lookupColumn": "ID", "lookupValue": "={{ $json.id }}" }
+      }
+    },
+    {
+      "id": "sample-email",
+      "name": "Email: Logistics & Shipping Instructions",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [720, 240],
+      "credentials": {
+        "gmailOAuth2": { "id": "eukzBWMaeb8VtN1s", "name": "Gmail" }
+      },
+      "parameters": {
+        "sendTo": "={{ $json.email }}, errol.denger@ascendagrp.com, andrew.therrien@ascendagrp.com",
+        "subject": "=Roadshow Confirmed: {{ $json.brandName }} - Logistics & Shipping Instructions",
+        "emailType": "html",
+        "message": "=<div style='font-family:Arial,sans-serif;max-width:600px'><h2>Roadshow Confirmed - Ship Your Product</h2><p><strong>Brand:</strong> {{ $json.brandName }}</p><p><strong>Event Date:</strong> {{ $json.eventDate }} to {{ $json.eventEndDate }}</p><p><strong>Location:</strong> {{ $json.retailerLocation }}</p><p><strong>Show Length:</strong> {{ $json.showLength }}</p><h3>Shipping Instructions</h3><ul><li><strong>Ship By:</strong> {{ $json.shippingDeadline }} (7 days before event)</li><li><strong>Quantity:</strong> Demo units + sellable inventory per agreed plan</li><li><strong>Include:</strong> Product spec sheets, marketing materials, pricing signs</li></ul><h3>Staffing</h3><p>{{ $json.staffingNeeds }}</p><p>Staff must be trained on Sam's Club In-Club Standards (setup during approved hours, clean display, compliant behavior, tear-down within window).</p><h3>Pre-Event Checklist</h3><ul><li>Complete pre-event club communication call</li><li>Confirm power drop requirements (if needed)</li><li>Verify display meets Sam's Club visual standards</li></ul></div>"
+      }
+    }
+  ],
+  "connections": {
+    "Retailer Approval Trigger": { "main": [[{ "node": "Build Logistics Plan", "type": "main", "index": 0 }]] },
+    "Build Logistics Plan": { "main": [[{ "node": "Create Roadshow Calendar Event", "type": "main", "index": 0 }, { "node": "Update Master: Phase 7", "type": "main", "index": 0 }]] },
+    "Create Roadshow Calendar Event": { "main": [[{ "node": "Email: Logistics & Shipping Instructions", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "saveManualExecutions": true, "executionTimeout": 300, "timezone": "America/Los_Angeles" },
+  "meta": { "phase": 7, "ascendaVersion": "3.0", "description": "Stage 6 - Logistics & Field Readiness. Creates calendar events, builds logistics plan, sends shipping instructions. Triggered when retailer approves the program." }
+}

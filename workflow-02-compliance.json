@@ -1,0 +1,173 @@
+{
+  "name": "Ascenda WF-02: Compliance & Risk Readiness",
+  "nodes": [
+    {
+      "id": "trigger-phase2",
+      "name": "Phase 2 Start Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [120, 240],
+      "parameters": { "path": "ascenda/phase2-start", "method": "POST", "responseMode": "lastNode" }
+    },
+    {
+      "id": "classify-risk",
+      "name": "Classify Risk Level & Build Checklist",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [320, 240],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst category = (d.category || '').toLowerCase();\n\n// ── RISK CLASSIFICATION (per Sam's Club 2025/2026 SOPs) ──\nconst isFoodOrSupp = category.includes('food') || category.includes('beverage') || category.includes('supplement') || category.includes('wellness');\nconst isElectronics = category.includes('electronic');\nconst isHouseholdOrPet = category.includes('home') || category.includes('pet') || category.includes('auto') || category.includes('office');\n\n// Food risk levels per Food Safety SOP 2025\n// Elevated High Risk: raw proteins, fresh produce, raw seafood, raw meat — NOT ALLOWED for Pop-Up\n// Medium Risk: reheated items, cold/hot holding, pre-cooked proteins, dairy, cut fruits\n// Low Risk: shelf-stable, pre-packaged, served in original packaging\nlet foodRiskLevel = 'N/A';\nif (isFoodOrSupp) {\n  // Default to Medium unless we know otherwise — safe assumption for roadshow food\n  foodRiskLevel = 'Medium';\n}\n\n// GMF risk levels per GMF Product Testing SOP 2026\n// Elevated High Risk: Natural Gas, Propane, Gasoline powered — NOT ALLOWED\n// Medium Risk: lithium-ion batteries, OTC, consumables, wellness, household care\n// Low Risk: non-powered, textile, plastic, glass, ceramic, metallic, wood, paper\nlet gmfRiskLevel = 'N/A';\nif (!isFoodOrSupp) {\n  gmfRiskLevel = isElectronics ? 'Medium' : 'Low';\n}\n\n// ── UNIVERSAL REQUIREMENTS (all brands) ──\nconst checklist = [\n  { item: 'Ascenda Services Agreement (Signed)', required: true, status: 'pending', stage: 'Stage 0', category: 'all' },\n  { item: 'Certificate of Insurance ($2M+ general liability)', required: true, status: d.hasInsurance === 'yes' ? 'received' : 'pending', stage: 'Stage 1', category: 'all' },\n  { item: 'Product Photos (hi-res, white background)', required: true, status: 'pending', stage: 'Stage 1', category: 'all' },\n  { item: 'UPC/GS1 Barcodes Registered', required: true, status: 'pending', stage: 'Stage 1', category: 'all' },\n  { item: 'Product Spec Sheet', required: true, status: 'pending', stage: 'Stage 1', category: 'all' },\n  { item: 'COGS Breakdown', required: true, status: d.canProvideCOGS === 'yes' ? 'received' : 'pending', stage: 'Stage 1', category: 'all' },\n  { item: 'Current P&L (last 12 months)', required: true, status: 'pending', stage: 'Stage 1', category: 'all' },\n  { item: 'Retail Distribution List (existing)', required: false, status: 'pending', stage: 'Stage 1', category: 'all' },\n  { item: 'Customer Testimonials / Reviews', required: false, status: 'pending', stage: 'Stage 1', category: 'all' },\n];\n\n// ── FOOD SAFETY REQUIREMENTS (per Food Safety SOP 2025 + Questionnaire) ──\nif (isFoodOrSupp) {\n  checklist.push(\n    { item: 'COMPLETED: Vendor Food Safety Questionnaire (Sam\\'s Club 2025)', required: true, status: 'pending', stage: 'Stage 1', category: 'food' },\n    { item: 'GFSI-recognized Certification OR Global Markets Audit OR Third-Party Audit (renewed annually)', required: true, status: 'pending', stage: 'Stage 1', category: 'food' },\n    { item: 'Health Department License/Permit for EACH event location (vendor responsibility to contact local jurisdiction)', required: true, status: 'pending', stage: 'Stage 1', category: 'food' },\n    { item: 'Food Safety Manager Certification (must be present at event — approved certs: AAA Food Safety, Learn2Serve, ServSafe, etc.)', required: true, status: 'pending', stage: 'Stage 1', category: 'food' },\n    { item: 'Food Handler Permits/Cards (if required by local jurisdiction)', required: true, status: 'pending', stage: 'Stage 1', category: 'food' },\n    { item: 'FDA / USDA Compliance Certification', required: true, status: 'pending', stage: 'Stage 1', category: 'food' },\n    { item: 'Ingredient Statement with NINE Major Allergens documented (Peanuts, Wheat, Soybeans, Fish, Crustacean Shellfish, Tree Nuts, Milk, Eggs, Sesame)', required: true, status: d.nutritionalLabel === 'yes' ? 'received' : 'pending', stage: 'Stage 1', category: 'food' },\n    { item: 'Food Preparation SOP (transport, cooking temps, temp/time logs, handwashing, gloves/hairnets, equipment)', required: true, status: 'pending', stage: 'Stage 1', category: 'food' },\n    { item: 'Equipment List (handwashing station, calibrated metal stem thermometer, ware washing area)', required: true, status: 'pending', stage: 'Stage 1', category: 'food' },\n    { item: 'Storage Method Documentation (refrigeration, freezer, dry storage)', required: true, status: 'pending', stage: 'Stage 1', category: 'food' },\n    { item: 'Sam\\'s Club Basic Food Safety High Five Training Acknowledgment', required: true, status: 'pending', stage: 'Stage 1', category: 'food' },\n    { item: 'Sampling Plan Documentation', required: true, status: 'pending', stage: 'Stage 1', category: 'food' }\n  );\n}\n\n// ── GENERAL MERCHANDISE REQUIREMENTS (per GMF Product Testing SOP 2026) ──\nif (!isFoodOrSupp) {\n  checklist.push(\n    { item: 'C63 Product Testing via Approved Third-Party Lab (UL, SGS, Intertek, or Bureau Veritas)', required: true, status: 'pending', stage: 'Stage 1', category: 'gmf' },\n    { item: 'Performance Testing Report (ISO 17025 accredited lab, dated within 12 months)', required: true, status: 'pending', stage: 'Stage 1', category: 'gmf' },\n    { item: 'Regulatory Compliance Testing (per Walmart Inc. requirements)', required: true, status: 'pending', stage: 'Stage 1', category: 'gmf' },\n    { item: 'Claims Testing Documentation (if applicable)', required: false, status: 'pending', stage: 'Stage 1', category: 'gmf' },\n    { item: 'C63 Merchant Team Packaging Approval (retail-ready packaging)', required: true, status: 'pending', stage: 'Stage 1', category: 'gmf' },\n    { item: 'Sam\\'s Club Structural Packaging Standards Compliance (PDQ display / pallet construction)', required: true, status: 'pending', stage: 'Stage 1', category: 'gmf' },\n    { item: 'FedEx ISTA6 Transit Testing (if applicable per lab review)', required: false, status: 'pending', stage: 'Stage 1', category: 'gmf' },\n    { item: 'WERCS Registration (battery-powered or regulated items)', required: gmfRiskLevel === 'Medium', status: 'pending', stage: 'Stage 1', category: 'gmf' },\n    { item: 'UI Inspection / CE Certification (electronic items)', required: isElectronics, status: 'pending', stage: 'Stage 1', category: 'gmf' },\n    { item: 'Manufacturing & Product Safety Documentation', required: true, status: 'pending', stage: 'Stage 1', category: 'gmf' }\n  );\n}\n\nconst requiredItems = checklist.filter(c => c.required);\nconst receivedItems = checklist.filter(c => c.status === 'received');\n\nreturn [{ json: {\n  ...d,\n  complianceChecklist: checklist,\n  complianceRequired: requiredItems.length,\n  complianceReceived: receivedItems.length,\n  complianceScore: Math.round((receivedItems.length / requiredItems.length) * 100),\n  isFoodCategory: isFoodOrSupp,\n  foodRiskLevel,\n  gmfRiskLevel,\n  riskClassification: isFoodOrSupp ? foodRiskLevel : gmfRiskLevel,\n  approvedTestLabs: isFoodOrSupp ? [] : [\n    { name: 'UL', contact: 'rog.hardlinessalesforcecustomerservice@ul.com' },\n    { name: 'SGS', contact: 'james.dorsey@sgs.com' },\n    { name: 'Intertek (ITS)', contact: 'jennifer.jenkins@intertek.com' },\n    { name: 'Bureau Veritas (BV)', contact: 'ryan.deleon@bureauveritas.com' }\n  ],\n  phase: 2,\n  phase2StartedAt: new Date().toISOString()\n} }];"
+      }
+    },
+    {
+      "id": "update-master-phase2",
+      "name": "Update Master: Phase 2 Start",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [520, 120],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "iAf8iDwbKFomAdUD", "name": "Google Sheets" }
+      },
+      "parameters": {
+        "operation": "update",
+        "documentId": { "value": "1zVPaQo5eSxj9rTFVXa4FPf-S7MFi-pEn-QT1D6s6mRc" },
+        "sheetName": "Phase1_Submissions",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "values": [
+            { "column": "Phase", "value": "2" },
+            { "column": "Phase2StartedAt", "value": "={{ $json.phase2StartedAt }}" },
+            { "column": "ComplianceScore", "value": "={{ $json.complianceScore }}" },
+            { "column": "RiskClassification", "value": "={{ $json.riskClassification }}" },
+            { "column": "FoodRiskLevel", "value": "={{ $json.foodRiskLevel }}" },
+            { "column": "GMFRiskLevel", "value": "={{ $json.gmfRiskLevel }}" }
+          ]
+        },
+        "options": {
+          "lookupColumn": "ID",
+          "lookupValue": "={{ $json.id }}"
+        }
+      }
+    },
+    {
+      "id": "send-food-compliance",
+      "name": "Send Food Safety Compliance Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [720, 200],
+      "credentials": {
+        "gmailOAuth2": { "id": "eukzBWMaeb8VtN1s", "name": "Gmail" }
+      },
+      "parameters": {
+        "sendTo": "={{ $json.email }}, errol.denger@ascendagrp.com, andrew.therrien@ascendagrp.com",
+        "subject": "=Action Required: Food Safety Compliance for {{ $json.brandName }} (Sam's Club Roadshow)",
+        "emailType": "html",
+        "message": "=<div style='font-family:Arial,sans-serif;max-width:700px'><h2>Phase 2: Food Safety Compliance & Risk Readiness</h2><p>Congratulations on advancing, <strong>{{ $json.brandName }}</strong>! As a food/supplement product, Sam's Club requires specific food safety documentation before scheduling any roadshow events.</p><div style='background:#fff3cd;border:1px solid #ffc107;padding:12px;border-radius:4px;margin:16px 0'><strong>Important:</strong> Fresh produce, eggs, raw seafood (including sushi) and raw meat products are NOT permitted for Sam's Club Roadshow or In-Store Demo purposes.</div><h3>Risk Classification: {{ $json.foodRiskLevel }} Risk</h3><p>{{ $json.foodRiskLevel === 'Low' ? 'Low Risk: Shelf-stable, pre-packaged items served in original packaging. Handwashing station required if items are opened/repackaged.' : $json.foodRiskLevel === 'Medium' ? 'Medium Risk: Items requiring reheating, cold/hot holding, or pre-cooked proteins. Requires: Handwashing station within 25 ft, Certified Food Safety Manager present at event.' : 'Your risk level will be determined during review.' }}</p><h3>Required Documents ({{ $json.complianceChecklist.filter(i => i.required && i.status === 'pending').length }} items):</h3><ol>{{ $json.complianceChecklist.filter(i => i.required && i.status === 'pending').map(i => '<li style=\"margin:8px 0\">' + i.item + '</li>').join('') }}</ol><h3>Key Food Safety Requirements:</h3><ul><li><strong>Allergen Documentation:</strong> You must document all NINE major allergens (Peanuts, Wheat, Soybeans, Fish, Crustacean Shellfish, Tree Nuts, Milk, Eggs, Sesame) present in your demo product</li><li><strong>Food Safety Manager:</strong> A certified food safety manager must be present at every event</li><li><strong>Calibrated Thermometer:</strong> Required for any food requiring temperature control</li><li><strong>No Unattended Food/Equipment:</strong> All food and equipment must be attended at all times during events</li><li><strong>No Samples to Children:</strong> Samples shall never be given to children without parental/guardian consent</li><li><strong>All vendor associates</strong> must be trained on Sam's Club Basic Food Safety High Five</li></ul><p><strong>Vendor Food Safety Questionnaire:</strong> Please complete and return the attached questionnaire covering vendor info, risk level, certifications, event details, product details, and food preparation procedures.</p><p><strong>Target:</strong> Complete within 5 business days. Reply to this email with documents or upload to your brand folder.</p><hr><p style='color:#999;font-size:12px'>Ascenda Group | Sam's Club & Costco Retail Readiness</p></div>"
+      }
+    },
+    {
+      "id": "send-gmf-compliance",
+      "name": "Send GMF Testing Compliance Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [720, 380],
+      "credentials": {
+        "gmailOAuth2": { "id": "eukzBWMaeb8VtN1s", "name": "Gmail" }
+      },
+      "parameters": {
+        "sendTo": "={{ $json.email }}, errol.denger@ascendagrp.com, andrew.therrien@ascendagrp.com",
+        "subject": "=Action Required: Product Testing & Compliance for {{ $json.brandName }} (Sam's Club C63 Roadshow)",
+        "emailType": "html",
+        "message": "=<div style='font-family:Arial,sans-serif;max-width:700px'><h2>Phase 2: Product Testing & Compliance</h2><p>Congratulations on advancing, <strong>{{ $json.brandName }}</strong>! Sam's Club C63 Roadshow products must meet Walmart Inc.'s Performance, Regulatory, Compliance and Claims testing requirements.</p><h3>Risk Classification: {{ $json.gmfRiskLevel }} Risk</h3><p>{{ $json.gmfRiskLevel === 'Low' ? 'Low Risk: Non-powered items (textile, plastic, glass, ceramic, metallic, wood, paper).' : $json.gmfRiskLevel === 'Medium' ? 'Medium Risk: Lithium-ion battery powered items, OTC products, consumables, wellness products, household care. WERCS registration required.' : 'Classification pending review.' }}</p><div style='background:#fff3cd;border:1px solid #ffc107;padding:12px;border-radius:4px;margin:16px 0'><strong>Note:</strong> Items powered by Natural Gas, Propane, or Gasoline are classified as Elevated High Risk and are NOT allowed for Roadshows / Pop-Up Shop events.</div><h3>Required Documents ({{ $json.complianceChecklist.filter(i => i.required && i.status === 'pending').length }} items):</h3><ol>{{ $json.complianceChecklist.filter(i => i.required && i.status === 'pending').map(i => '<li style=\"margin:8px 0\">' + i.item + '</li>').join('') }}</ol><h3>Approved Third-Party Test Labs (contact one to initiate C63 testing):</h3><ul><li><strong>UL:</strong> rog.hardlinessalesforcecustomerservice@ul.com</li><li><strong>SGS:</strong> james.dorsey@sgs.com</li><li><strong>Intertek (ITS):</strong> jennifer.jenkins@intertek.com</li><li><strong>Bureau Veritas (BV):</strong> ryan.deleon@bureauveritas.com</li></ul><h3>Testing Process:</h3><ol><li>Contact an approved lab to initiate testing under <strong>C63 Roadshows</strong> (do not include other category numbers)</li><li>Lab reviews product (photo or sample) to determine test sample requirements</li><li>Lab selects testing protocols, determines costs and timeline</li><li>If you have existing test reports from an ISO 17025 accredited lab dated within 12 months, you may submit those in lieu of new testing (DAL process)</li></ol><h3>Packaging Requirements:</h3><ul><li>C63 Merchant Team must approve all retail-ready packaging</li><li>Must follow Sam's Club structural packaging standards for PDQ display and/or pallet construction</li><li>Sam's Club FedEx ISTA6 transit testing may be required (confirm with lab)</li></ul><p><strong>Packaging Standards Reference:</strong> <a href=\"https://corporate.walmart.com/content/dam/corporate/documents/suppliers/requirements/sams-club-structural-packaging-standards.pdf\">Sam's Club Structural Packaging Standards</a></p><p><strong>Target:</strong> Complete within 5 business days. Reply to this email with documents or upload to your brand folder.</p><hr><p style='color:#999;font-size:12px'>Ascenda Group | Sam's Club & Costco Retail Readiness</p></div>"
+      }
+    },
+    {
+      "id": "route-by-category",
+      "name": "Food or General Merchandise?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [520, 290],
+      "parameters": {
+        "conditions": { "boolean": [{ "value1": "={{ $json.isFoodCategory }}", "value2": true, "operation": "equal" }] }
+      }
+    },
+    {
+      "id": "doc-upload-webhook",
+      "name": "Document Upload Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [120, 560],
+      "parameters": { "path": "ascenda/doc-upload", "method": "POST", "responseMode": "lastNode" }
+    },
+    {
+      "id": "parse-documents",
+      "name": "Parse & Analyze Documents",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [320, 560],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst received = d.documents || [];\nconst category = (d.category || '').toLowerCase();\nconst isFoodOrSupp = category.includes('food') || category.includes('beverage') || category.includes('supplement') || category.includes('wellness');\n\n// Build required docs list based on category\nlet requiredDocs;\nif (isFoodOrSupp) {\n  requiredDocs = [\n    'Agreement', 'Insurance', 'Photos', 'UPC', 'ProductSpec', 'COGS', 'PnL',\n    'FoodSafetyQuestionnaire', 'GFSI', 'HealthPermit', 'FoodSafetyManager',\n    'FoodHandlerPermit', 'FDA', 'AllergenStatement', 'FoodPrepSOP',\n    'EquipmentList', 'StorageMethod', 'FoodSafetyTraining', 'SamplingPlan'\n  ];\n} else {\n  requiredDocs = [\n    'Agreement', 'Insurance', 'Photos', 'UPC', 'ProductSpec', 'COGS', 'PnL',\n    'C63ProductTesting', 'PerformanceTesting', 'RegulatoryCompliance',\n    'PackagingApproval', 'StructuralPackaging', 'Manufacturing'\n  ];\n}\n\nconst gaps = requiredDocs.filter(r => !received.some(doc => doc.toLowerCase().includes(r.toLowerCase())));\nconst complianceScore = Math.round(((requiredDocs.length - gaps.length) / requiredDocs.length) * 100);\n\nreturn [{ json: { ...d, receivedDocs: received, gaps, complianceScore, complianceClear: gaps.length === 0, totalRequired: requiredDocs.length, totalReceived: requiredDocs.length - gaps.length, phase: 2 } }];"
+      }
+    },
+    {
+      "id": "compliance-route",
+      "name": "All Compliance Docs Received?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [520, 560],
+      "parameters": {
+        "conditions": { "boolean": [{ "value1": "={{ $json.complianceClear }}", "value2": true, "operation": "equal" }] }
+      }
+    },
+    {
+      "id": "trigger-phase3",
+      "name": "Trigger WF-03: Readiness Scoring",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [720, 500],
+      "parameters": {
+        "url": "https://edenger.app.n8n.cloud/webhook/ascenda/phase3-start",
+        "method": "POST",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}"
+      }
+    },
+    {
+      "id": "gaps-email",
+      "name": "Send Gap Notification",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [720, 620],
+      "credentials": {
+        "gmailOAuth2": { "id": "eukzBWMaeb8VtN1s", "name": "Gmail" }
+      },
+      "parameters": {
+        "sendTo": "={{ $json.email }}, errol.denger@ascendagrp.com, andrew.therrien@ascendagrp.com",
+        "subject": "=Missing Documents ({{ $json.gaps.length }} remaining): {{ $json.brandName }} Compliance Review",
+        "emailType": "html",
+        "message": "=<div style='font-family:Arial,sans-serif;max-width:600px'><h2>Additional Documents Required</h2><p>We're still missing <strong>{{ $json.gaps.length }}</strong> of {{ $json.totalRequired }} required documents for <strong>{{ $json.brandName }}</strong>:</p><ul>{{ $json.gaps.map(g => '<li>' + g + '</li>').join('') }}</ul><p>Current compliance score: <strong>{{ $json.complianceScore }}%</strong> ({{ $json.totalReceived }}/{{ $json.totalRequired }} received)</p><p>Please submit within 48 hours to avoid a delay in your pipeline status.</p><hr><p style='color:#999;font-size:12px'>Ascenda Group | Sam's Club & Costco Retail Readiness</p></div>"
+      }
+    }
+  ],
+  "connections": {
+    "Phase 2 Start Trigger": { "main": [[{ "node": "Classify Risk Level & Build Checklist", "type": "main", "index": 0 }]] },
+    "Classify Risk Level & Build Checklist": { "main": [[{ "node": "Update Master: Phase 2 Start", "type": "main", "index": 0 }, { "node": "Food or General Merchandise?", "type": "main", "index": 0 }]] },
+    "Food or General Merchandise?": {
+      "main": [
+        [{ "node": "Send Food Safety Compliance Email", "type": "main", "index": 0 }],
+        [{ "node": "Send GMF Testing Compliance Email", "type": "main", "index": 0 }]
+      ]
+    },
+    "Document Upload Webhook": { "main": [[{ "node": "Parse & Analyze Documents", "type": "main", "index": 0 }]] },
+    "Parse & Analyze Documents": { "main": [[{ "node": "All Compliance Docs Received?", "type": "main", "index": 0 }]] },
+    "All Compliance Docs Received?": {
+      "main": [
+        [{ "node": "Trigger WF-03: Readiness Scoring", "type": "main", "index": 0 }],
+        [{ "node": "Send Gap Notification", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "saveManualExecutions": true, "executionTimeout": 300, "timezone": "America/Los_Angeles" },
+  "meta": { "phase": 2, "ascendaVersion": "3.1", "description": "Stage 1 - Compliance & Risk Readiness. Classifies brand by risk level per Sam's Club 2025/2026 SOPs. Food brands get full food safety checklist (GFSI, health permits, food safety manager, allergen documentation, food prep SOPs, equipment lists). General merchandise brands get C63 product testing requirements (approved third-party labs: UL/SGS/ITS/BV, performance/regulatory/compliance testing, packaging standards). Routes to category-specific compliance email with complete requirements." }
+}
